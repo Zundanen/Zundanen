@@ -2,7 +2,7 @@
 
 **[Suomi](README.md) | [日本語](README_JA.md) | English**
 
-Zundanen is a local Windows application that converts Finnish text through **Finnish-NLP/Chatterbox-Finnish ↁERVC** and produces WAV files with your local RVC voice models.
+Zundanen is a local Windows application that converts Finnish text through **Finnish-NLP/Chatterbox-Finnish → RVC** and produces WAV files with your local RVC voice models.
 
 The same UI also includes **Batch Generation**, optional word-level **Accent** editing, and a **Model Trainer** for creating RVC v2 `.pth + .index` models from an audio folder.
 
@@ -20,7 +20,7 @@ Normal Voice Generation, Batch Generation, and Model Trainer do not require Dock
 
 ## Installation
 
-Download the repository with `Code ↁEDownload ZIP` and extract it to a short path such as:
+Download the repository with `Code → Download ZIP` and extract it to a short path such as:
 
 ```text
 C:\Zundanen
@@ -108,8 +108,8 @@ Zundamon_20260916_180000_seed123456.wav
 
 Save options:
 
-- `Create subtitle TXT`  Ecreates a same-name `.txt`; enabled by default
-- `Save source audio`  Esaves the clean pre-RVC Finnish TTS for later high-quality Accent editing; disabled by default
+- `Create subtitle TXT` — creates a same-name `.txt`; enabled by default
+- `Save source audio` — saves the clean pre-RVC Finnish TTS for later high-quality Accent editing; disabled by default
 
 With source audio enabled:
 
@@ -127,8 +127,8 @@ RVC models are normally detected from layouts such as:
 ```text
 runtime/rvc/exports/
 ├─ CharacterA/
-━E ├─ CharacterA.pth
-━E └─ CharacterA.index
+│  ├─ CharacterA.pth
+│  └─ CharacterA.index
 └─ CharacterB/
    ├─ CharacterB.pth
    └─ CharacterB.index
@@ -167,7 +167,7 @@ The editor uses Aalto alignment for syllable timing and WORLD/PyWORLD for the pr
 - a same-name `.txt` is loaded automatically when present
 - Voice Generation `*_source.wav` / `*_source.json` files are detected automatically
 - matching Batch sources inside `source_audio/` are detected automatically
-- when source audio exists, Zundanen can use the higher-quality pre-RVC ↁEWORLD ↁERVC path
+- when source audio exists, Zundanen can use the higher-quality pre-RVC → WORLD → RVC path
 - older/external WAV files without source audio fall back to WORLD editing directly on the finished WAV
 
 ## Batch Generation
@@ -200,8 +200,8 @@ With `Fix seed` off, every queue item receives a new random seed. With it enable
 
 Save options:
 
-- `Create subtitle TXT`  Ecreates same-name `.txt` files; enabled by default
-- `Save source audio`  Esaves the pre-RVC Finnish TTS; disabled by default
+- `Create subtitle TXT` — creates same-name `.txt` files; enabled by default
+- `Save source audio` — saves the pre-RVC Finnish TTS; disabled by default
 
 When source audio is enabled, all Batch sources are collected under `source_audio/`:
 
@@ -212,10 +212,10 @@ outputs/batches/20260916_180000_ab12cd/
 ├─ 002_seed987654.wav
 ├─ 002_seed987654.txt
 ├─ source_audio/
-━E ├─ 001_seed123456_source.wav
-━E ├─ 001_seed123456_source.json
-━E ├─ 002_seed987654_source.wav
-━E └─ 002_seed987654_source.json
+│  ├─ 001_seed123456_source.wav
+│  ├─ 001_seed123456_source.json
+│  ├─ 002_seed987654_source.wav
+│  └─ 002_seed987654_source.json
 └─ failed_items.csv            # only when failures occurred
 ```
 
@@ -238,12 +238,18 @@ Training pipeline:
 
 ```text
 Audio dataset
-  ↁEPreprocess / 40 kHz
-  ↁERMVPE F0
-  ↁEHuBERT v2 / 768-dim
-  ↁERVC v2 training
-  ↁEFAISS index
-  ↁEruntime/rvc/exports/<Character>/<Character>.pth
+  ↓
+Preprocess / 40 kHz
+  ↓
+RMVPE F0
+  ↓
+HuBERT v2 / 768-dim
+  ↓
+RVC v2 training
+  ↓
+FAISS index
+  ↓
+runtime/rvc/exports/<Character>/<Character>.pth
 runtime/rvc/exports/<Character>/<Character>.index
 ```
 
@@ -251,7 +257,7 @@ Windows automatic sleep is prevented during training and restored after training
 
 ## UI languages
 
-Explanatory/help text can be switched between `Suomi / 日本誁E/ English`. Suomi is the default, and the selected language is stored locally.
+Explanatory/help text can be switched between `Suomi / 日本語 / English`. Suomi is the default, and the selected language is stored locally.
 
 Buttons, technical labels, and some status text intentionally remain in English.
 
@@ -315,4 +321,3 @@ If you use, publish, or redistribute third-party audio, datasets, `.pth`, or `.i
 - FFmpeg: https://ffmpeg.org/
 
 See `THIRD_PARTY_NOTICES.md` for licensing notes.
-

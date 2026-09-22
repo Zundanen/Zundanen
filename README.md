@@ -2,7 +2,7 @@
 
 **Suomi | [日本語](README_JA.md) | [English](README_EN.md)**
 
-Zundanen on paikallinen Windows-sovellus, joka muuntaa suomenkielisen tekstin ketjulla **Finnish-NLP/Chatterbox-Finnish ↁERVC** ja tuottaa WAV-tiedostoja paikallisilla RVC-äänimalleilla.
+Zundanen on paikallinen Windows-sovellus, joka muuntaa suomenkielisen tekstin ketjulla **Finnish-NLP/Chatterbox-Finnish → RVC** ja tuottaa WAV-tiedostoja paikallisilla RVC-äänimalleilla.
 
 Samassa käyttöliittymässä ovat **Batch Generation**, valinnainen sanakohtainen **Accent**-muokkaus sekä **Model Trainer**, jolla voi kouluttaa RVC v2 -mallin (`.pth + .index`) äänikansiosta.
 
@@ -20,7 +20,7 @@ Tavallinen Voice Generation, Batch Generation ja Model Trainer eivät tarvitse D
 
 ## Asennus
 
-Lataa projekti GitHubista kohdasta `Code ↁEDownload ZIP` ja pura se lyhyeen polkuun, esimerkiksi:
+Lataa projekti GitHubista kohdasta `Code → Download ZIP` ja pura se lyhyeen polkuun, esimerkiksi:
 
 ```text
 C:\Zundanen
@@ -108,8 +108,8 @@ Zundamon_20260916_180000_seed123456.wav
 
 Tallennusasetukset:
 
-- `Create subtitle TXT`  Etallentaa samannimisen `.txt`-tiedoston; oletuksena käytössä
-- `Save source audio`  Etallentaa puhtaan Finnish TTS -äänen ennen RVC:tä myöhempää korkealaatuista Accent-muokkausta varten; oletuksena pois käytöstä
+- `Create subtitle TXT` — tallentaa samannimisen `.txt`-tiedoston; oletuksena käytössä
+- `Save source audio` — tallentaa puhtaan Finnish TTS -äänen ennen RVC:tä myöhempää korkealaatuista Accent-muokkausta varten; oletuksena pois käytöstä
 
 Kun source audio on käytössä:
 
@@ -127,8 +127,8 @@ RVC-mallit tunnistetaan normaalisti esimerkiksi rakenteesta:
 ```text
 runtime/rvc/exports/
 ├─ CharacterA/
-━E ├─ CharacterA.pth
-━E └─ CharacterA.index
+│  ├─ CharacterA.pth
+│  └─ CharacterA.index
 └─ CharacterB/
    ├─ CharacterB.pth
    └─ CharacterB.index
@@ -167,7 +167,7 @@ Aalto-kohdistus määrittää tavujen ajoituksen. WORLD/PyWORLD muokkaa RVC:tä 
 - samanniminen `.txt` luetaan automaattisesti, jos se löytyy
 - Voice Generationin `*_source.wav` / `*_source.json` tunnistetaan automaattisesti
 - Batch Generationin `source_audio/`-kansion vastaava source tunnistetaan automaattisesti
-- source audion löytyessä käytetään laadukkaampaa pre-RVC ↁEWORLD ↁERVC -reittiä
+- source audion löytyessä käytetään laadukkaampaa pre-RVC → WORLD → RVC -reittiä
 - vanhat/ulkoiset WAV-tiedostot ilman source audiota muokataan varareittinä suoraan WORLDilla
 
 ## Batch Generation
@@ -200,8 +200,8 @@ Kun `Fix seed` on pois käytöstä, jokainen jonon kohde saa uuden satunnaisen s
 
 Tallennusasetukset:
 
-- `Create subtitle TXT`  Eluo samannimisen `.txt`-tiedoston; oletuksena käytössä
-- `Save source audio`  Etallentaa Finnish TTS -lähdeäänen ennen RVC:tä; oletuksena pois käytöstä
+- `Create subtitle TXT` — luo samannimisen `.txt`-tiedoston; oletuksena käytössä
+- `Save source audio` — tallentaa Finnish TTS -lähdeäänen ennen RVC:tä; oletuksena pois käytöstä
 
 Kun source audio on käytössä, kaikki Batch-lähteet tallennetaan `source_audio/`-kansioon:
 
@@ -212,10 +212,10 @@ outputs/batches/20260916_180000_ab12cd/
 ├─ 002_seed987654.wav
 ├─ 002_seed987654.txt
 ├─ source_audio/
-━E ├─ 001_seed123456_source.wav
-━E ├─ 001_seed123456_source.json
-━E ├─ 002_seed987654_source.wav
-━E └─ 002_seed987654_source.json
+│  ├─ 001_seed123456_source.wav
+│  ├─ 001_seed123456_source.json
+│  ├─ 002_seed987654_source.wav
+│  └─ 002_seed987654_source.json
 └─ failed_items.csv            # vain jos virheitä esiintyi
 ```
 
@@ -238,12 +238,18 @@ Koulutusputki:
 
 ```text
 Audio dataset
-  ↁEPreprocess / 40 kHz
-  ↁERMVPE F0
-  ↁEHuBERT v2 / 768-dim
-  ↁERVC v2 training
-  ↁEFAISS index
-  ↁEruntime/rvc/exports/<Character>/<Character>.pth
+  ↓
+Preprocess / 40 kHz
+  ↓
+RMVPE F0
+  ↓
+HuBERT v2 / 768-dim
+  ↓
+RVC v2 training
+  ↓
+FAISS index
+  ↓
+runtime/rvc/exports/<Character>/<Character>.pth
 runtime/rvc/exports/<Character>/<Character>.index
 ```
 
@@ -251,7 +257,7 @@ Windowsin automaattinen lepotila estetään koulutuksen ajaksi ja palautetaan ko
 
 ## Käyttöliittymän kielet
 
-Ohje- ja seliteteksti voidaan vaihtaa kielille `Suomi / 日本誁E/ English`. Oletuskieli on Suomi ja valinta tallennetaan paikallisesti.
+Ohje- ja seliteteksti voidaan vaihtaa kielille `Suomi / 日本語 / English`. Oletuskieli on Suomi ja valinta tallennetaan paikallisesti.
 
 Painikkeet, tekniset nimet ja osa tilateksteistä pidetään tarkoituksella englanniksi.
 
@@ -297,7 +303,7 @@ __pycache__/
 
 Ladatut mallit, virtuaaliympäristöt, käyttäjäasetukset, RVC-mallit ja generoidut äänet eivät näin normaalisti päädy repositoryyn.
 
-## ÁE�ni- ja hahmooikeudet
+## Ääni- ja hahmooikeudet
 
 Zundanenin MIT-lisenssi ei anna oikeuksia kolmansien osapuolten hahmoääniin, koulutusdataan tai RVC-malleihin.
 
@@ -315,4 +321,3 @@ Jos käytät, julkaiset tai jaat kolmannen osapuolen ääntä, datasettejä, `.p
 - FFmpeg: https://ffmpeg.org/
 
 Lisenssitiedot löytyvät myös tiedostosta `THIRD_PARTY_NOTICES.md`.
-
