@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zundanen</title>
+<style>
+:root{
+  --bg:#090d14; --panel:#111824; --panel2:#0d131d; --line:#233044;
+  --text:#f4f7fb; --muted:#8995a8; --accent:#7c6cff; --accent2:#55d6be;
+  --danger:#ff7289; --warn:#f4c76b; --shadow:0 24px 80px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; color:var(--text);
+  font-family:Inter,"Segoe UI",system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(124,108,255,.18),transparent 30%),
+    radial-gradient(circle at 85% 90%,rgba(85,214,190,.10),transparent 32%),
+    var(--bg);
+}
+button,input,select,textarea{font:inherit}
+.shell{max-width:1240px;margin:auto;padding:30px 28px 42px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:16px}
+.brand h1{font-size:30px;letter-spacing:-.7px;margin:0 0 4px}.brand p{margin:0;color:var(--muted);font-size:13px}
+.badges{display:flex;align-items:center;gap:10px}.badge{padding:8px 13px;border:1px solid #20483f;border-radius:999px;color:#75dfc1;background:#10251f;font-size:12px;font-weight:700}
+.iconbtn,.secondary{border:1px solid var(--line);background:#121a27;color:#c4cddd;border-radius:12px;padding:9px 13px;cursor:pointer;text-decoration:none;transition:.18s}
+.langselect{width:auto;min-width:105px;background:#121a27;color:#c4cddd;border:1px solid var(--line);border-radius:12px;padding:9px 30px 9px 11px;cursor:pointer}
+.iconbtn:hover,.secondary:hover{background:#1b2636}
+.tabs{display:inline-flex;gap:5px;padding:5px;border:1px solid rgba(255,255,255,.06);border-radius:15px;background:#0d131d;margin-bottom:18px}
+.tab{border:0;background:transparent;color:#7f8b9e;padding:10px 18px;border-radius:11px;cursor:pointer;font-weight:700}.tab.active{color:#fff;background:#1b2434;box-shadow:0 5px 18px rgba(0,0,0,.25)}
+.view{display:none}.view.active{display:block}.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.8fr);gap:20px}
+.trainergrid,.batchgrid{display:grid;grid-template-columns:minmax(350px,.82fr) minmax(0,1.45fr);gap:20px}
+.card{background:linear-gradient(180deg,rgba(19,27,40,.96),rgba(14,20,30,.96));border:1px solid rgba(255,255,255,.055);border-radius:24px;box-shadow:var(--shadow)}
+.editor{padding:25px;min-height:555px;display:flex;flex-direction:column}.controls,.trainerSetup,.monitor,.batchSetup,.batchMonitor{padding:25px}
+.title{font-weight:750;font-size:18px;margin-bottom:4px}.sub{color:var(--muted);font-size:13px;margin-bottom:17px;line-height:1.55}
+textarea{flex:1;width:100%;min-height:390px;resize:none;background:#090f18;color:#f0f4fa;border:1px solid var(--line);border-radius:16px;padding:18px;font:16px/1.6 "Segoe UI",sans-serif;outline:none;transition:.2s}
+textarea:focus,input[type=text]:focus,input[type=number]:focus{border-color:#6258d7;box-shadow:0 0 0 3px rgba(124,108,255,.10)}
+.editorfoot{display:flex;justify-content:space-between;color:#657287;font-size:12px;margin-top:12px}
+label.small{display:block;color:#aeb8c7;font-size:13px;margin:16px 0 7px}
+select,input[type=text],input[type=number]{width:100%;background:#111b2a;color:var(--text);border:1px solid var(--line);border-radius:13px;padding:12px 13px;outline:none}
+.modelhint,.hint{font-size:11px;color:#657287;margin-top:7px;line-height:1.5}.rangehead{display:flex;justify-content:space-between;align-items:center;margin-top:19px;font-size:13px}.rangeval{color:#bcc6d6;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin-top:9px}.generate{width:100%;border:none;border-radius:15px;padding:16px 18px;margin-top:25px;background:linear-gradient(135deg,#7465ff,#5f7df7);color:white;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 12px 30px rgba(90,103,242,.28);transition:.2s}.generate:hover{transform:translateY(-1px);filter:brightness(1.07)}.generate:disabled{opacity:.5;cursor:default;transform:none}.generateRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch;margin-top:25px}.generateRow .generate{margin-top:0}.accentTopActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.importWavBtn{border:1px solid var(--line);border-radius:15px;padding:0 18px;background:#121a27;color:#d7deeb;font-weight:700;cursor:pointer;white-space:nowrap}.importWavBtn:hover{background:#1b2636}.importWavBtn:disabled{opacity:.5;cursor:default}
+.status{margin-top:13px;min-height:20px;color:var(--muted);font-size:12px}.player{display:none;margin-top:17px;padding:14px;background:#0b111a;border:1px solid var(--line);border-radius:15px}.player.show{display:block}audio{width:100%;height:38px}.actions{display:flex;gap:9px;margin-top:10px}.actions>*{flex:1;text-align:center}
+.row{display:flex;gap:9px;align-items:center}.row>.grow{flex:1}.browse{white-space:nowrap}.numberGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fixedBadges{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.fixedBadges span{font-size:11px;color:#9eabc0;background:#0c141f;border:1px solid #263347;border-radius:999px;padding:6px 9px}
+.checkrow{display:flex;gap:10px;align-items:flex-start;margin-top:17px;padding:12px;border:1px solid #273347;border-radius:12px;background:#0c131d;color:#aeb8c7;font-size:12px;line-height:1.5}.checkrow input{accent-color:var(--accent);margin-top:3px}
+.datasetInfo{margin-top:9px;min-height:18px;color:#7c8aa0;font-size:12px}.datasetInfo.good{color:#65d9b6}.datasetInfo.bad{color:var(--danger)}
+.monitorHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.phase{font-size:21px;font-weight:780}.sleepBadge{font-size:11px;padding:7px 10px;border-radius:999px;background:#0d1c18;color:#64d7b5;border:1px solid #21463d;display:none}.sleepBadge.show{display:block}
+.progressTrack{height:10px;background:#080e16;border:1px solid #1d293a;border-radius:99px;overflow:hidden;margin-top:17px}.progressFill{height:100%;width:0;background:linear-gradient(90deg,#6f62ff,#55d6be);transition:width .35s ease}.progressMeta{display:flex;justify-content:space-between;margin-top:7px;color:#718095;font-size:12px;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:17px}.stat{padding:12px;background:#0b121c;border:1px solid #202c3e;border-radius:13px}.stat b{display:block;font-size:18px;margin-top:3px}.stat span{font-size:10px;color:#758297;text-transform:uppercase;letter-spacing:.8px}
+.logTitle{display:flex;justify-content:space-between;align-items:center;margin-top:18px;margin-bottom:7px;color:#9faabd;font-size:12px}.terminal{height:310px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#070c12;color:#b7c4d5;border:1px solid #1f2a39;border-radius:14px;padding:14px;font:12px/1.55 Consolas,"Cascadia Mono",monospace}.terminal .empty{color:#546176}
+.result{display:none;margin-top:14px;padding:13px;border-radius:13px;background:#0d1c18;border:1px solid #21463d;color:#78dcbc;font-size:12px;line-height:1.55;word-break:break-all}.result.show{display:block}.errorbox{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#26131a;border:1px solid #5c2838;color:#ff9daf;font-size:12px;white-space:pre-wrap}.errorbox.show{display:block}
+.danger{border-color:#552837;background:#2a141c;color:#ff9daf}.danger:hover{background:#3a1925}.monitorActions{display:flex;gap:9px;margin-top:13px;flex-wrap:wrap}.monitorActions button{flex:1;min-width:120px}.batchText{min-height:260px;height:310px;font-size:14px}.modeRow{display:flex;gap:8px;margin-top:12px}.modeBtn{flex:1;border:1px solid var(--line);background:#0c141f;color:#8995a8;border-radius:11px;padding:9px 10px;cursor:pointer}.modeBtn.active{background:#1b2434;color:#fff;border-color:#4d4a8d}.batchCurrent{margin-top:14px;padding:12px;background:#0b121c;border:1px solid #202c3e;border-radius:13px;min-height:68px}.batchCurrent b{display:block;font-size:12px;color:#8f9caf;margin-bottom:5px}.batchCurrent span{font-size:13px;line-height:1.45;word-break:break-word}.failedList{max-height:155px;overflow:auto;margin-top:10px;font-size:11px;color:#ff9daf;white-space:pre-wrap;background:#160d12;border:1px solid #4b2431;border-radius:11px;padding:10px;display:none}.failedList.show{display:block}.fileinput{display:none}.tinyActions{display:flex;gap:8px;margin-top:9px}.tinyActions>*{flex:1}
+.modalbg{position:fixed;inset:0;background:rgba(3,6,11,.72);display:none;place-items:center;padding:22px;backdrop-filter:blur(8px);z-index:30}.modalbg.show{display:grid}.modal{width:min(760px,100%);background:#101722;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}.modal h2{margin:0 0 5px}.modal p{color:var(--muted);font-size:13px}.field{margin-top:13px}.field span{display:block;color:#aeb8c7;font-size:12px;margin-bottom:6px}.field input{width:100%;background:#090f18;color:#e8edf5;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.modalactions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}
+.voiceLeftColumn{display:flex;flex-direction:column;gap:20px;min-width:0}.voiceEditor{min-height:300px}.voiceEditor textarea{flex:0 0 auto;min-height:180px;height:220px;resize:vertical}.alignmentCard{margin-top:0;padding:25px}.pitchCompactTable th:first-child,.pitchCompactTable td:first-child{white-space:normal;word-break:break-word}.pitchCompactTable th:not(:first-child),.pitchCompactTable td:not(:first-child){width:1%;white-space:nowrap}.alignmentMeta{margin-top:12px;color:var(--muted);font-size:12px}.alignmentTableWrap{overflow:auto;margin-top:12px;max-height:330px;border:1px solid var(--line);border-radius:12px}.alignmentTable{width:100%;border-collapse:collapse;font-size:13px}.alignmentTable th,.alignmentTable td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.alignmentTable th{position:sticky;top:0;background:#111925;color:var(--muted);font-size:11px}.alignmentTable tr:last-child td{border-bottom:0}.pitchEditCell{display:flex;align-items:center;gap:6px}.pitchEditCell button{border:1px solid var(--line);background:#121a27;color:#c4cddd;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:11px}.pitchEditCell button:hover{background:#1b2636}.pitchOffset,.durationOffset{min-width:46px;text-align:center;font-variant-numeric:tabular-nums;color:#d8def0;font-size:12px}.pitchOffset.changed,.durationOffset.changed{color:#7ee0c3}.alignmentPitchPanel{margin-top:14px;padding:13px;background:#0b121c;border:1px solid #202c3e;border-radius:12px}.alignmentPitchPanel .hint{margin-top:0}.alignmentPitchActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.alignmentPitchActions button{flex:1;min-width:150px}.alignmentPitchMediaRow{display:flex;align-items:center;gap:10px;margin-top:10px}.alignmentPitchAudio{display:none;flex:1 1 auto;min-width:0;width:auto;margin:0}.alignmentPitchAudio.show{display:block}.alignmentPitchSave{display:none;flex:0 0 min(360px,48%);min-width:150px;height:38px;align-items:center;justify-content:center;text-align:center;white-space:nowrap}
+@media(max-width:900px){.grid,.trainergrid,.batchgrid{grid-template-columns:1fr}.editor{min-height:460px}.terminal{height:280px}}
+
+.accentTable th:first-child,.accentTable td:first-child{white-space:normal;word-break:break-word;min-width:180px;width:34%}.accentChoiceCell{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.accentChoiceBtn{border:1px solid var(--line);background:#121a27;color:#c4cddd;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:11px}.accentChoiceBtn:hover{background:#1b2636}.accentChoiceBtn.active{border-color:#4b9f88;background:#173129;color:#9df0d4}.accentStrengthWrap{display:flex;align-items:center;gap:9px;min-width:190px}.accentStrength{width:145px!important;min-width:120px;margin:0!important}.accentStrengthValue{min-width:38px;text-align:right;color:#cbd6e8;font-variant-numeric:tabular-nums;font-size:11px}.accentDebug{margin-top:12px}.accentDebug summary{cursor:pointer;color:var(--muted);font-size:12px}.accentWordLabel{font-weight:600;color:#dce5f5}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand"><h1>Zundanen</h1><p>Finnish TTS &nbsp;→&nbsp; RVC Character Voice</p></div>
+    <div class="badges"><div class="badge">● LOCAL PIPELINE</div><select class="langselect" id="helpLanguage" aria-label="Help language"><option value="fi">Suomi</option><option value="ja">日本語</option><option value="en">English</option></select><button class="iconbtn" onclick="openSettings()">⚙ Settings</button></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tabVoice" onclick="showTab('voice')">✦ Voice Generation</button>
+    <button class="tab" id="tabBatch" onclick="showTab('batch')">≡ Batch Generation</button>
+    <button class="tab" id="tabTrainer" onclick="showTab('trainer')">◇ Model Trainer</button>
+  </div>
+
+  <div class="view active" id="voiceView">
+    <div class="grid">
+      <div class="voiceLeftColumn">
+        <section class="card editor voiceEditor">
+          <div class="title">Finnish text</div>
+          <div class="sub" data-help="voiceIntro"></div>
+          <textarea id="text">Moi! Olen Zundamon. Tämä on suomalaisen puhesynteesin testi.</textarea>
+          <div class="editorfoot"><span id="chars">0 chars</span><span>UTF-8 / Finnish</span></div>
+        </section>
+        <section class="card alignmentCard">
+          <div class="title">Accent</div>
+          <div id="accentInstallPanel" style="display:none">
+            <div class="sub" data-help="accentSupportMissing"></div>
+            <div class="hint" data-help="accentSupportInstallHelp"></div>
+            <div class="accentTopActions"><button class="secondary" id="installAccentSupport" type="button" onclick="installAccentSupport()">Install Accent support</button></div>
+            <div class="status" id="accentInstallStatus"></div>
+          </div>
+          <div id="accentEditorPanel">
+            <div class="sub" data-help="alignmentIntro"></div>
+            <div class="hint" data-help="alignmentDockerHelp"></div>
+            <div class="status" id="alignmentStatus"></div>
+            <div class="accentTopActions"><button class="secondary" id="analyzeAccent" type="button" style="display:none" onclick="runAccentAnalysis(true)" data-help="analyzeAccent">Analyze accent</button></div>
+            <div id="alignmentResult"></div>
+          </div>
+        </section>
+      </div>
+      <section class="card controls">
+        <div class="title">Voice</div>
+        <label class="small">Character</label><select id="voice"></select>
+        <div class="modelhint" id="modelhint"></div>
+        <div class="rangehead"><span>Pitch</span><span class="rangeval" id="pitchv">0</span></div><input id="pitch" type="range" min="-12" max="12" step="1" value="0"><div class="hint" data-help="pitchHelp"></div>
+        <div class="rangehead"><span>Index rate</span><span class="rangeval" id="indexv">0.55</span></div><input id="index" type="range" min="0" max="1" step="0.01" value="0.55"><div class="hint" data-help="indexHelp"></div>
+        <div class="rangehead"><span>Protect</span><span class="rangeval" id="protectv">0.15</span></div><input id="protect" type="range" min="0" max="0.5" step="0.01" value="0.15"><div class="hint" data-help="protectHelp"></div>
+        <div class="rangehead"><span>Expression</span><span class="rangeval" id="expressionv">0.60</span></div><input id="expression" type="range" min="0.2" max="1.2" step="0.01" value="0.60"><div class="hint" data-help="expressionHelp"></div>
+        <label class="small">Seed</label><input type="number" id="seed" min="0" max="2147483647" step="1" value="0">
+        <label class="checkrow"><input type="checkbox" id="fixSeed"><span><b>Fix seed</b><br><span data-help="seedHelp"></span></span></label>
+        <div class="generateRow"><button class="generate" id="generate" onclick="generateVoice()">✦ Generate voice</button><button class="importWavBtn" id="importWav" type="button" onclick="importWav()">Import WAV</button></div><div class="status" id="status"></div>
+        <label class="checkrow"><input type="checkbox" id="voiceSubtitleTxt" checked><span><b>Create subtitle TXT</b><br><span data-help="subtitleTxtHelp"></span></span></label>
+        <label class="checkrow"><input type="checkbox" id="voiceSourceAudio"><span><b>Save source audio</b><br><span data-help="sourceAudioHelp"></span></span></label>
+        <div class="player" id="player"><audio id="audio" controls></audio><div class="actions"><button class="secondary" id="saveAs" onclick="saveVoiceAs()">Save As...</button></div></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="view" id="batchView">
+    <div class="batchgrid">
+      <section class="card batchSetup">
+        <div class="title">Batch / Queue</div>
+        <div class="sub" data-help="batchIntro"></div>
+        <div class="modeRow"><button class="modeBtn active" id="batchModeLines" onclick="setBatchMode('lines')">One line = one WAV</button><button class="modeBtn" id="batchModeCsv" onclick="setBatchMode('csv')">CSV</button></div>
+        <label class="small" id="batchContentLabel">Text</label>
+        <textarea class="batchText" id="batchText" placeholder="Hyvää päivää!&#10;Minun nimeni on Zundamon.&#10;Tänään puhutaan tästä aiheesta.">Hyvää päivää!
+Minun nimeni on Zundamon.
+Tänään puhutaan tästä aiheesta.</textarea>
+        <div id="batchCsvTools" style="display:none">
+          <div class="tinyActions"><button class="iconbtn" onclick="document.getElementById('batchCsvFile').click()">Import CSV</button><button class="iconbtn" onclick="downloadCsvTemplate()">CSV template</button></div>
+          <input class="fileinput" type="file" id="batchCsvFile" accept=".csv,text/csv">
+        </div>
+        <div class="hint" id="batchModeHelp" data-help="batchLinesHelp"></div>
+        <label class="small" id="batchVoiceLabel">Character</label><select id="batchVoice"></select>
+        <div class="numberGrid">
+          <div><label class="small">Pitch</label><input type="number" id="batchPitch" min="-24" max="24" step="1" value="0"></div>
+          <div><label class="small">Index rate</label><input type="number" id="batchIndex" min="0" max="1" step="0.01" value="0.55"></div>
+          <div><label class="small">Protect</label><input type="number" id="batchProtect" min="0" max="0.5" step="0.01" value="0.15"></div>
+          <div><label class="small">Expression</label><input type="number" id="batchExpression" min="0.2" max="1.2" step="0.01" value="0.60"></div>
+          <div><label class="small">Seed</label><input type="number" id="batchSeed" min="0" max="2147483647" step="1" value="0"></div>
+        </div>
+        <label class="checkrow"><input type="checkbox" id="batchFixSeed"><span><b>Fix seed</b><br><span data-help="batchSeedHelp"></span></span></label>
+        <div class="hint" id="batchDefaultsModeHelp" data-help="batchDefaultsHelp" style="display:none"></div>
+        <label class="checkrow"><input type="checkbox" id="batchSubtitleTxt" checked><span><b>Create subtitle TXT</b><br><span data-help="subtitleTxtHelp"></span></span></label>
+        <label class="checkrow"><input type="checkbox" id="batchSourceAudio"><span><b>Save source audio</b><br><span data-help="batchSourceAudioHelp"></span></span></label>
+        <button class="generate" id="batchStart" onclick="startBatch()">▶ Start Queue</button>
+      </section>
+
+      <section class="card batchMonitor">
+        <div class="monitorHead"><div><div class="title">Queue monitor</div><div class="phase" id="batchPhase">Ready</div></div><div class="sleepBadge" id="batchSleepBadge">● SLEEP PREVENTED</div></div>
+        <div class="progressTrack"><div class="progressFill" id="batchProgressFill"></div></div>
+        <div class="progressMeta"><span id="batchProgressText">0%</span><span id="batchQueueId">No queue</span></div>
+        <div class="stats">
+          <div class="stat"><span>Done</span><b id="batchDoneStat">0 / 0</b></div>
+          <div class="stat"><span>Failed</span><b id="batchFailedStat">0</b></div>
+          <div class="stat"><span>Pending</span><b id="batchPendingStat">0</b></div>
+        </div>
+        <div class="batchCurrent"><b>Currently processing</b><span id="batchCurrentText" data-help="batchNoCurrent"></span></div>
+        <div class="logTitle"><span>Queue log</span><span>auto-scroll</span></div>
+        <pre class="terminal" id="batchLog"><span class="empty" data-help="batchLogEmpty"></span></pre>
+        <div class="failedList" id="batchFailedList"></div>
+        <div class="errorbox" id="batchError"></div>
+        <div class="monitorActions">
+          <button class="iconbtn danger" id="batchStop" onclick="stopBatch()" disabled>Stop Queue</button>
+          <button class="iconbtn" id="batchResume" onclick="resumeBatch()" disabled>Resume Queue</button>
+          <button class="iconbtn" onclick="openBatchOutput()">Open batch folder</button>
+          <button class="iconbtn" id="batchClear" onclick="clearBatch()">Clear Queue</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="view" id="trainerView">
+    <div class="trainergrid">
+      <section class="card trainerSetup">
+        <div class="title">Train a character model</div>
+        <div class="sub" data-help-html="trainerIntro"></div>
+        <label class="small">Character name</label><input type="text" id="trainCharacter" placeholder="e.g. Kiritan">
+        <label class="small">Dataset folder</label>
+        <div class="row"><input class="grow" type="text" id="trainDataset" placeholder="C:\...\datasets\Kiritan"><button class="iconbtn browse" onclick="pickDataset()">Browse…</button></div>
+        <div class="datasetInfo" id="datasetInfo" data-help="formats"></div>
+        <div class="numberGrid">
+          <div><label class="small">Epochs</label><input type="number" id="trainEpochs" min="1" value="100"></div>
+          <div><label class="small">Batch size</label><input type="number" id="trainBatch" min="1" value="6"></div>
+          <div><label class="small">Save every</label><input type="number" id="trainSaveEvery" min="1" value="10"></div>
+          <div><label class="small">Workers</label><input type="number" id="trainWorkers" min="1" value="8"></div>
+          <div><label class="small">GPU</label><input type="text" id="trainGpu" value="0"></div>
+        </div>
+        <div class="fixedBadges"><span>RVC v2</span><span>40 kHz</span><span>F0 ON</span><span>RMVPE</span><span>HuBERT 768</span></div>
+        <label class="checkrow"><input type="checkbox" id="trainFresh" checked><span><b>Fresh training</b><br><span data-help="freshHelp"></span></span></label>
+        <button class="generate" id="trainStart" onclick="startTraining()">◇ Start training</button>
+      </section>
+
+      <section class="card monitor">
+        <div class="monitorHead"><div><div class="title">Training monitor</div><div class="phase" id="trainPhase">Ready</div></div><div class="sleepBadge" id="sleepBadge">● SLEEP PREVENTED</div></div>
+        <div class="progressTrack"><div class="progressFill" id="trainProgressFill"></div></div>
+        <div class="progressMeta"><span id="trainProgressText">0%</span><span id="trainCharacterStatus">No active job</span></div>
+        <div class="stats">
+          <div class="stat"><span>Epoch</span><b id="epochStat">0 / 100</b></div>
+          <div class="stat"><span>Audio files</span><b id="filesStat">0</b></div>
+          <div class="stat"><span>Phase</span><b id="phaseStat" style="font-size:14px">Idle</b></div>
+        </div>
+        <div class="logTitle"><span>Live log</span><span>auto-scroll</span></div>
+        <pre class="terminal" id="trainLog"><span class="empty" data-help="logEmpty"></span></pre>
+        <div class="result" id="trainResult"></div><div class="errorbox" id="trainError"></div>
+        <div class="monitorActions"><button class="iconbtn danger" id="stopTraining" onclick="stopTrainer()" disabled>Stop training</button><button class="iconbtn" onclick="openExports()">Open exports</button></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="modalbg" id="modal"><div class="modal"><h2>Environment paths</h2><p data-help="envHelp"></p><div id="settingsFields"></div><div class="modalactions"><button class="iconbtn" onclick="closeSettings()">Cancel</button><button class="generate" style="width:auto;margin:0;padding:10px 20px" onclick="saveSettings()">Save</button></div></div></div>
+
+<script>
+let state={voices:{},config:{},tts:{},trainer:{}};
+let trainerInitialized=false, lastTrainerDoneKey="", lastTrainerLog=[];
+let datasetInfoState={type:"formats",count:0,message:""};
+let batchMode="lines", lastBatchLog=[], batchCsvHeader="filename,text,character,pitch,index_rate,protect,expression,seed";
+let batchOptionsSyncedQueueId=null;
+let alignmentSyllables=[], alignmentAccentWords=[];
+let accentSupportInstalled=false, accentSupportPollTimer=null;
+const $=id=>document.getElementById(id);
+const labels={chatterbox_repo:"Chatterbox repo",chatterbox_weights:"Finnish weights",reference_audio:"Reference audio",rvc_python:"RVC Python",rvc_repo:"RVC repo",exports_root:"RVC exports"};
+
+const helpTexts={
+  fi:{
+    voiceIntro:"Kirjoita teksti suomeksi. Syötetty teksti muunnetaan suoraan valitun hahmon ääneksi.",alignmentIntro:"Puheen kohdistus käynnistyy automaattisesti äänen generoinnin jälkeen. Valitse sanakohtainen aksenttitavu ja säädä voimakkuutta.",alignmentDockerHelp:"Puheen kohdistus vaatii Docker Desktopin. Ensimmäinen kohdistus voi kestää kauemmin tarvittavan Docker-kuvan lataamisen vuoksi.",alignmentReady:"Puheen kohdistus käynnistyy automaattisesti.",alignmentRunning:"Kohdistetaan puhetta… Ensimmäinen kohdistus voi kestää kauemmin Docker-kuvan lataamisen vuoksi.",alignmentComplete:"Puheen kohdistus valmis.",alignmentWord:"Sana",alignmentPhone:"Foneemi",alignmentSyllable:"Tavu",alignmentWords:"Sanat",alignmentPhones:"Foneemit",alignmentSyllables:"Tavut",alignmentStart:"Alku",alignmentEnd:"Loppu",alignmentDuration:"Kesto",alignmentMeanF0:"F0-mediaani",alignmentF0Note:"F0: pYIN, soinnilliset kehykset; poikkeamat poistettu; mediaani",alignmentF0Warning:"F0-varoitus",alignmentF0Outlier:"poikkeava / epävarma",alignmentSource:"Lähde",alignmentTranscript:"Tavutus (alkuperäinen teksti)",alignmentPitchEdit:"Aksentti",alignmentLengthEdit:"Voimakkuus",alignmentPitchReset:"Ei muutosta",alignmentPitchResetAll:"Nollaa",alignmentPitchPreview:"Esikuuntele aksentti",alignmentPitchRendering:"Luodaan aksenttimuokattua ääntä WORLDilla…",alignmentPitchComplete:"Aksenttiesikatselu valmis.",alignmentPitchHint:"Valitse sanan aksenttitavu ja säädä aksentin voimakkuutta liukusäätimellä. 0 % ei muuta ääntä; 100 % käyttää voimakkainta aksenttia.",alignmentAccentWeak:"Heikko",alignmentAccentNormal:"Normaali",alignmentAccentStrong:"Vahva",alignmentAccentNone:"Ei muutosta",alignmentAccentWord:"Sana",alignmentAccentDetails:"Tekniset tiedot",importWav:"Import WAV",analyzeAccent:"Kohdista puhetta",importingWav:"Tuodaan WAV-tiedostoa…",importWavTxtComplete:"WAV + TXT tuotu",importWavComplete:"WAV tuotu",enterFinnishText:"Syötä vastaava suomenkielinen teksti ja valitse Kohdista puhetta.",accentSupportMissing:"Aksentti-tuki ei ole asennettu.",accentSupportInstallHelp:"Aksentin muokkaus tarvitsee WSL2:n, Docker Desktopin, Aalto-kohdistuksen ja PyWORLDin. Asenna puuttuvat osat automaattisesti.",accentSupportInstalling:"Aksentti-tuen asennus on käynnissä erillisessä ikkunassa…",accentSupportInstallerOpened:"Aksentti-tuen asennusohjelma avattiin. Suorita sen vaiheet loppuun tässä ikkunassa.",accentSupportReboot:"Windows on käynnistettävä uudelleen Aksentti-tuen asennuksen jatkamiseksi. Käynnistä uudelleen ja paina samaa painiketta uudelleen.",accentSupportInstallFailed:"Aksentti-tuen asennus ei valmistunut. Voit yrittää uudelleen painamalla asennuspainiketta.",
+    batchIntro:"Luo pitkä äänijono automaattisesti. Halutessasi jokaiselle .wav-tiedostolle voidaan luoda myös samanniminen .txt-tiedosto tekstitystyön tueksi. Jono voidaan jättää ajettavaksi esimerkiksi yön yli, ja Windowsin lepotila estetään käsittelyn ajaksi.",
+    batchLinesHelp:"Yksi ei-tyhjä rivi = yksi .wav-tiedosto (esim. 001_seed123456.wav). Jos Create subtitle TXT on käytössä, samalla luodaan samanniminen .txt-tiedosto. Kaikki rivit käyttävät alla olevia oletusasetuksia.",
+    batchCsvHelp:"CSV-sarakkeet: filename,text,character,pitch,index_rate,protect,expression,seed. Vain text on pakollinen. filename on valinnainen: tyhjä kenttä tuottaa esimerkiksi 001_seed123456.wav, ja intro tuottaa 001_intro_seed123456.wav. seed on valinnainen: tyhjä kenttä käyttää Batch-näkymän Seed / Fix seed -asetusta, ja numero kiinnittää kyseisen rivin TTS-seedin.",
+    batchDefaultsHelp:"Näitä oletusasetuksia käytetään, jos CSV-kenttä on tyhjä.",batchSeedHelp:"Kun Fix seed ei ole käytössä, jokaiselle jonon kohteelle valitaan uusi satunnainen seed. Kun Fix seed on käytössä, Seed-kentän arvoa käytetään kaikille kohteille. CSV-rivin seed-arvo ohittaa tämän asetuksen.",
+    batchLogEmpty:"Jonon tapahtumat näkyvät tässä.",
+    batchNoCurrent:"Ei aktiivista käsittelyä.",
+    batchReady:"Valmis",
+    batchRunning:"Jonoa käsitellään…",
+    batchStopped:"Jono pysäytetty. Voit jatkaa myöhemmin Resume Queue -painikkeella.",
+    batchComplete:"Jono valmis.",
+    batchStartConfirm:"Aloitetaanko uusi jono? Nykyinen tallennettu jono korvataan.",
+    batchStopConfirm:"Pysäytetäänkö jono? Nykyinen TTS/RVC-prosessi keskeytetään ja keskeneräinen kohde jätetään odottamaan jatkamista.",
+    batchClearConfirm:"Poistetaanko tallennetun jonon tila? Jo luotuja WAV-tiedostoja ei poisteta.",
+    batchNeedText:"Lisää vähintään yksi tekstirivi tai CSV-rivi.",
+    searchingModels:"Etsitään RVC-malleja…",
+    noModels:"Exports-kansiosta tarvitaan sekä .pth- että .index-tiedosto.",
+    pitchHelp:"Säätää äänen korkeutta. 0 säilyttää alkuperäisen korkeuden.",
+    indexHelp:"Suurempi arvo korostaa koulutetun hahmon äänenpiirteitä.",
+    protectHelp:"Säätää konsonanttien ja soinnittomien äänteiden suojausta. Pienempi arvo säilyttää alkuperäistä ääntämystä enemmän.",
+    expressionHelp:"Säätää TTS:n ilmaisun ja intonaation voimakkuutta.",seedHelp:"Kun Fix seed ei ole käytössä, jokainen generointi käyttää uutta satunnaista seed-arvoa ja käytetty arvo näytetään Seed-kentässä. Kun Fix seed on käytössä, Seed-kentän arvoa käytetään uudelleen.",
+    trainerIntro:'Luo äänikansiosta RVC v2 -mallin <b>.pth + .index</b>. Windowsin automaattinen lepotila estetään koulutuksen ajaksi.',
+    formats:"Tuetut muodot: WAV / FLAC / MP3 / M4A / OGG / AAC",
+    freshHelp:"Poistaa saman hahmon aiemmat koulutuslokit ja tulosteet ja aloittaa koulutuksen alusta.",
+    logEmpty:"Kun koulutus käynnistetään, loki näkyy tässä.",
+    logStarting:"Käynnistetään koulutusta…",
+    logFreshDeleted:"[Zundanen] Aiemmat koulutustiedot poistettiin.",
+    logPreprocess:"[Zundanen] Äänitiedostojen esikäsittely aloitetaan…",
+    logF0:"[Zundanen] RMVPE / F0 -analyysi aloitetaan…",
+    logHubert:"[Zundanen] HuBERT-piirteiden poiminta aloitetaan…",
+    logTrain:"[Zundanen] RVC-mallin koulutus aloitetaan…",
+    logIndex:"[Zundanen] FAISS-indeksiä rakennetaan…",
+    logComplete:"[Zundanen] Koulutus valmis.",
+    logStopped:"[Zundanen] Koulutus pysäytettiin käyttäjän toimesta.",
+    logFilelist:"[Zundanen] Koulutuslista valmis: {count} leikettä + 2 hiljaista näytettä",
+    logConfig:"[Zundanen] RVC-konfiguraatio valmis: ",
+    logSleep:"Sleep     : lepotila estetty koulutuksen ajaksi",
+    envHelp:"Paikallinen ympäristö määritetään automaattisesti. Muuta näitä polkuja vain, jos olet siirtänyt kansioita.",
+    generating:"Luodaan Finnish TTS → RVC -ääntä…",
+    complete:"Valmis",subtitleTxtLabel:"Luo tekstityksen TXT",sourceAudioLabel:"Tallenna lähdeääni",subtitleTxtHelp:"Luo .wav-tiedoston rinnalle samannimisen .txt-tiedoston. Hyödyllinen tekstityksessä ja videoeditoinnin työnkuluissa.",sourceAudioHelp:"Tallentaa RVC:tä edeltävän suomalaisen TTS-äänen samaan kansioon *_source.wav-tiedostona myöhempää accent-muokkausta varten.",batchSourceAudioHelp:"Tallentaa RVC:tä edeltävät lähdeäänet batch-kansion source_audio-alikansioon myöhempää accent-muokkausta varten.",
+    choosingFolder:"Avataan kansionvalinta…",
+    audioFilesFound:"✓ {count} äänitiedostoa löytyi.",
+    noAudioFiles:"✕ Äänitiedostoja ei löytynyt.",
+    folderNotFound:"✕ Kansiota ei löytynyt.",
+    datasetCheckFailed:"✕ Äänikansion tarkistus epäonnistui.",
+    folderPickerFailed:"✕ Kansion valinta epäonnistui.",
+    characterRequired:"Syötä Character name.",
+    datasetRequired:"Valitse Dataset folder.",
+    freshConfirm:"Hahmon “{character}” aiemmat koulutuslokit ja tulosteet poistetaan, jos niitä on.\nAloitetaanko koulutus alusta?",
+    stopConfirm:"Pysäytetäänkö nykyinen koulutus?"
+  },
+  ja:{
+    voiceIntro:"フィンランド語の文章を入力すると、そのまま選択したキャラクター音声に変換します。",alignmentIntro:"音声生成後に強制アライメントを自動で行います。単語ごとにアクセントを置く音節を選び、強さを調整できます。",alignmentDockerHelp:"強制アライメントにはDocker Desktopが必要です。初回は必要なDockerイメージの取得で時間がかかる場合があります。",alignmentReady:"強制アライメントは音声生成後に自動で開始します。",alignmentRunning:"強制アライメントを実行中… 初回はDockerイメージの取得で時間がかかる場合があります。",alignmentComplete:"強制アライメント完了",alignmentWord:"単語",alignmentPhone:"音素",alignmentSyllable:"音節",alignmentWords:"単語",alignmentPhones:"音素",alignmentSyllables:"音節",alignmentStart:"開始",alignmentEnd:"終了",alignmentDuration:"長さ",alignmentMeanF0:"F0中央値",alignmentF0Note:"F0: pYIN（有声音のみ・外れ値除外・中央値）",alignmentF0Warning:"F0警告",alignmentF0Outlier:"外れ値 / 判定不確実",alignmentSource:"対象",alignmentTranscript:"音節区切り（入力テキスト）",alignmentPitchEdit:"アクセント",alignmentLengthEdit:"強さ",alignmentPitchReset:"変更なし",alignmentPitchResetAll:"リセット",alignmentPitchPreview:"アクセントをプレビュー",alignmentPitchRendering:"WORLDでアクセント音声を生成中…",alignmentPitchComplete:"アクセントプレビューが完成しました。",alignmentPitchHint:"単語ごとにアクセント音節を選び、スライダーで強さを調整します。0%では音声を変更せず、100%で最大のアクセントを適用します。",alignmentAccentWeak:"弱",alignmentAccentNormal:"普通",alignmentAccentStrong:"強",alignmentAccentNone:"変更なし",alignmentAccentWord:"単語",alignmentAccentDetails:"技術情報",importWav:"WAVを読み込む",analyzeAccent:"強制アライメントを実行",importingWav:"WAVを読み込み中…",importWavTxtComplete:"WAV + TXTを読み込みました",importWavComplete:"WAVを読み込みました",enterFinnishText:"対応するフィンランド語テキストを入力して、強制アライメントを実行してください。",accentSupportMissing:"Accent support がインストールされていません。",accentSupportInstallHelp:"アクセント編集には WSL2、Docker Desktop、Aalto alignment、PyWORLD が必要です。不足しているものだけ自動でインストールします。",accentSupportInstalling:"別ウィンドウで Accent support をインストールしています…",accentSupportInstallerOpened:"Accent support のインストーラを開きました。表示されたウィンドウの手順を完了してください。",accentSupportReboot:"Accent support のセットアップを続けるには Windows の再起動が必要です。再起動後、同じボタンをもう一度押してください。",accentSupportInstallFailed:"Accent support のインストールが完了していません。インストールボタンから再試行できます。",
+    batchIntro:"大量の文章を順番に自動生成します。必要に応じて各.wavファイルと同名の.txtファイルも作成でき、字幕作成などの動画編集ワークフローに利用できます。夜間などに連続実行でき、処理中はWindowsのスリープを防止します。",
+    batchLinesHelp:"空行を除き、1行 = 1つの.wavファイルとして 001_seed123456.wav のように生成します。Create subtitle TXT がONの場合は同名の.txtファイルも作成します。全行に下のデフォルト設定を使います。",
+    batchCsvHelp:"CSV列: filename,text,character,pitch,index_rate,protect,expression,seed。必須は text だけです。filename は任意で、空欄なら 001_seed123456.wav、intro なら 001_intro_seed123456.wav のように保存されます。seed は任意で、空欄ならBatch画面のSeed / Fix seed設定を使い、数値を入れるとその行のTTS Seedを固定します。",
+    batchDefaultsHelp:"CSVの項目が空欄の場合に使用されるデフォルト設定です。",batchSeedHelp:"Fix seed がOFFの場合はキューの各項目に新しいランダムSeedを使用します。ONの場合はSeed欄の値を全項目に使用します。CSVのseedに数値がある行では、その値が優先されます。",
+    batchLogEmpty:"キューを開始するとログがここに表示されます。",
+    batchNoCurrent:"現在処理中の項目はありません。",
+    batchReady:"待機中",
+    batchRunning:"キューを処理中…",
+    batchStopped:"キューを停止しました。Resume Queue で続きから再開できます。",
+    batchComplete:"キューが完了しました。",
+    batchStartConfirm:"新しいキューを開始しますか？保存されている現在のキュー状態は置き換えられます。",
+    batchStopConfirm:"キューを停止しますか？現在のTTS/RVC処理も停止し、その項目は再開待ちに戻します。",
+    batchClearConfirm:"保存されているキュー状態を消去しますか？生成済みWAVは削除されません。",
+    batchNeedText:"少なくとも1行の文章、またはCSVデータを入力してください。",
+    searchingModels:"RVCモデルを検索中…",
+    noModels:"exports に .pth + .index が必要です。",
+    pitchHelp:"声の高さを調整します。0が元の高さです。",
+    indexHelp:"高いほど学習したキャラクター声の特徴が強くなります。",
+    protectHelp:"子音や無声音の保護量を調整します。低いほど元の発音を残しやすくなります。",
+    expressionHelp:"TTSの抑揚や感情表現の強さを調整します。",seedHelp:"Fix seed がOFFの場合は生成ごとに新しいランダムSeedを使用し、実際に使った値をSeed欄に表示します。ONの場合はSeed欄の値を繰り返し使用します。",
+    trainerIntro:'音声フォルダから RVC v2 の <b>.pth + .index</b> を作ります。学習中はWindowsの自動スリープを防止します。',
+    formats:"WAV / FLAC / MP3 / M4A / OGG / AAC に対応",
+    freshHelp:"同名キャラの既存ログ・出力を削除して最初から学習します。",
+    logEmpty:"学習を開始するとログがここに表示されます。",
+    logStarting:"学習を開始しています…",
+    logFreshDeleted:"[Zundanen] 既存の学習データを削除しました。",
+    logPreprocess:"[Zundanen] 音声の前処理を開始します…",
+    logF0:"[Zundanen] RMVPE / F0 抽出を開始します…",
+    logHubert:"[Zundanen] HuBERT特徴抽出を開始します…",
+    logTrain:"[Zundanen] RVCモデルの学習を開始します…",
+    logIndex:"[Zundanen] FAISS indexを作成します…",
+    logComplete:"[Zundanen] 学習が完了しました。",
+    logStopped:"[Zundanen] ユーザー操作により学習を停止しました。",
+    logFilelist:"[Zundanen] 学習リストを作成しました: {count} clips + 2 mute",
+    logConfig:"[Zundanen] RVC設定を準備しました: ",
+    logSleep:"Sleep     : 学習中のスリープを防止中",
+    envHelp:"今のローカル環境を自動設定しています。フォルダを移動したときだけ変更してください。",
+    generating:"Finnish TTS → RVC を生成中…",
+    complete:"完成",subtitleTxtHelp:".wavファイルと同名の.txtファイルを作成します。字幕作成などの動画編集ワークフローに便利です。",sourceAudioHelp:"RVC前のフィンランド語TTS音声を、後から高品質にアクセント編集できるよう同じフォルダへ *_source.wav として保存します。",batchSourceAudioHelp:"RVC前の元音声を、Batch出力フォルダ内の source_audio フォルダへまとめて保存します。",
+    choosingFolder:"フォルダ選択画面を開いています…",
+    audioFilesFound:"✓ {count} 件の音声ファイルが見つかりました。",
+    noAudioFiles:"✕ 音声ファイルが見つかりません。",
+    folderNotFound:"✕ フォルダが見つかりません。",
+    datasetCheckFailed:"✕ 音声フォルダの確認に失敗しました。",
+    folderPickerFailed:"✕ フォルダ選択に失敗しました。",
+    characterRequired:"Character name を入力してください。",
+    datasetRequired:"Dataset folder を選択してください。",
+    freshConfirm:"「{character}」の既存学習ログ/出力がある場合は削除して最初から学習します。\n開始しますか？",
+    stopConfirm:"現在の学習を停止しますか？"
+  },
+  en:{
+    voiceIntro:"Enter Finnish text to convert it directly into the selected character voice.",alignmentIntro:"Forced alignment runs automatically after voice generation. Choose the accented syllable for each word and adjust its strength.",alignmentDockerHelp:"Forced alignment requires Docker Desktop. The first alignment may take longer while the required Docker image is downloaded.",alignmentReady:"Forced alignment starts automatically after voice generation.",alignmentRunning:"Aligning speech… The first alignment may take longer while the Docker image is downloaded.",alignmentComplete:"Forced alignment complete.",alignmentWord:"Word",alignmentPhone:"Phone",alignmentSyllable:"Syllable",alignmentWords:"Words",alignmentPhones:"Phones",alignmentSyllables:"Syllables",alignmentStart:"Start",alignmentEnd:"End",alignmentDuration:"Duration",alignmentMeanF0:"Median F0",alignmentF0Note:"F0: pYIN, voiced frames only; outliers rejected; median",alignmentF0Warning:"F0 warning",alignmentF0Outlier:"outlier / uncertain",alignmentSource:"Source",alignmentTranscript:"Syllabified input text",alignmentPitchEdit:"Accent",alignmentLengthEdit:"Strength",alignmentPitchReset:"No change",alignmentPitchResetAll:"Reset",alignmentPitchPreview:"Preview accent",alignmentPitchRendering:"Rendering WORLD accent edits…",alignmentPitchComplete:"Accent preview is ready.",alignmentPitchHint:"Choose the accented syllable for each word, then set its strength with the slider. 0% leaves the audio unchanged; 100% applies the maximum accent.",alignmentAccentWeak:"Weak",alignmentAccentNormal:"Normal",alignmentAccentStrong:"Strong",alignmentAccentNone:"No change",alignmentAccentWord:"Word",alignmentAccentDetails:"Technical details",importWav:"Import WAV",analyzeAccent:"Analyze accent",importingWav:"Importing WAV…",importWavTxtComplete:"WAV + TXT imported",importWavComplete:"WAV imported",enterFinnishText:"Enter the corresponding Finnish text, then click Analyze accent.",accentSupportMissing:"Accent support is not installed.",accentSupportInstallHelp:"Accent editing requires WSL2, Docker Desktop, Aalto alignment, and PyWORLD. Missing components can be installed automatically.",accentSupportInstalling:"Installing Accent support in a separate window…",accentSupportInstallerOpened:"The Accent support installer has opened. Complete the steps in that window.",accentSupportReboot:"Windows must be restarted to continue installing Accent support. Restart Windows, then click the same button again.",accentSupportInstallFailed:"Accent support installation is not complete. Click the install button to try again.",
+    batchIntro:"Generate a long queue of voice clips automatically. Optionally create a same-name .txt file for each .wav file for subtitle and video editing workflows. It can run unattended overnight, with Windows sleep prevented while the queue is active.",
+    batchLinesHelp:"Each non-empty line creates one .wav file such as 001_seed123456.wav. When Create subtitle TXT is enabled, a same-name .txt file is created too. All lines use the default settings below.",
+    batchCsvHelp:"CSV columns: filename,text,character,pitch,index_rate,protect,expression,seed. Only text is required. filename is optional: leave it blank for 001_seed123456.wav, or use intro to get 001_intro_seed123456.wav. seed is optional: leave it blank to use the Batch Seed / Fix seed setting, or enter a number to fix the TTS seed for that row.",
+    batchDefaultsHelp:"These defaults are used when a CSV field is left blank.",batchSeedHelp:"When Fix seed is off, each queue item gets a new random seed. When enabled, the value in the Seed field is used for every item. A seed value in a CSV row overrides this setting.",
+    batchLogEmpty:"Queue events will appear here after the batch starts.",
+    batchNoCurrent:"Nothing is currently being processed.",
+    batchReady:"Ready",
+    batchRunning:"Processing queue…",
+    batchStopped:"Queue stopped. Use Resume Queue to continue later.",
+    batchComplete:"Queue complete.",
+    batchStartConfirm:"Start a new queue? The currently saved queue state will be replaced.",
+    batchStopConfirm:"Stop the queue? The current TTS/RVC process will be terminated and that item will return to pending.",
+    batchClearConfirm:"Clear the saved queue state? Generated WAV files will not be deleted.",
+    batchNeedText:"Enter at least one text line or CSV row.",
+    searchingModels:"Searching for RVC models…",
+    noModels:"Both .pth and .index files are required in the exports folder.",
+    pitchHelp:"Adjusts the voice pitch. 0 keeps the original pitch.",
+    indexHelp:"Higher values make the trained character voice characteristics stronger.",
+    protectHelp:"Controls protection of consonants and unvoiced sounds. Lower values preserve the original pronunciation more strongly.",
+    expressionHelp:"Adjusts the intensity of TTS expression and intonation.",seedHelp:"When Fix seed is off, each generation uses a new random seed and shows the value used in the Seed field. When enabled, the value in the Seed field is reused.",
+    trainerIntro:'Creates an RVC v2 model <b>.pth + .index</b> from an audio folder. Windows sleep is prevented while training.',
+    formats:"Supported: WAV / FLAC / MP3 / M4A / OGG / AAC",
+    freshHelp:"Deletes existing training logs and outputs for the same character and starts from scratch.",
+    logEmpty:"Training logs will appear here after training starts.",
+    logStarting:"Starting training…",
+    logFreshDeleted:"[Zundanen] Previous training data was removed.",
+    logPreprocess:"[Zundanen] Starting audio preprocessing…",
+    logF0:"[Zundanen] Starting RMVPE / F0 extraction…",
+    logHubert:"[Zundanen] Starting HuBERT feature extraction…",
+    logTrain:"[Zundanen] Starting RVC model training…",
+    logIndex:"[Zundanen] Building the FAISS index…",
+    logComplete:"[Zundanen] Training complete.",
+    logStopped:"[Zundanen] Training was stopped by the user.",
+    logFilelist:"[Zundanen] Training list prepared: {count} clips + 2 mute samples",
+    logConfig:"[Zundanen] RVC configuration prepared: ",
+    logSleep:"Sleep     : prevented while training",
+    envHelp:"Local environment paths are configured automatically. Change them only if you move the folders.",
+    generating:"Generating Finnish TTS → RVC…",
+    complete:"Complete",subtitleTxtLabel:"Create subtitle TXT",sourceAudioLabel:"Save source audio",subtitleTxtHelp:"Creates a same-name .txt file alongside each .wav file. Useful for subtitle and video editing workflows.",sourceAudioHelp:"Saves the pre-RVC Finnish TTS beside the final WAV as *_source.wav for high-quality accent editing later.",batchSourceAudioHelp:"Saves all pre-RVC source audio in a source_audio subfolder inside the Batch output folder.",
+    choosingFolder:"Opening folder picker…",
+    audioFilesFound:"✓ {count} audio files found.",
+    noAudioFiles:"✕ No audio files found.",
+    folderNotFound:"✕ Folder not found.",
+    datasetCheckFailed:"✕ Failed to inspect the audio folder.",
+    folderPickerFailed:"✕ Folder selection failed.",
+    characterRequired:"Enter a Character name.",
+    datasetRequired:"Select a Dataset folder.",
+    freshConfirm:"Existing training logs and outputs for “{character}” will be deleted if present.\nStart fresh training?",
+    stopConfirm:"Stop the current training?"
+  }
+};
+let helpLanguage=localStorage.getItem("zundanenHelpLanguage")||"fi";
+if(!["fi","ja","en"].includes(helpLanguage)) helpLanguage="fi";
+function ht(key){return (helpTexts[helpLanguage]&&helpTexts[helpLanguage][key])||helpTexts.fi[key]||key}
+function formatHelp(key,values={}){
+  let out=ht(key);Object.entries(values).forEach(([k,v])=>{out=out.replaceAll("{"+k+"}",v)});return out;
+}
+// Only Zundanen internal markers are localized here. Upstream RVC logs are displayed unchanged.
+function formatStudioLogLine(line){
+  if(line==='[ZUNDANEN] FRESH_CLEANED') return ht('logFreshDeleted');
+  if(line==='[PHASE] PREPROCESS') return ht('logPreprocess');
+  if(line==='[PHASE] F0') return ht('logF0');
+  if(line==='[PHASE] HUBERT') return ht('logHubert');
+  if(line==='[PHASE] TRAIN') return ht('logTrain');
+  if(line==='[PHASE] INDEX') return ht('logIndex');
+  if(line==='TRAINING COMPLETE') return ht('logComplete');
+  if(line==='[STOPPED] Training was stopped by the user.') return ht('logStopped');
+  if(line==='Sleep     : prevented while training') return ht('logSleep');
+  let m=line.match(/^\[OK\] filelist\.txt: (\d+) training clips \+ 2 mute$/);
+  if(m) return formatHelp('logFilelist',{count:m[1]});
+  if(line.startsWith('[OK] config: ')) return ht('logConfig')+line.slice('[OK] config: '.length);
+  return line;
+}
+function renderTrainerLog(running=false){
+  const box=$('trainLog');
+  if(!lastTrainerLog.length){
+    if(box.querySelector('.empty')) box.querySelector('.empty').textContent=ht('logEmpty');
+    return;
+  }
+  const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<90;
+  box.textContent=lastTrainerLog.map(formatStudioLogLine).join('\n');
+  if(nearBottom||running) box.scrollTop=box.scrollHeight;
+}
+function renderDatasetInfo(){
+  const el=$('datasetInfo');
+  if(!el)return;
+  if(datasetInfoState.type==='found'){el.className='datasetInfo good';el.textContent=formatHelp('audioFilesFound',{count:datasetInfoState.count});return}
+  if(datasetInfoState.type==='empty'){el.className='datasetInfo bad';el.textContent=ht('noAudioFiles');return}
+  if(datasetInfoState.type==='folderNotFound'){el.className='datasetInfo bad';el.textContent=ht('folderNotFound');return}
+  if(datasetInfoState.type==='checking'){el.className='datasetInfo';el.textContent=ht('choosingFolder');return}
+  if(datasetInfoState.type==='error'){el.className='datasetInfo bad';el.textContent=datasetInfoState.message||ht('datasetCheckFailed');return}
+  el.className='datasetInfo';el.textContent=ht('formats');
+}
+function setLocalizedStatus(el,key,prefix="",suffix=""){
+  if(!el)return;
+  el.dataset.statusKey=key||"";el.dataset.statusPrefix=prefix||"";el.dataset.statusSuffix=suffix||"";
+  el.textContent=(prefix||"")+(key?ht(key):"")+(suffix||"");
+}
+function clearLocalizedStatus(el){if(!el)return;delete el.dataset.statusKey;delete el.dataset.statusPrefix;delete el.dataset.statusSuffix;el.textContent="";}
+function refreshLocalizedStatuses(){
+  document.querySelectorAll('[data-status-key]').forEach(el=>{
+    const key=el.dataset.statusKey;if(key)el.textContent=(el.dataset.statusPrefix||"")+ht(key)+(el.dataset.statusSuffix||"");
+  });
+}
+function applyHelpLanguage(){
+  document.documentElement.lang=helpLanguage;
+  $('helpLanguage').value=helpLanguage;
+  document.querySelectorAll('[data-help]').forEach(el=>{el.textContent=ht(el.dataset.help)});
+  document.querySelectorAll('[data-help-html]').forEach(el=>{el.innerHTML=ht(el.dataset.helpHtml)});
+  refreshLocalizedStatuses();
+  const names=Object.keys(state.voices||{});
+  if(!names.length)$('modelhint').textContent=ht('noModels');
+  else updateVoiceModelHint();
+  renderDatasetInfo();
+  renderTrainerLog(false);
+  updateBatchModeHelp();
+  renderBatchLog(false);
+}
+$('helpLanguage').addEventListener('change',e=>{
+  helpLanguage=e.target.value;localStorage.setItem("zundanenHelpLanguage",helpLanguage);applyHelpLanguage();
+});
+
+function showTab(name){
+  ['voice','batch','trainer'].forEach(n=>{
+    $(n+'View').classList.toggle('active',name===n);
+    $('tab'+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle('active',name===n);
+  });
+}
+function syncRange(id,digits=2,signed=false){const el=$(id),out=$(id+'v');const go=()=>{let n=Number(el.value);out.textContent=signed?(n>=0?'+'+n:n):n.toFixed(digits)};el.addEventListener('input',go);go()}
+syncRange('pitch',0,true);syncRange('index');syncRange('protect');syncRange('expression');
+$('text').addEventListener('input',()=>{$('chars').textContent=$('text').value.length+' chars'});$('chars').textContent=$('text').value.length+' chars';
+
+async function loadState(){
+  const previousVoice=$('voice').value; const r=await fetch('/api/state'); state=await r.json();
+  const sel=$('voice');sel.innerHTML='';const names=Object.keys(state.voices);
+  if(!names.length){sel.innerHTML='<option>No models found</option>';$('modelhint').textContent=ht('noModels')}
+  else{names.forEach(n=>{let o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o)});if(previousVoice&&names.includes(previousVoice))sel.value=previousVoice;applyVoice()}
+  const bsel=$('batchVoice'), previousBatchVoice=bsel.value;bsel.innerHTML='';
+  if(!names.length)bsel.innerHTML='<option>No models found</option>';else{names.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;bsel.appendChild(o)});bsel.value=(previousBatchVoice&&names.includes(previousBatchVoice))?previousBatchVoice:($('voice').value||names[0]);applyBatchVoiceDefaults()}
+  $('expression').value=state.tts.exaggeration??0.6;$('expression').dispatchEvent(new Event('input'));
+  $('batchExpression').value=state.tts.exaggeration??0.6;
+  if(!trainerInitialized){
+    const t=state.trainer||{};$('trainEpochs').value=t.epochs??100;$('trainBatch').value=t.batch_size??6;$('trainSaveEvery').value=t.save_every??10;$('trainWorkers').value=t.workers??8;$('trainGpu').value=t.gpu??'0';$('trainFresh').checked=t.fresh!==false;
+    trainerInitialized=true;
+  }
+}
+$('voice').addEventListener('change',applyVoice);
+function updateVoiceModelHint(){const v=state.voices[$('voice').value];if(!v)return;$('modelhint').textContent=$('voice').value+'  •  '+v.pth.split(/[\\/]/).pop()}
+function applyVoice(){const v=state.voices[$('voice').value];if(!v)return;$('pitch').value=v.pitch;$('index').value=v.index_rate;$('protect').value=v.protect;['pitch','index','protect'].forEach(x=>$(x).dispatchEvent(new Event('input')));updateVoiceModelHint()}
+
+function renderAccentSupportState(j){
+  accentSupportInstalled=!!(j&&j.installed);
+  const installPanel=$('accentInstallPanel'),editorPanel=$('accentEditorPanel'),status=$('accentInstallStatus'),analyzeBtn=$('analyzeAccent');
+  if(installPanel)installPanel.style.display=accentSupportInstalled?'none':'block';
+  if(editorPanel)editorPanel.style.display=accentSupportInstalled?'block':'none';
+  if(accentSupportInstalled){
+    if(status)clearLocalizedStatus(status);
+    if(analyzeBtn&&$('player').classList.contains('show')&&$('text').value.trim())analyzeBtn.style.display='inline-flex';
+    if(accentSupportPollTimer){clearInterval(accentSupportPollTimer);accentSupportPollTimer=null;}
+    return;
+  }
+  if(analyzeBtn)analyzeBtn.style.display='none';
+  if(!status)return;
+  const stateName=String((j&&j.installer_state)||'');
+  if(j&&j.reboot_required){setLocalizedStatus(status,'accentSupportReboot');if(accentSupportPollTimer){clearInterval(accentSupportPollTimer);accentSupportPollTimer=null;}}
+  else if(stateName==='error'){setLocalizedStatus(status,'accentSupportInstallFailed');if(accentSupportPollTimer){clearInterval(accentSupportPollTimer);accentSupportPollTimer=null;}}
+  else if(['starting','installing_pyworld','installing_wsl','installing_docker','starting_docker','pulling_image'].includes(stateName)){setLocalizedStatus(status,'accentSupportInstalling');}
+}
+async function checkAccentSupport(){
+  try{
+    const r=await fetch('/api/accent-support/status');const j=await r.json();
+    if(r.ok&&j.ok)renderAccentSupportState(j);
+  }catch(e){console.error(e)}
+}
+async function installAccentSupport(){
+  const btn=$('installAccentSupport'),status=$('accentInstallStatus');if(btn)btn.disabled=true;
+  try{
+    if(status)setLocalizedStatus(status,'accentSupportInstalling');
+    const r=await fetch('/api/accent-support/install',{method:'POST'});const j=await r.json();
+    if(!r.ok||!j.ok)throw new Error(j.error||'Could not start Accent support installer');
+    if(status)setLocalizedStatus(status,'accentSupportInstallerOpened');
+    if(accentSupportPollTimer)clearInterval(accentSupportPollTimer);
+    accentSupportPollTimer=setInterval(checkAccentSupport,3000);
+    setTimeout(checkAccentSupport,800);
+  }catch(e){if(status){clearLocalizedStatus(status);status.textContent='✕ '+e.message;}alert(e.message)}finally{if(btn)btn.disabled=false}
+}
+
+async function generateVoice(){
+  const btn=$('generate'),status=$('status');btn.disabled=true;btn.textContent='Generating…';$('player').classList.remove('show');setLocalizedStatus(status,'generating');
+  $('alignmentStatus').textContent='';$('alignmentResult').innerHTML='';const analyzeBtn=$('analyzeAccent');if(analyzeBtn)analyzeBtn.style.display='none';
+  try{
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:$('text').value,voice:$('voice').value,pitch:Number($('pitch').value),index_rate:Number($('index').value),protect:Number($('protect').value),expression:Number($('expression').value),seed:Number($('seed').value),fix_seed:$('fixSeed').checked})});
+    const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Generation failed');
+    if(Number.isInteger(j.seed))$('seed').value=j.seed;
+    const a=$('audio');a.src=j.audio_url+'?t='+Date.now();$('saveAs').dataset.filename=j.filename||'Zundanen.wav';$('player').classList.add('show');setLocalizedStatus(status,'complete','✓ ');a.play().catch(()=>{});
+    if(accentSupportInstalled)await runAccentAnalysis(false);
+  }catch(e){clearLocalizedStatus(status);clearLocalizedStatus(status);status.textContent='✕ '+e.message;alert(e.message)}finally{btn.disabled=false;btn.textContent='✦ Generate voice'}
+}
+
+
+async function importWav(){
+  const btn=$('importWav'),status=$('status'),alignmentStatus=$('alignmentStatus');
+  btn.disabled=true;setLocalizedStatus(status,'importingWav');
+  $('alignmentResult').innerHTML='';
+  const analyzeBtn=$('analyzeAccent');if(analyzeBtn)analyzeBtn.style.display='none';
+  try{
+    const r=await fetch('/api/import-wav',{method:'POST'});
+    const raw=await r.text();let j;try{j=JSON.parse(raw)}catch(_){throw new Error('Import WAV server error ('+r.status+').')}
+    if(!r.ok||!j.ok)throw new Error(j.error||'Import WAV failed');
+    if(j.cancelled){clearLocalizedStatus(status);return;}
+    const a=$('audio');a.src=j.audio_url+'?t='+Date.now();$('player').classList.add('show');$('saveAs').dataset.filename=j.filename||'Imported.wav';a.play().catch(()=>{});
+    // Restore the RVC settings saved alongside a Batch/Voice Generation source WAV.
+    // This keeps high-quality Accent re-editing consistent with the original output.
+    const rs=j.rvc_settings||{};
+    if(j.source_found&&rs&&typeof rs==='object'){
+      if(rs.voice&&state.voices&&state.voices[rs.voice]){$('voice').value=rs.voice;updateVoiceModelHint();}
+      if(Number.isFinite(Number(rs.pitch)))$('pitch').value=Number(rs.pitch);
+      if(Number.isFinite(Number(rs.index_rate)))$('index').value=Number(rs.index_rate);
+      if(Number.isFinite(Number(rs.protect)))$('protect').value=Number(rs.protect);
+      if(Number.isFinite(Number(rs.expression)))$('expression').value=Number(rs.expression);
+      if(Number.isInteger(Number(rs.seed)))$('seed').value=Number(rs.seed);
+      ['pitch','index','protect','expression'].forEach(id=>$(id).dispatchEvent(new Event('input')));
+    }
+    if(j.text_found){
+      $('text').value=j.text||'';$('text').dispatchEvent(new Event('input'));
+      setLocalizedStatus(status,'importWavTxtComplete','✓ ');
+      if(accentSupportInstalled)await runAccentAnalysis(false);
+    }else{
+      $('text').value='';$('text').dispatchEvent(new Event('input'));
+      setLocalizedStatus(status,'importWavComplete','✓ ');
+      setLocalizedStatus(alignmentStatus,'enterFinnishText');
+      if(analyzeBtn&&accentSupportInstalled)analyzeBtn.style.display='inline-flex';
+    }
+  }catch(e){clearLocalizedStatus(status);status.textContent='✕ '+e.message;alert(e.message)}finally{btn.disabled=false}
+}
+
+
+function buildAccentWords(words,syllables){
+  const grouped=[];
+  (words||[]).forEach((word,i)=>grouped.push({word_index:i,label:word.display_word||word.word||'',syllables:[],selected:null,strength:0}));
+  (syllables||[]).forEach((syllable,globalIndex)=>{
+    const wi=Number(syllable.word_index);if(!Number.isInteger(wi)||wi<0)return;
+    while(grouped.length<=wi)grouped.push({word_index:grouped.length,label:syllable.display_word||syllable.word||'',syllables:[],selected:null,strength:0});
+    grouped[wi].syllables.push({...syllable,globalIndex});
+    if(!grouped[wi].label)grouped[wi].label=syllable.display_word||syllable.word||'';
+  });
+  grouped.forEach(w=>{w.syllables.sort((a,b)=>Number(a.syllable_index)-Number(b.syllable_index));if(w.syllables.length)w.selected=Number(w.syllables[0].syllable_index);});
+  return grouped.filter(w=>w.syllables.length);
+}
+function setWordAccent(wordIndex,syllableIndex){
+  const w=alignmentAccentWords.find(x=>x.word_index===wordIndex);if(!w)return;
+  w.selected=(syllableIndex===null?null:Number(syllableIndex));renderAccentSelection(wordIndex);
+}
+function setWordAccentStrength(wordIndex,value){
+  const w=alignmentAccentWords.find(x=>x.word_index===wordIndex);if(!w)return;
+  const n=Number(value);w.strength=Number.isFinite(n)?Math.max(0,Math.min(100,n)):0;
+  const label=document.querySelector('[data-accent-strength-value="'+wordIndex+'"]');if(label)label.textContent=Math.round(w.strength)+'%';
+}
+
+function renderAccentSelection(wordIndex){
+  const w=alignmentAccentWords.find(x=>x.word_index===wordIndex);if(!w)return;
+  document.querySelectorAll('[data-accent-word="'+wordIndex+'"]').forEach(btn=>{
+    const selected=Number(btn.dataset.accentSyllable);
+    btn.classList.toggle('active',selected===w.selected);
+  });
+  const slider=document.querySelector('[data-accent-strength="'+wordIndex+'"]');if(slider)slider.value=String(w.strength);
+  const label=document.querySelector('[data-accent-strength-value="'+wordIndex+'"]');if(label)label.textContent=Math.round(w.strength)+'%';
+}
+function resetAllAccents(){
+  alignmentAccentWords.forEach(w=>{w.selected=w.syllables.length?Number(w.syllables[0].syllable_index):null;w.strength=0;renderAccentSelection(w.word_index)});
+}
+async function previewAccents(){
+  const btn=$('alignmentPitchPreview'),status=$('alignmentPitchStatus'),player=$('alignmentPitchAudio'),saveBtn=$('alignmentPitchSave');
+  if(!btn)return;btn.disabled=true;if(saveBtn)saveBtn.disabled=true;if(status)setLocalizedStatus(status,'alignmentPitchRendering');
+  const accents=alignmentAccentWords.filter(w=>w.selected!==null&&Number(w.strength)>0).map(w=>({word_index:w.word_index,syllable_index:w.selected,strength:Number(w.strength)}));
+  try{
+    const r=await fetch('/api/alignment/accent-preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accents,voice:$('voice').value,pitch:Number($('pitch').value),index_rate:Number($('index').value),protect:Number($('protect').value)})});
+    const raw=await r.text();let j;try{j=JSON.parse(raw)}catch(_){throw new Error('Accent preview server error ('+r.status+').')}
+    if(!r.ok||!j.ok)throw new Error(j.error||'Accent preview failed');
+    if(player){player.src=j.audio_url+'?t='+Date.now();player.classList.add('show');player.play().catch(()=>{});}
+    // The main/right-side player must always stay on the original generated
+    // voice. Accent preview audio is intentionally isolated in its own player.
+    const mainAudio=$('audio');if(mainAudio&&j.original_audio_url)mainAudio.src=j.original_audio_url+'?t='+Date.now();
+    if(status)setLocalizedStatus(status,'alignmentPitchComplete','✓ ');
+    if(saveBtn)saveBtn.style.display='inline-flex';
+  }catch(e){if(status){clearLocalizedStatus(status);status.textContent='✕ '+e.message;}alert(e.message)}finally{btn.disabled=false;if(saveBtn)saveBtn.disabled=false}
+}
+function renderAlignment(words,phones,syllables,source,syllabifiedTranscript,f0Warning){
+  alignmentSyllables=syllables||[];alignmentAccentWords=buildAccentWords(words||[],alignmentSyllables);
+  const result=$('alignmentResult');result.innerHTML='';
+  const wrap=document.createElement('div');wrap.className='alignmentTableWrap';
+  const table=document.createElement('table');table.className='alignmentTable accentTable';
+  const head=document.createElement('thead'),hr=document.createElement('tr');
+  [['alignmentAccentWord',ht('alignmentAccentWord')],['alignmentPitchEdit',ht('alignmentPitchEdit')],['alignmentLengthEdit',ht('alignmentLengthEdit')]].forEach(([key,t])=>{const th=document.createElement('th');th.dataset.help=key;th.textContent=t;hr.appendChild(th)});head.appendChild(hr);table.appendChild(head);
+  const body=document.createElement('tbody');
+  alignmentAccentWords.forEach(w=>{
+    const tr=document.createElement('tr');
+    const wordTd=document.createElement('td');wordTd.className='accentWordLabel';wordTd.textContent=w.label;tr.appendChild(wordTd);
+    const accentTd=document.createElement('td'),choices=document.createElement('div');choices.className='accentChoiceCell';
+    w.syllables.forEach(syl=>{const b=document.createElement('button');b.type='button';b.className='accentChoiceBtn'+(Number(syl.syllable_index)===w.selected?' active':'');b.textContent=syl.syllable;b.dataset.accentWord=String(w.word_index);b.dataset.accentSyllable=String(syl.syllable_index);b.onclick=()=>setWordAccent(w.word_index,Number(syl.syllable_index));choices.appendChild(b)});
+    accentTd.appendChild(choices);tr.appendChild(accentTd);
+    const strengthTd=document.createElement('td'),strengthWrap=document.createElement('div');strengthWrap.className='accentStrengthWrap';
+    const slider=document.createElement('input');slider.type='range';slider.min='0';slider.max='100';slider.step='5';slider.value='0';slider.className='accentStrength';slider.dataset.accentStrength=String(w.word_index);slider.oninput=()=>setWordAccentStrength(w.word_index,slider.value);
+    const value=document.createElement('span');value.className='accentStrengthValue';value.dataset.accentStrengthValue=String(w.word_index);value.textContent='0%';strengthWrap.append(slider,value);strengthTd.appendChild(strengthWrap);tr.appendChild(strengthTd);
+    body.appendChild(tr);
+  });
+  table.appendChild(body);wrap.appendChild(table);result.appendChild(wrap);
+
+  const panel=document.createElement('div');panel.className='alignmentPitchPanel';
+  const hint=document.createElement('div');hint.className='hint';hint.dataset.help='alignmentPitchHint';hint.textContent=ht('alignmentPitchHint');panel.appendChild(hint);
+  const actions=document.createElement('div');actions.className='alignmentPitchActions';
+  const resetAll=document.createElement('button');resetAll.className='secondary';resetAll.type='button';resetAll.textContent='Reset';resetAll.onclick=resetAllAccents;
+  const preview=document.createElement('button');preview.className='secondary';preview.id='alignmentPitchPreview';preview.type='button';preview.textContent='Preview';preview.onclick=previewAccents;
+  actions.append(resetAll,preview);panel.appendChild(actions);
+  const status=document.createElement('div');status.className='status';status.id='alignmentPitchStatus';panel.appendChild(status);
+  const media=document.createElement('div');media.className='alignmentPitchMediaRow';
+  const audio=document.createElement('audio');audio.id='alignmentPitchAudio';audio.className='alignmentPitchAudio';audio.controls=true;
+  const save=document.createElement('button');save.className='secondary alignmentPitchSave';save.id='alignmentPitchSave';save.type='button';save.textContent='Save As...';save.onclick=saveAccentAs;
+  media.append(audio,save);panel.appendChild(media);result.appendChild(panel);
+
+}
+
+async function runAccentAnalysis(showAlert=true){
+  if(!accentSupportInstalled){await checkAccentSupport();if(!accentSupportInstalled)return false;}
+  const status=$('alignmentStatus');
+  setLocalizedStatus(status,'alignmentRunning');$('alignmentResult').innerHTML='';
+  try{
+    const r=await fetch('/api/alignment/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:$('text').value})});
+    const raw=await r.text();let j;try{j=JSON.parse(raw)}catch(_){throw new Error('Accent analysis server error ('+r.status+').')}
+    if(!r.ok||!j.ok)throw new Error(j.error||'Accent analysis failed');
+    renderAlignment(j.words,j.phones,j.syllables,j.source,j.syllabified_transcript||j.transcript||'',j.f0_warning||'');
+    setLocalizedStatus(status,'alignmentComplete','✓ ');
+    const analyzeBtn=$('analyzeAccent');if(analyzeBtn)analyzeBtn.style.display='none';
+    return true;
+  }catch(e){
+    status.textContent='✕ '+e.message;
+    if(showAlert)alert(e.message);
+    return false;
+  }
+}
+
+
+function accentSaveFilename(){
+  const original=($('saveAs')?.dataset.filename||'Zundanen.wav').trim()||'Zundanen.wav';
+  return /\.wav$/i.test(original)?original.replace(/\.wav$/i,'_accent.wav'):original+'_accent.wav';
+}
+async function saveAccentAs(){
+  const btn=$('alignmentPitchSave'),status=$('alignmentPitchStatus');if(!btn)return;btn.disabled=true;
+  try{
+    const r=await fetch('/api/save-accent-preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      filename:accentSaveFilename(),text:$('text').value,create_subtitle_txt:$('voiceSubtitleTxt').checked,save_source_audio:$('voiceSourceAudio').checked,
+      voice:$('voice').value,pitch:Number($('pitch').value),index_rate:Number($('index').value),protect:Number($('protect').value),expression:Number($('expression').value),seed:Number($('seed').value)
+    })});
+    const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Save failed');
+    if(j.cancelled)return;
+    clearLocalizedStatus(status);status.textContent='✓ Saved: '+j.path;
+  }catch(e){clearLocalizedStatus(status);status.textContent='✕ '+e.message;alert(e.message)}finally{btn.disabled=false}
+}
+
+async function saveVoiceAs(){
+  const btn=$('saveAs'),status=$('status');btn.disabled=true;
+  try{
+    const r=await fetch('/api/save-preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:btn.dataset.filename||'Zundanen.wav',text:$('text').value,create_subtitle_txt:$('voiceSubtitleTxt').checked,save_source_audio:$('voiceSourceAudio').checked})});
+    const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Save failed');
+    if(j.cancelled)return;
+    setLocalizedStatus(status,'complete','✓ ',': '+j.path);
+  }catch(e){status.textContent='✕ '+e.message;alert(e.message)}finally{btn.disabled=false}
+}
+
+
+function setBatchMode(mode){
+  batchMode=mode==='csv'?'csv':'lines';
+  $('batchModeLines').classList.toggle('active',batchMode==='lines');
+  $('batchModeCsv').classList.toggle('active',batchMode==='csv');
+  updateBatchModeHelp();
+}
+function updateBatchModeHelp(){
+  const isCsv=batchMode==='csv';
+  const el=$('batchModeHelp');
+  if(el)el.textContent=ht(isCsv?'batchCsvHelp':'batchLinesHelp');
+
+  const csvTools=$('batchCsvTools');
+  if(csvTools)csvTools.style.display=isCsv?'block':'none';
+
+  const defaultsHelp=$('batchDefaultsModeHelp');
+  if(defaultsHelp){
+    defaultsHelp.style.display=isCsv?'block':'none';
+    defaultsHelp.textContent=isCsv?ht('batchDefaultsHelp'):'';
+  }
+
+  const voiceLabel=$('batchVoiceLabel');
+  if(voiceLabel)voiceLabel.textContent=isCsv?'Default Character':'Character';
+
+  const contentLabel=$('batchContentLabel');
+  if(contentLabel)contentLabel.textContent=isCsv?'CSV':'Text';
+}
+function applyBatchVoiceDefaults(){
+  const v=state.voices[$('batchVoice').value];if(!v)return;
+  $('batchPitch').value=v.pitch??0;$('batchIndex').value=v.index_rate??0.55;$('batchProtect').value=v.protect??0.15;
+  if(!$('batchExpression').value)$('batchExpression').value=state.tts.exaggeration??0.6;
+}
+$('batchVoice').addEventListener('change',applyBatchVoiceDefaults);
+$('batchCsvFile').addEventListener('change',async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  const raw=(await f.text()).replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const lines=raw.split('\n');
+  batchCsvHeader=(lines.shift()||'filename,text,character,pitch,index_rate,protect,expression,seed').trim();
+  $('batchText').value=lines.join('\n').replace(/\n+$/,'');
+  setBatchMode('csv');
+  e.target.value='';
+});
+function downloadCsvTemplate(){
+  const text='filename,text,character,pitch,index_rate,protect,expression,seed\n,"Hyvää päivää!",,8,0.60,0.05,1.00,\n,"Minun nimeni on Zundamon.",Zundamon,8,0.65,0.10,1.20,12345\n,"Tänään puhutaan tästä aiheesta.",Metan,7,0.70,0.05,1.00,\n';
+  const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zundanen_batch_template.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function getBatchContentForSubmit(){
+  const visible=$('batchText').value;
+  if(batchMode!=='csv')return visible;
+
+  // If the user manually pasted a complete CSV including a header, keep it as-is.
+  const firstLine=visible.replace(/^\uFEFF/,'').split(/\r?\n/,1)[0]||'';
+  const headerFields=firstLine.replace(/"/g,'').split(',').map(x=>x.trim().toLowerCase());
+  if(headerFields.includes('text'))return visible;
+
+  const header=(batchCsvHeader||'filename,text,character,pitch,index_rate,protect,expression,seed').trim();
+  return header+(visible.trim()?'\n'+visible:'');
+}
+function formatBatchLogLine(line){
+  if(line==='[BATCH] STARTED')return '[Zundanen] '+(helpLanguage==='fi'?'Jono käynnistettiin.':helpLanguage==='ja'?'キューを開始しました。':'Queue started.');
+  if(line==='[BATCH] COMPLETE')return '[Zundanen] '+(helpLanguage==='fi'?'Jono valmis.':helpLanguage==='ja'?'キューが完了しました。':'Queue complete.');
+  if(line==='[BATCH] STOPPED')return '[Zundanen] '+(helpLanguage==='fi'?'Jono pysäytettiin.':helpLanguage==='ja'?'キューを停止しました。':'Queue stopped.');
+  let m=line.match(/^\[BATCH\] ITEM_START (\d+\/\d+) (.+) SEED=(\d+)$/);if(m)return '▶ '+m[1]+' '+m[2]+' · Seed '+m[3];
+  m=line.match(/^\[BATCH\] ITEM_START (\d+\/\d+) (.+)$/);if(m)return '▶ '+m[1]+' '+m[2];
+  m=line.match(/^\[BATCH\] ITEM_DONE (\d+\/\d+) (.+)$/);if(m)return '✓ '+m[1]+' '+m[2];
+  m=line.match(/^\[BATCH\] ITEM_FAILED (\d+\/\d+) (.+)$/);if(m)return '✕ '+m[1]+' '+m[2];
+  if(line.startsWith('[BATCH] ERROR '))return '✕ '+line.slice(14);
+  return line;
+}
+function renderBatchLog(running=false){
+  const box=$('batchLog');if(!box)return;
+  if(!lastBatchLog.length){box.textContent=ht('batchLogEmpty');return}
+  const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<90;
+  box.textContent=lastBatchLog.map(formatBatchLogLine).join('\n');if(nearBottom||running)box.scrollTop=box.scrollHeight;
+}
+async function startBatch(){
+  if(!$('batchText').value.trim()){alert(ht('batchNeedText'));return}
+  if(!confirm(ht('batchStartConfirm')))return;
+  $('batchStart').disabled=true;$('batchError').classList.remove('show');
+  try{
+    const body={mode:batchMode,content:getBatchContentForSubmit(),voice:$('batchVoice').value,pitch:Number($('batchPitch').value),index_rate:Number($('batchIndex').value),protect:Number($('batchProtect').value),expression:Number($('batchExpression').value),seed:Number($('batchSeed').value),fix_seed:$('batchFixSeed').checked,create_subtitle_txt:$('batchSubtitleTxt').checked,save_source_audio:$('batchSourceAudio').checked};
+    const r=await fetch('/api/batch/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const raw=await r.text();let j;try{j=JSON.parse(raw)}catch(_){throw new Error('Batch server error ('+r.status+'). Check temp\\desktop_server.log.')}
+    if(!r.ok||!j.ok)throw new Error(j.error||'Could not start batch');showTab('batch');await pollBatch();
+  }catch(e){alert(e.message);$('batchStart').disabled=false}
+}
+async function stopBatch(){if(!confirm(ht('batchStopConfirm')))return;const r=await fetch('/api/batch/stop',{method:'POST'}),j=await r.json();if(!r.ok||!j.ok)alert(j.error||'Stop failed')}
+async function resumeBatch(){const r=await fetch('/api/batch/resume',{method:'POST'}),j=await r.json();if(!r.ok||!j.ok)alert(j.error||'Resume failed');await pollBatch()}
+async function clearBatch(){if(!confirm(ht('batchClearConfirm')))return;const r=await fetch('/api/batch/clear',{method:'POST'}),j=await r.json();if(!r.ok||!j.ok)alert(j.error||'Clear failed');lastBatchLog=[];await pollBatch()}
+async function openBatchOutput(){await fetch('/api/batch/open-output',{method:'POST'})}
+async function pollBatch(){
+  try{
+    const r=await fetch('/api/batch/status'),b=await r.json();
+    const pct=Math.max(0,Math.min(100,Number(b.progress||0)));$('batchProgressFill').style.width=pct.toFixed(1)+'%';$('batchProgressText').textContent=pct.toFixed(1)+'%';
+    $('batchQueueId').textContent=b.queue_id||'No queue';$('batchDoneStat').textContent=(b.completed||0)+' / '+(b.total||0);$('batchFailedStat').textContent=b.failed||0;$('batchPendingStat').textContent=b.pending||0;
+    $('batchSleepBadge').classList.toggle('show',!!b.running);$('batchStop').disabled=!b.running;$('batchResume').disabled=!!b.running||!b.resumable;$('batchStart').disabled=!!b.running;$('batchClear').disabled=!!b.running;
+    // Hydrate saved queue options only once per queue. Re-applying them on every
+    // status poll would undo checkbox/seed edits the user is making for the next batch.
+    if(!b.queue_id){
+      batchOptionsSyncedQueueId=null;
+    }else if(batchOptionsSyncedQueueId!==b.queue_id){
+      if(typeof b.create_subtitle_txt==='boolean')$('batchSubtitleTxt').checked=b.create_subtitle_txt;
+      if(typeof b.save_source_audio==='boolean')$('batchSourceAudio').checked=b.save_source_audio;
+      if(typeof b.fix_seed==='boolean')$('batchFixSeed').checked=b.fix_seed;
+      if(Number.isInteger(b.seed))$('batchSeed').value=b.seed;
+      batchOptionsSyncedQueueId=b.queue_id;
+    }
+    $('batchPhase').textContent=b.running?'Processing queue…':(b.resumable?'Queue stopped':(b.done&&b.total?'Queue complete':'Ready'));
+    $('batchCurrentText').textContent=b.current_text?((b.current_filename||'')+' — '+b.current_text):ht('batchNoCurrent');
+    if((b.log||[]).length){lastBatchLog=b.log;renderBatchLog(!!b.running)}else if(!b.queue_id){lastBatchLog=[];renderBatchLog(false)}
+    const failed=b.failed_items||[];const fl=$('batchFailedList');if(failed.length){fl.classList.add('show');fl.textContent=failed.map(x=>'✕ '+x.filename+'\n  '+x.text+'\n  '+String(x.error||'').split('\n').slice(-1)[0]).join('\n\n')}else{fl.classList.remove('show');fl.textContent=''}
+    if(b.error){$('batchError').textContent=b.error;$('batchError').classList.add('show')}else{$('batchError').classList.remove('show')}
+  }catch(e){console.error(e)}
+}
+
+async function pickDataset(){
+  datasetInfoState={type:'checking',count:0,message:''};renderDatasetInfo();
+  try{
+    const r=await fetch('/api/pick-folder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initial:$('trainDataset').value})});
+    const j=await r.json();
+    if(!r.ok||!j.ok)throw new Error(j.error||ht('folderPickerFailed'));
+    if(j.path){$('trainDataset').value=j.path;await inspectDataset()}
+    else{datasetInfoState={type:'formats',count:0,message:''};renderDatasetInfo()}
+  }catch(e){datasetInfoState={type:'error',count:0,message:ht('folderPickerFailed')};renderDatasetInfo()}
+}
+async function inspectDataset(){
+  const path=$('trainDataset').value.trim();
+  if(!path){datasetInfoState={type:'formats',count:0,message:''};renderDatasetInfo();return null}
+  try{
+    const r=await fetch('/api/dataset-info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path})});
+    const j=await r.json();
+    if(!r.ok||!j.ok){
+      datasetInfoState={type:j.error_code==='folder_not_found'?'folderNotFound':'error',count:0,message:j.error||''};
+      renderDatasetInfo();return null;
+    }
+    $('trainDataset').value=j.path;
+    const count=Number(j.count||0);
+    datasetInfoState={type:count>0?'found':'empty',count,message:''};
+    renderDatasetInfo();
+    return count;
+  }catch(e){datasetInfoState={type:'error',count:0,message:ht('datasetCheckFailed')};renderDatasetInfo();return null}
+}
+$('trainDataset').addEventListener('change',inspectDataset);$('trainDataset').addEventListener('blur',inspectDataset);
+
+async function startTraining(){
+  const character=$('trainCharacter').value.trim(),dataset=$('trainDataset').value.trim();
+  if(!character){alert(ht('characterRequired'));return} if(!dataset){alert(ht('datasetRequired'));return}
+  const audioCount=await inspectDataset();if(audioCount===null||audioCount===0)return;
+  if($('trainFresh').checked&&!confirm(formatHelp('freshConfirm',{character})))return;
+  $('trainStart').disabled=true;$('trainError').classList.remove('show');$('trainResult').classList.remove('show');lastTrainerLog=[];$('trainLog').textContent=ht('logStarting');
+  try{const r=await fetch('/api/trainer/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,dataset,epochs:Number($('trainEpochs').value),batch_size:Number($('trainBatch').value),save_every:Number($('trainSaveEvery').value),workers:Number($('trainWorkers').value),gpu:$('trainGpu').value,fresh:$('trainFresh').checked})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Could not start trainer');showTab('trainer');await pollTrainer()}catch(e){$('trainStart').disabled=false;alert(e.message)}
+}
+
+async function pollTrainer(){
+  try{
+    const r=await fetch('/api/trainer/status');const t=await r.json();
+    const pct=Math.max(0,Math.min(100,Number(t.progress||0)));$('trainProgressFill').style.width=pct.toFixed(1)+'%';$('trainProgressText').textContent=pct.toFixed(1)+'%';
+    $('trainPhase').textContent=t.phase_label||'Ready';$('phaseStat').textContent=(t.phase||'idle').toUpperCase();$('epochStat').textContent=(t.epoch||0)+' / '+(t.epochs||100);$('filesStat').textContent=t.audio_files||0;$('trainCharacterStatus').textContent=t.character?(t.character+' • '+(t.dataset||'')):'No active job';
+    $('sleepBadge').classList.toggle('show',!!t.running);$('stopTraining').disabled=!t.running;$('trainStart').disabled=!!t.running;
+    if((t.log||[]).length){lastTrainerLog=t.log||[];renderTrainerLog(!!t.running)}
+    if(t.error){$('trainError').textContent=t.error;$('trainError').classList.add('show')}else{$('trainError').classList.remove('show')}
+    if(t.done){
+      const p=t.result?.pth||'',i=t.result?.index||'';$('trainResult').innerHTML='<b>✓ Training complete</b><br>PTH: '+escapeHtml(p)+'<br>INDEX: '+escapeHtml(i);$('trainResult').classList.add('show');
+      const key=(t.character||'')+'|'+p+'|'+i;if(key!==lastTrainerDoneKey){lastTrainerDoneKey=key;await loadState()}
+    }else if(t.running){$('trainResult').classList.remove('show')}
+  }catch(e){console.error(e)}
+}
+async function stopTrainer(){if(!confirm(ht('stopConfirm')))return;const r=await fetch('/api/trainer/stop',{method:'POST'});const j=await r.json();if(!r.ok||!j.ok)alert(j.error||'Stop failed')}
+function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
+function openSettings(){const wrap=$('settingsFields');wrap.innerHTML='';Object.entries(labels).forEach(([key,label])=>{const d=document.createElement('div');d.className='field';d.innerHTML=`<span>${label}</span><input id="cfg_${key}" value="">`;wrap.appendChild(d);d.querySelector('input').value=state.config[key]||''});$('modal').classList.add('show')}
+function closeSettings(){$('modal').classList.remove('show')}
+async function saveSettings(){const body={};Object.keys(labels).forEach(k=>body[k]=$('cfg_'+k).value);await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeSettings();await loadState()}
+async function openExports(){await fetch('/api/open-exports',{method:'POST'})}
+
+applyHelpLanguage();loadState();checkAccentSupport();pollTrainer();pollBatch();setInterval(pollTrainer,1000);setInterval(pollBatch,1000);
+</script>
+</body>
+</html>

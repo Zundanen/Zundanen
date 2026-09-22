@@ -1,0 +1,65 @@
+name: Windows smoke test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27.x'
+          cache: false
+
+      - name: Parse PowerShell scripts
+        shell: powershell
+        run: |
+          $files = @('setup.ps1', 'doctor.ps1', 'install_accent_support.ps1')
+          foreach ($file in $files) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Host
+              throw "PowerShell parse failed: $file"
+            }
+          }
+
+
+      - name: Compile small launcher
+        shell: powershell
+        run: |
+          $env:CGO_ENABLED = '0'
+          go build -trimpath -ldflags="-s -w -H=windowsgui" -o "$env:RUNNER_TEMP\Zundanen.exe" .\launcher_src\zundanen_launcher.go
+
+      - name: Run lightweight setup smoke mode
+        shell: powershell
+        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1 -CI
+
+      - name: Start local UI and check API
+        shell: powershell
+        run: |
+          $env:ZUNDANEN_NO_BROWSER = '1'
+          $env:ZUNDANEN_PORT = '8765'
+          $py = Join-Path $PWD '.ci-venv\Scripts\python.exe'
+          $proc = Start-Process -FilePath $py -ArgumentList 'app.py' -PassThru
+          try {
+            $ok = $false
+            for ($i = 0; $i -lt 20; $i++) {
+              Start-Sleep -Milliseconds 500
+              try {
+                $r = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/api/state
+                if ($r.StatusCode -eq 200) { $ok = $true; break }
+              } catch {}
+            }
+            if (-not $ok) { throw 'UI did not answer /api/state' }
+          }
+          finally {
+            if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+          }

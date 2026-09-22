@@ -1,0 +1,12 @@
+config.json
+runtime/
+outputs/
+temp/
+.ci-venv/
+__pycache__/
+*.pyc
+dist/
+build/
+*.spec
+.DS_Store
+Thumbs.db
