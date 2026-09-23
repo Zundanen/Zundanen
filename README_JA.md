@@ -295,7 +295,7 @@ push / pull request ごとにGitHub側で，
 
 を自動チェックします．
 
-通常の GitHub-hosted runner では CUDA を使った実際の TTS/RVC 生成や Docker を使う強制アライメントまではテストしません．GPU 機能と Accent 機能は Windows 実機でも確認してください．
+通常の GitHub-hosted runner では CUDA を使った実際の TTS/RVC 生成や Docker を使う強制アライメントまではテストしません．ただし，インストール，TTS 生成，RVC 音声変換，Accent 編集については Windows 11 環境で別途動作確認済みです．
 
 ## GitHub へ含めないもの
 

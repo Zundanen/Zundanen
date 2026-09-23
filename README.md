@@ -293,7 +293,7 @@ Pushin ja pull requestin yhteydessä GitHub tarkistaa automaattisesti muun muass
 - Flask-käyttöliittymän käynnistymisen
 - `/api/state`-rajapinnan HTTP 200 -vastauksen
 
-Tavallinen GitHub-hosted runner ei testaa varsinaista CUDA-TTS/RVC-generointia eikä Docker-pohjaista puheen kohdistusta. GPU- ja Accent-toiminta tulee testata Windows-koneella erikseen.
+Tavallinen GitHub-hosted runner ei testaa varsinaista CUDA-TTS/RVC-generointia eikä Docker-pohjaista puheen kohdistusta. Asennus, TTS-generointi, RVC-äänimuunnos sekä Accent-muokkaus on kuitenkin testattu erikseen Windows 11 -ympäristössä.
 
 ## Mitä GitHubiin ei tallenneta
 

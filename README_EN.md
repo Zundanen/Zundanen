@@ -293,7 +293,7 @@ On each push / pull request, GitHub checks items including:
 - Flask UI startup
 - an HTTP 200 response from `/api/state`
 
-Standard GitHub-hosted runners do not run the full CUDA TTS/RVC pipeline or Docker-based forced alignment. GPU and Accent functionality should still be tested on a Windows PC.
+Standard GitHub-hosted runners do not run the full CUDA TTS/RVC pipeline or Docker-based forced alignment. However, installation, TTS generation, RVC voice conversion, and Accent editing have been tested separately in a Windows 11 environment.
 
 ## Files excluded from GitHub
 
