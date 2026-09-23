@@ -6,7 +6,7 @@ Zundanen は，フィンランド語テキストを **Finnish-NLP/Chatterbox-Fin
 
 同じ UI に，複数文章を連続生成する **Batch Generation**，単語ごとのアクセントを編集する **Accent**，音声フォルダから RVC v2 モデル（`.pth + .index`）を作成する **Model Trainer** を含みます．
 
-![Zundanen UI](docs/Zundanen-UI.png)
+![Zundanen UI](docs/Zundanen-UI_japani.png)
 
 ## 使い方動画
 

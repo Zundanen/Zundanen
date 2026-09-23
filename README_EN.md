@@ -6,7 +6,7 @@ Zundanen is a local Windows application that converts Finnish text through **Fin
 
 The same UI also includes **Batch Generation**, optional word-level **Accent** editing, and a **Model Trainer** for creating RVC v2 `.pth + .index` models from an audio folder.
 
-![Zundanen UI](docs/Zundanen-UI.png)
+![Zundanen UI](docs/Zundanen-UI_englanti.png)
 
 ## Tutorial video
 

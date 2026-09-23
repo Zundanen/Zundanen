@@ -6,7 +6,7 @@ Zundanen on paikallinen Windows-sovellus, joka muuntaa suomenkielisen tekstin ke
 
 Samassa käyttöliittymässä ovat **Batch Generation**, valinnainen sanakohtainen **Accent**-muokkaus sekä **Model Trainer**, jolla voi kouluttaa RVC v2 -mallin (`.pth + .index`) äänikansiosta.
 
-![Zundanen UI](docs/Zundanen-UI.png)
+![Zundanen UI](docs/Zundanen-UI_suomi.png)
 
 ## Käyttöohjevideo
 
