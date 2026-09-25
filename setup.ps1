@@ -323,6 +323,7 @@ if ($CI) {
 Start-SetupSleepPrevention
 
 try {
+# Zundanen v1.0.0 setup
 Write-Host "Zundanen v1.0.0 - clean Windows setup" -ForegroundColor Green
 Write-Host "This creates isolated TTS and RVC environments under: $Runtime"
 Write-Host "Large model files and PyTorch packages will be downloaded."
