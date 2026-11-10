@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zundanen</title>
 <style>
+[hidden]{display:none!important}
 :root{
   --bg:#090d14; --panel:#111824; --panel2:#0d131d; --line:#233044;
   --text:#f4f7fb; --muted:#8995a8; --accent:#7c6cff; --accent2:#55d6be;
@@ -27,7 +28,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .iconbtn,.secondary{border:1px solid var(--line);background:#121a27;color:#c4cddd;border-radius:12px;padding:9px 13px;cursor:pointer;text-decoration:none;transition:.18s}
 .langselect{width:auto;min-width:105px;background:#121a27;color:#c4cddd;border:1px solid var(--line);border-radius:12px;padding:9px 30px 9px 11px;cursor:pointer}
 .iconbtn:hover,.secondary:hover{background:#1b2636}
-.tabs{display:inline-flex;gap:5px;padding:5px;border:1px solid rgba(255,255,255,.06);border-radius:15px;background:#0d131d;margin-bottom:18px}
+.tabs{display:inline-flex;flex-wrap:wrap;gap:5px;padding:5px;border:1px solid rgba(255,255,255,.06);border-radius:15px;background:#0d131d;margin-bottom:18px}
 .tab{border:0;background:transparent;color:#7f8b9e;padding:10px 18px;border-radius:11px;cursor:pointer;font-weight:700}.tab.active{color:#fff;background:#1b2434;box-shadow:0 5px 18px rgba(0,0,0,.25)}
 .view{display:none}.view.active{display:block}.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.8fr);gap:20px}
 .trainergrid,.batchgrid{display:grid;grid-template-columns:minmax(350px,.82fr) minmax(0,1.45fr);gap:20px}
@@ -43,7 +44,8 @@ select,input[type=text],input[type=number]{width:100%;background:#111b2a;color:v
 input[type=range]{width:100%;accent-color:var(--accent);margin-top:9px}.generate{width:100%;border:none;border-radius:15px;padding:16px 18px;margin-top:25px;background:linear-gradient(135deg,#7465ff,#5f7df7);color:white;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 12px 30px rgba(90,103,242,.28);transition:.2s}.generate:hover{transform:translateY(-1px);filter:brightness(1.07)}.generate:disabled{opacity:.5;cursor:default;transform:none}.generateRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch;margin-top:25px}.generateRow .generate{margin-top:0}.accentTopActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.importWavBtn{border:1px solid var(--line);border-radius:15px;padding:0 18px;background:#121a27;color:#d7deeb;font-weight:700;cursor:pointer;white-space:nowrap}.importWavBtn:hover{background:#1b2636}.importWavBtn:disabled{opacity:.5;cursor:default}
 .status{margin-top:13px;min-height:20px;color:var(--muted);font-size:12px}.player{display:none;margin-top:17px;padding:14px;background:#0b111a;border:1px solid var(--line);border-radius:15px}.player.show{display:block}audio{width:100%;height:38px}.actions{display:flex;gap:9px;margin-top:10px}.actions>*{flex:1;text-align:center}
 .row{display:flex;gap:9px;align-items:center}.row>.grow{flex:1}.browse{white-space:nowrap}.numberGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fixedBadges{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.fixedBadges span{font-size:11px;color:#9eabc0;background:#0c141f;border:1px solid #263347;border-radius:999px;padding:6px 9px}
-.checkrow{display:flex;gap:10px;align-items:flex-start;margin-top:17px;padding:12px;border:1px solid #273347;border-radius:12px;background:#0c131d;color:#aeb8c7;font-size:12px;line-height:1.5}.checkrow input{accent-color:var(--accent);margin-top:3px}
+.emoRow{margin-top:8px;padding:10px;border:1px solid #273347;border-radius:12px;background:#0c131d}.emoRow .row{margin-top:6px}.emoRow .row:first-child{margin-top:0}.emoRow select,.emoRow input[data-k=speaker]{flex:1}
+.conditionalPanel{margin-top:12px;padding:14px;border:1px solid #273347;border-radius:14px;background:#0a111a}.conditionalPanel[hidden]{display:none}.checkrow{display:flex;gap:10px;align-items:flex-start;margin-top:17px;padding:12px;border:1px solid #273347;border-radius:12px;background:#0c131d;color:#aeb8c7;font-size:12px;line-height:1.5}.checkrow input{accent-color:var(--accent);margin-top:3px}
 .datasetInfo{margin-top:9px;min-height:18px;color:#7c8aa0;font-size:12px}.datasetInfo.good{color:#65d9b6}.datasetInfo.bad{color:var(--danger)}
 .monitorHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.phase{font-size:21px;font-weight:780}.sleepBadge{font-size:11px;padding:7px 10px;border-radius:999px;background:#0d1c18;color:#64d7b5;border:1px solid #21463d;display:none}.sleepBadge.show{display:block}
 .progressTrack{height:10px;background:#080e16;border:1px solid #1d293a;border-radius:99px;overflow:hidden;margin-top:17px}.progressFill{height:100%;width:0;background:linear-gradient(90deg,#6f62ff,#55d6be);transition:width .35s ease}.progressMeta{display:flex;justify-content:space-between;margin-top:7px;color:#718095;font-size:12px;font-variant-numeric:tabular-nums}
@@ -51,17 +53,36 @@ input[type=range]{width:100%;accent-color:var(--accent);margin-top:9px}.generate
 .logTitle{display:flex;justify-content:space-between;align-items:center;margin-top:18px;margin-bottom:7px;color:#9faabd;font-size:12px}.terminal{height:310px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#070c12;color:#b7c4d5;border:1px solid #1f2a39;border-radius:14px;padding:14px;font:12px/1.55 Consolas,"Cascadia Mono",monospace}.terminal .empty{color:#546176}
 .result{display:none;margin-top:14px;padding:13px;border-radius:13px;background:#0d1c18;border:1px solid #21463d;color:#78dcbc;font-size:12px;line-height:1.55;word-break:break-all}.result.show{display:block}.errorbox{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#26131a;border:1px solid #5c2838;color:#ff9daf;font-size:12px;white-space:pre-wrap}.errorbox.show{display:block}
 .danger{border-color:#552837;background:#2a141c;color:#ff9daf}.danger:hover{background:#3a1925}.monitorActions{display:flex;gap:9px;margin-top:13px;flex-wrap:wrap}.monitorActions button{flex:1;min-width:120px}.batchText{min-height:260px;height:310px;font-size:14px}.modeRow{display:flex;gap:8px;margin-top:12px}.modeBtn{flex:1;border:1px solid var(--line);background:#0c141f;color:#8995a8;border-radius:11px;padding:9px 10px;cursor:pointer}.modeBtn.active{background:#1b2434;color:#fff;border-color:#4d4a8d}.batchCurrent{margin-top:14px;padding:12px;background:#0b121c;border:1px solid #202c3e;border-radius:13px;min-height:68px}.batchCurrent b{display:block;font-size:12px;color:#8f9caf;margin-bottom:5px}.batchCurrent span{font-size:13px;line-height:1.45;word-break:break-word}.failedList{max-height:155px;overflow:auto;margin-top:10px;font-size:11px;color:#ff9daf;white-space:pre-wrap;background:#160d12;border:1px solid #4b2431;border-radius:11px;padding:10px;display:none}.failedList.show{display:block}.fileinput{display:none}.tinyActions{display:flex;gap:8px;margin-top:9px}.tinyActions>*{flex:1}
+.styleSourceRow{display:grid;grid-template-columns:minmax(110px,.32fr) minmax(0,1fr) auto;gap:8px;align-items:center;margin-top:8px}.styleSourceRow .styleName{min-width:0}.styleSourceRow .stylePath{min-width:0}.stylePairBox{margin-top:12px;padding:12px;background:#0b121c;border:1px solid #202c3e;border-radius:13px;color:#8f9caf;font-size:12px;line-height:1.55;white-space:pre-wrap}.styleTestText{min-height:120px;height:135px;resize:vertical;font-size:14px}.styleAB{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.styleAB .player{display:block;margin-top:0}.styleABLabel{font-size:11px;color:#8f9caf;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px}.styleStrengthLine{display:flex;justify-content:space-between;align-items:center;margin-top:15px;color:#aeb8c7;font-size:13px}.styleStrengthValue{font-variant-numeric:tabular-nums;color:#dce5f5}.styleButtons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.styleButtons .generate{margin-top:0;padding:13px}.styleProfileStats{margin-top:10px;font-size:11px;color:#7f8b9e;line-height:1.6}.styleProfileStats b{color:#cfd8e8}
 .modalbg{position:fixed;inset:0;background:rgba(3,6,11,.72);display:none;place-items:center;padding:22px;backdrop-filter:blur(8px);z-index:30}.modalbg.show{display:grid}.modal{width:min(760px,100%);background:#101722;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}.modal h2{margin:0 0 5px}.modal p{color:var(--muted);font-size:13px}.field{margin-top:13px}.field span{display:block;color:#aeb8c7;font-size:12px;margin-bottom:6px}.field input{width:100%;background:#090f18;color:#e8edf5;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.modalactions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}
 .voiceLeftColumn{display:flex;flex-direction:column;gap:20px;min-width:0}.voiceEditor{min-height:300px}.voiceEditor textarea{flex:0 0 auto;min-height:180px;height:220px;resize:vertical}.alignmentCard{margin-top:0;padding:25px}.pitchCompactTable th:first-child,.pitchCompactTable td:first-child{white-space:normal;word-break:break-word}.pitchCompactTable th:not(:first-child),.pitchCompactTable td:not(:first-child){width:1%;white-space:nowrap}.alignmentMeta{margin-top:12px;color:var(--muted);font-size:12px}.alignmentTableWrap{overflow:auto;margin-top:12px;max-height:330px;border:1px solid var(--line);border-radius:12px}.alignmentTable{width:100%;border-collapse:collapse;font-size:13px}.alignmentTable th,.alignmentTable td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.alignmentTable th{position:sticky;top:0;background:#111925;color:var(--muted);font-size:11px}.alignmentTable tr:last-child td{border-bottom:0}.pitchEditCell{display:flex;align-items:center;gap:6px}.pitchEditCell button{border:1px solid var(--line);background:#121a27;color:#c4cddd;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:11px}.pitchEditCell button:hover{background:#1b2636}.pitchOffset,.durationOffset{min-width:46px;text-align:center;font-variant-numeric:tabular-nums;color:#d8def0;font-size:12px}.pitchOffset.changed,.durationOffset.changed{color:#7ee0c3}.alignmentPitchPanel{margin-top:14px;padding:13px;background:#0b121c;border:1px solid #202c3e;border-radius:12px}.alignmentPitchPanel .hint{margin-top:0}.alignmentPitchActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.alignmentPitchActions button{flex:1;min-width:150px}.alignmentPitchMediaRow{display:flex;align-items:center;gap:10px;margin-top:10px}.alignmentPitchAudio{display:none;flex:1 1 auto;min-width:0;width:auto;margin:0}.alignmentPitchAudio.show{display:block}.alignmentPitchSave{display:none;flex:0 0 min(360px,48%);min-width:150px;height:38px;align-items:center;justify-content:center;text-align:center;white-space:nowrap}
 @media(max-width:900px){.grid,.trainergrid,.batchgrid{grid-template-columns:1fr}.editor{min-height:460px}.terminal{height:280px}}
 
 .accentTable th:first-child,.accentTable td:first-child{white-space:normal;word-break:break-word;min-width:180px;width:34%}.accentChoiceCell{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.accentChoiceBtn{border:1px solid var(--line);background:#121a27;color:#c4cddd;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:11px}.accentChoiceBtn:hover{background:#1b2636}.accentChoiceBtn.active{border-color:#4b9f88;background:#173129;color:#9df0d4}.accentStrengthWrap{display:flex;align-items:center;gap:9px;min-width:190px}.accentStrength{width:145px!important;min-width:120px;margin:0!important}.accentStrengthValue{min-width:38px;text-align:right;color:#cbd6e8;font-variant-numeric:tabular-nums;font-size:11px}.accentDebug{margin-top:12px}.accentDebug summary{cursor:pointer;color:var(--muted);font-size:12px}.accentWordLabel{font-weight:600;color:#dce5f5}
+
+.conversionLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.conversionCard{padding:25px;min-width:0}
+.vcStack{display:flex;flex-direction:column;gap:20px;min-width:0}
+.conversionCard select,.conversionCard input[type=number]{width:100%}
+.conversionCard .row{display:flex;align-items:center;gap:9px}
+.conversionCard .grow{min-width:0;flex:1}
+.conversionCard .vcResult{display:none;margin-top:14px;padding:14px;background:#0b151f;border:1px solid #244b43;border-radius:14px}
+.conversionCard .vcResult.show{display:block}
+.conversionCard audio{width:100%;margin-bottom:10px}
+.conversionCard .vcResultActions{flex-wrap:wrap}
+.conversionCard .vcResultActions>a{text-align:center}
+.conversionCard .conversionNote,.conversionCard .conversionSteps{font-size:13px;line-height:1.65;color:#b1bdd1;background:#0c141f;padding:14px;border:1px solid var(--line);border-radius:12px;margin:12px 0}
+.conversionCard .conversionSteps{line-height:1.9}
+.conversionCard .conversionButtons{align-items:stretch;flex-wrap:wrap}
+.conversionCard .conversionButtons .generate{flex:1;margin-top:14px}
+.conversionCard .conversionButtons .secondary{margin-top:14px}
+@media(max-width:900px){.conversionLayout{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="shell">
   <header>
-    <div class="brand"><div class="brandTitleRow"><h1>Zundanen</h1><span class="brandVersion">v1.1.0</span></div><p>Finnish TTS &nbsp;→&nbsp; RVC Character Voice</p></div>
+    <div class="brand"><div class="brandTitleRow"><h1>Zundanen</h1><span class="brandVersion">v2.0.0</span></div><p>Zundanen VITS / Finnish Text-to-Speech</p></div>
     <div class="badges"><div class="badge">● LOCAL PIPELINE</div><select class="langselect" id="helpLanguage" aria-label="Help language"><option value="fi">Suomi</option><option value="ja">日本語</option><option value="en">English</option></select><button class="iconbtn" onclick="openSettings()">⚙ Settings</button></div>
   </header>
 
@@ -69,6 +90,7 @@ input[type=range]{width:100%;accent-color:var(--accent);margin-top:9px}.generate
     <button class="tab active" id="tabVoice" onclick="showTab('voice')">✦ Voice Generation</button>
     <button class="tab" id="tabBatch" onclick="showTab('batch')">≡ Batch Generation</button>
     <button class="tab" id="tabTrainer" onclick="showTab('trainer')">◇ Model Trainer</button>
+    <button class="tab" id="tabConversion" onclick="showTab('conversion')">♫ Voice Conversion</button>
   </div>
 
   <div class="view active" id="voiceView">
@@ -76,39 +98,81 @@ input[type=range]{width:100%;accent-color:var(--accent);margin-top:9px}.generate
       <div class="voiceLeftColumn">
         <section class="card editor voiceEditor">
           <div class="title">Finnish text</div>
-          <div class="sub" data-help="voiceIntro"></div>
-          <textarea id="text">Moi! Olen Zundamon. Tämä on suomalaisen puhesynteesin testi.</textarea>
+          <div class="sub" data-i18n="finnishTextSub">Zundanen generates Finnish speech with the selected character and style.</div>
+          <textarea id="text">Moi! Tämä on suomenkielisen puhesynteesin testi.</textarea>
           <div class="editorfoot"><span id="chars">0 chars</span><span>UTF-8 / Finnish</span></div>
         </section>
         <section class="card alignmentCard">
           <div class="title">Accent</div>
-          <div id="accentInstallPanel" style="display:none">
-            <div class="sub" data-help="accentSupportMissing"></div>
-            <div class="hint" data-help="accentSupportInstallHelp"></div>
-          </div>
-          <div id="accentEditorPanel">
-            <div class="sub" data-help="alignmentIntro"></div>
-            <div class="status" id="alignmentStatus"></div>
-            <div class="accentTopActions"><button class="secondary" id="analyzeAccent" type="button" style="display:none" onclick="runAccentAnalysis(true)" data-help="analyzeAccent">Analyze accent</button></div>
-            <div id="alignmentResult"></div>
-          </div>
+          <div id="accentInstallPanel" style="display:none"><div class="sub" data-help="accentSupportMissing"></div><div class="hint" data-help="accentSupportInstallHelp"></div></div>
+          <div id="accentEditorPanel"><div class="sub" data-help="alignmentIntro"></div><div class="status" id="alignmentStatus"></div><div class="accentTopActions"><button class="secondary" id="analyzeAccent" type="button" style="display:none" onclick="runAccentAnalysis(true)" data-help="analyzeAccent">Analyze accent</button></div><div id="alignmentResult"></div></div>
         </section>
       </div>
       <section class="card controls">
-        <div class="title">Voice</div>
-        <label class="small">Character</label><select id="voice"></select>
-        <div class="modelhint" id="modelhint"></div>
-        <div class="rangehead"><span>Pitch</span><span class="rangeval" id="pitchv">0</span></div><input id="pitch" type="range" min="-12" max="12" step="1" value="0"><div class="hint" data-help="pitchHelp"></div>
-        <div class="rangehead"><span>Index rate</span><span class="rangeval" id="indexv">0.55</span></div><input id="index" type="range" min="0" max="1" step="0.01" value="0.55"><div class="hint" data-help="indexHelp"></div>
-        <div class="rangehead"><span>Protect</span><span class="rangeval" id="protectv">0.15</span></div><input id="protect" type="range" min="0" max="0.5" step="0.01" value="0.15"><div class="hint" data-help="protectHelp"></div>
-        <div class="rangehead"><span>Expression</span><span class="rangeval" id="expressionv">0.60</span></div><input id="expression" type="range" min="0.2" max="1.2" step="0.01" value="0.60"><div class="hint" data-help="expressionHelp"></div>
+        <div class="title">Character</div>
+        <select id="v2Character" onchange="v2CharacterChanged()"><option value="Zundamon">Zundamon</option></select>
+        <div class="hint" data-i18n="characterHint"></div>
+        <label class="small" for="v65Style">Style</label><select id="v65Style" onchange="v65StyleChanged()"><option value="normal">Normal</option></select>
+        <div class="rangehead"><span>Style strength</span><span class="rangeval" id="v65Strengthv">0.00</span></div><input id="v65Strength" type="range" min="0" max="2" step="0.05" value="0">
+        <div class="rangehead"><span>Pitch</span><span class="rangeval" id="v65Levelv">0.0</span></div><input id="v65Level" type="range" min="-10" max="10" step="0.5" value="0">
+        <div class="rangehead"><span>Speed</span><span class="rangeval" id="speedv">1.00</span></div><input id="speed" type="range" min="0.7" max="1.5" step="0.05" value="1.00" data-fmt="2">
         <label class="small">Seed</label><input type="number" id="seed" min="0" max="2147483647" step="1" value="0">
-        <label class="checkrow"><input type="checkbox" id="fixSeed"><span><b>Fix seed</b><br><span data-help="seedHelp"></span></span></label>
+        <label class="checkrow"><input type="checkbox" id="fixSeed"><span><b>Fix seed</b><br><span data-i18n="fixSeedHint"></span></span></label>
+        <label class="checkrow"><input type="checkbox" id="v2UseRvc" onchange="updateV2RvcUi()"><span><b>Use RVC voice conversion</b><br><span data-i18n="useRvcHint"></span></span></label>
+        <div class="conditionalPanel" id="v2RvcPanel" hidden>
+          <label class="small" for="v2RvcVoice">RVC model (exports folder)</label>
+          <div class="row"><select class="grow" id="v2RvcVoice" onchange="v2Store()"></select></div>
+          <div class="rangehead"><span>Pitch</span><span class="rangeval" id="v2RvcPitchv"></span></div><input id="v2RvcPitch" type="range" min="-12" max="12" step="1" value="0" data-fmt="int" oninput="v2Store()">
+          <div class="rangehead"><span>Index rate</span><span class="rangeval" id="v2RvcIndexv"></span></div><input id="v2RvcIndex" type="range" min="0" max="1" step="0.05" value="0.1" data-fmt="2" oninput="v2Store()">
+          <div class="rangehead"><span>Protect</span><span class="rangeval" id="v2RvcProtectv"></span></div><input id="v2RvcProtect" type="range" min="0" max="0.5" step="0.01" value="0.15" data-fmt="2" oninput="v2Store()">
+        </div>
         <div class="generateRow"><button class="generate" id="generate" onclick="generateVoice()">✦ Generate voice</button><button class="importWavBtn" id="importWav" type="button" onclick="importWav()">Import WAV</button></div><div class="status" id="status"></div>
-        <label class="checkrow"><input type="checkbox" id="voiceSubtitleTxt" checked><span><b>Create subtitle TXT</b><br><span data-help="subtitleTxtHelp"></span></span></label>
-        <label class="checkrow"><input type="checkbox" id="voiceSourceAudio"><span><b>Save source audio</b><br><span data-help="sourceAudioHelp"></span></span></label>
+        <label class="checkrow"><input type="checkbox" id="voiceSubtitleTxt" checked><span><b>Create subtitle TXT</b></span></label>
         <div class="player" id="player"><audio id="audio" controls></audio><div class="actions"><button class="secondary" id="saveAs" onclick="saveVoiceAs()">Save As...</button></div></div>
+        <!-- Fixed / legacy values (noise 0.40, intonation 1.0, old checkpoint and RVC sidecar fields) stay hidden so existing code keeps working. -->
+        <div style="display:none"><input type="hidden" id="noiseScale" value="0.40"><input type="hidden" id="v65Range" value="1"><input type="text" id="vitsCheckpoint"><select id="learnedStyleModel"><option value=""></option></select><select id="learnedStyle"><option value="neutral"></option></select><input id="learnedStrength" value="1"><div id="modelhint"></div><select id="voice"></select><input id="pitch" value="0"><input id="index" value="0"><input id="protect" value="0.33"><input id="expression" value="0.6"><input type="checkbox" id="sourceOnly"><input type="checkbox" id="voiceSourceAudio"></div>
       </section>
+    </div>
+  </div>
+
+  <div class="view" id="conversionView">
+    <div class="conversionLayout">
+      <section class="card conversionCard">
+        <div class="title">RVC voice model</div>
+        <div class="sub" data-i18n="vcIntro"></div>
+        <label class="small" for="vcModel">RVC model</label>
+        <div class="row"><select class="grow" id="vcModel" onchange="vcStore()"><option value="">Loading models…</option></select></div>
+        <div class="rangehead"><span>Pitch</span><span class="rangeval" id="vcPitchv"></span></div><input id="vcPitch" type="range" min="-24" max="24" step="1" value="0" data-fmt="int" oninput="vcStore()">
+        <div class="rangehead"><span>Index rate</span><span class="rangeval" id="vcIndexRatev"></span></div><input id="vcIndexRate" type="range" min="0" max="1" step="0.05" value="0.1" data-fmt="2" oninput="vcStore()">
+        <div class="rangehead"><span>Protect</span><span class="rangeval" id="vcProtectv"></span></div><input id="vcProtect" type="range" min="0" max="0.5" step="0.01" value="0.15" data-fmt="2" oninput="vcStore()">
+      </section>
+      <div class="vcStack">
+        <section class="card conversionCard">
+          <div class="title">WAV conversion</div>
+          <div class="sub" data-i18n="vcFileHint"></div>
+          <div class="row"><input class="grow" type="text" id="vcInput" placeholder="WAV file or folder"><button class="iconbtn browse" onclick="pickInto('vcInput','wav','Select WAV to convert')">WAV…</button><button class="iconbtn browse" onclick="pickFolderInto('vcInput')">Folder…</button></div>
+          <button class="generate" id="vcConvert" onclick="vcConvertWav()">▶ Convert</button>
+          <div class="status" id="vcStatus">Ready</div>
+          <div class="vcResult" id="vcResult"><audio controls id="vcAudio"></audio><div class="row vcResultActions"><button class="secondary" id="vcFileSave" onclick="vcSaveAs('file')">Save As...</button><button class="secondary" onclick="vcOpenOutput()">Open output folder</button></div><div class="hint" id="vcSavedPath"></div></div>
+        </section>
+        <section class="card conversionCard">
+          <div class="title">Recording</div>
+          <div class="sub" data-i18n="vcRecordHint"></div>
+          <div class="row conversionButtons"><button class="generate" id="vcRecStart" onclick="vcRecordStart()">● Record</button><button class="secondary danger" id="vcRecStop" onclick="vcRecordStop()" disabled>■ Stop</button></div>
+          <div class="status" id="vcRecStatus">Ready</div>
+          <div class="vcResult" id="vcRecResult"><audio controls id="vcRecAudio"></audio><div class="row vcResultActions"><button class="secondary" onclick="vcSaveAs('recording')">Save As...</button></div></div>
+        </section>
+        <section class="card conversionCard">
+          <div class="title">Realtime voice conversion</div>
+          <div class="sub" data-i18n="vcRealtimeHint"></div>
+          <div class="numberGrid">
+            <div><label class="small" for="vcRtInput">Input device</label><select id="vcRtInput"><option value="">Auto</option></select></div>
+            <div><label class="small" for="vcRtOutput">Output device</label><select id="vcRtOutput"><option value="">Auto</option></select></div>
+          </div>
+          <div class="row conversionButtons"><button class="generate" id="vcRealtimeStart" onclick="vcStartRealtime()">▶ Start</button><button class="secondary danger" id="vcRealtimeStop" onclick="vcStopRealtime()">■ Stop</button></div>
+          <div class="status" id="vcRealtimeStatus">Not started</div>
+        </section>
+      </div>
     </div>
   </div>
 
@@ -119,49 +183,40 @@ input[type=range]{width:100%;accent-color:var(--accent);margin-top:9px}.generate
         <div class="sub" data-help="batchIntro"></div>
         <div class="modeRow"><button class="modeBtn active" id="batchModeLines" onclick="setBatchMode('lines')">One line = one WAV</button><button class="modeBtn" id="batchModeCsv" onclick="setBatchMode('csv')">CSV</button></div>
         <label class="small" id="batchContentLabel">Text</label>
-        <textarea class="batchText" id="batchText" placeholder="Hyvää päivää!&#10;Minun nimeni on Zundamon.&#10;Tänään puhutaan tästä aiheesta.">Hyvää päivää!
-Minun nimeni on Zundamon.
-Tänään puhutaan tästä aiheesta.</textarea>
-        <div id="batchCsvTools" style="display:none">
-          <div class="tinyActions"><button class="iconbtn" onclick="document.getElementById('batchCsvFile').click()">Import CSV</button><button class="iconbtn" onclick="downloadCsvTemplate()">CSV template</button></div>
-          <input class="fileinput" type="file" id="batchCsvFile" accept=".csv,text/csv">
-        </div>
-        <div class="hint" id="batchModeHelp" data-help="batchLinesHelp"></div>
-        <label class="small" id="batchVoiceLabel">Character</label><select id="batchVoice"></select>
+        <textarea class="batchText" id="batchText" placeholder="Hyvää päivää!&#10;Minun nimeni on Zundamon.">Hyvää päivää!
+Minun nimeni on Zundamon.</textarea>
+        <div id="batchCsvTools" style="display:none"><div class="tinyActions"><button class="iconbtn" onclick="document.getElementById('batchCsvFile').click()">Import CSV</button><button class="iconbtn" onclick="downloadCsvTemplate()">CSV template</button></div><input class="fileinput" type="file" id="batchCsvFile" accept=".csv,text/csv"></div>
+        <div class="hint" id="batchModeHelp"></div>
         <div class="numberGrid">
-          <div><label class="small">Pitch</label><input type="number" id="batchPitch" min="-24" max="24" step="1" value="0"></div>
-          <div><label class="small">Index rate</label><input type="number" id="batchIndex" min="0" max="1" step="0.01" value="0.55"></div>
-          <div><label class="small">Protect</label><input type="number" id="batchProtect" min="0" max="0.5" step="0.01" value="0.15"></div>
-          <div><label class="small">Expression</label><input type="number" id="batchExpression" min="0.2" max="1.2" step="0.01" value="0.60"></div>
-          <div><label class="small">Seed</label><input type="number" id="batchSeed" min="0" max="2147483647" step="1" value="0"></div>
+          <div><label class="small" for="batchCharacter">Character</label><select id="batchCharacter" onchange="batchCharacterChanged()"></select></div>
+          <div><label class="small" for="batchStyle">Style</label><select id="batchStyle" onchange="batchStyleChanged()"></select></div>
         </div>
-        <label class="checkrow"><input type="checkbox" id="batchFixSeed"><span><b>Fix seed</b><br><span data-help="batchSeedHelp"></span></span></label>
-        <div class="hint" id="batchDefaultsModeHelp" data-help="batchDefaultsHelp" style="display:none"></div>
-        <label class="checkrow"><input type="checkbox" id="batchSubtitleTxt" checked><span><b>Create subtitle TXT</b><br><span data-help="subtitleTxtHelp"></span></span></label>
-        <label class="checkrow"><input type="checkbox" id="batchSourceAudio"><span><b>Save source audio</b><br><span data-help="batchSourceAudioHelp"></span></span></label>
+        <div class="rangehead"><span>Style strength</span><span class="rangeval" id="batchStrengthv">0.00</span></div><input id="batchStrength" type="range" min="0" max="2" step="0.05" value="0">
+        <div class="rangehead"><span>Pitch</span><span class="rangeval" id="batchLevelv">0.0</span></div><input id="batchLevel" type="range" min="-10" max="10" step="0.5" value="0">
+        <div class="rangehead"><span>Speed</span><span class="rangeval" id="batchSpeedv"></span></div><input id="batchSpeed" type="range" min="0.7" max="1.5" step="0.05" value="1.0" data-fmt="2">
+        <label class="small">Seed</label><input type="number" id="batchSeed" min="0" max="2147483647" step="1" value="0">
+        <label class="checkrow"><input type="checkbox" id="batchFixSeed"><span><b>Fix seed</b></span></label>
+        <label class="checkrow"><input type="checkbox" id="batchSubtitleTxt" checked><span><b>Create subtitle TXT</b></span></label>
+        <label class="checkrow"><input type="checkbox" id="batchSentenceSlicer"><span><b>Sentence slicer (Aalto)</b><br><span data-help="batchSentenceSlicerHelp"></span></span></label>
+        <label class="checkrow"><input type="checkbox" id="batchUseRvc" onchange="updateBatchRvcUi()"><span><b>Use RVC voice conversion</b><br><span data-i18n="useRvcHint"></span></span></label>
+        <div class="conditionalPanel" id="batchRvcPanel" hidden>
+          <label class="small" for="batchRvcVoice">RVC model (exports folder)</label>
+          <div class="row"><select class="grow" id="batchRvcVoice" onchange="v2Store()"></select></div>
+          <div class="rangehead"><span>Pitch</span><span class="rangeval" id="batchRvcPitchv"></span></div><input id="batchRvcPitch" type="range" min="-12" max="12" step="1" value="0" data-fmt="int" oninput="v2Store()">
+          <div class="rangehead"><span>Index rate</span><span class="rangeval" id="batchRvcIndexv"></span></div><input id="batchRvcIndex" type="range" min="0" max="1" step="0.05" value="0.1" data-fmt="2" oninput="v2Store()">
+          <div class="rangehead"><span>Protect</span><span class="rangeval" id="batchRvcProtectv"></span></div><input id="batchRvcProtect" type="range" min="0" max="0.5" step="0.01" value="0.15" data-fmt="2" oninput="v2Store()">
+        </div>
         <button class="generate" id="batchStart" onclick="startBatch()">▶ Start Queue</button>
+        <div id="batchDefaultsModeHelp" style="display:none"></div>
+        <div style="display:none"><input type="text" id="batchCheckpoint"><input type="hidden" id="batchNoiseScale" value="0.40"><select id="batchVoice"></select><input id="batchPitch" value="0"><input id="batchIndex" value="0"><input id="batchProtect" value="0.33"><input id="batchExpression" value="0.6"><input type="checkbox" id="batchSourceOnly"><input type="checkbox" id="batchSourceAudio"></div>
       </section>
-
       <section class="card batchMonitor">
         <div class="monitorHead"><div><div class="title">Queue monitor</div><div class="phase" id="batchPhase">Ready</div></div><div class="sleepBadge" id="batchSleepBadge">● SLEEP PREVENTED</div></div>
-        <div class="progressTrack"><div class="progressFill" id="batchProgressFill"></div></div>
-        <div class="progressMeta"><span id="batchProgressText">0%</span><span id="batchQueueId">No queue</span></div>
-        <div class="stats">
-          <div class="stat"><span>Done</span><b id="batchDoneStat">0 / 0</b></div>
-          <div class="stat"><span>Failed</span><b id="batchFailedStat">0</b></div>
-          <div class="stat"><span>Pending</span><b id="batchPendingStat">0</b></div>
-        </div>
-        <div class="batchCurrent"><b>Currently processing</b><span id="batchCurrentText" data-help="batchNoCurrent"></span></div>
-        <div class="logTitle"><span>Queue log</span><span>auto-scroll</span></div>
-        <pre class="terminal" id="batchLog"><span class="empty" data-help="batchLogEmpty"></span></pre>
-        <div class="failedList" id="batchFailedList"></div>
-        <div class="errorbox" id="batchError"></div>
-        <div class="monitorActions">
-          <button class="iconbtn danger" id="batchStop" onclick="stopBatch()" disabled>Stop Queue</button>
-          <button class="iconbtn" id="batchResume" onclick="resumeBatch()" disabled>Resume Queue</button>
-          <button class="iconbtn" onclick="openBatchOutput()">Open batch folder</button>
-          <button class="iconbtn" id="batchClear" onclick="clearBatch()">Clear Queue</button>
-        </div>
+        <div class="progressTrack"><div class="progressFill" id="batchProgressFill"></div></div><div class="progressMeta"><span id="batchProgressText">0%</span><span id="batchQueueId">No queue</span></div>
+        <div class="stats"><div class="stat"><span>Done</span><b id="batchDoneStat">–</b></div><div class="stat"><span>Failed</span><b id="batchFailedStat">0</b></div><div class="stat"><span>Pending</span><b id="batchPendingStat">0</b></div></div>
+        <div class="batchCurrent"><b>Currently processing</b><span id="batchCurrentText">No item is running.</span></div>
+        <div class="logTitle"><span>Queue log</span><span>auto-scroll</span></div><pre class="terminal" id="batchLog"><span class="empty">No batch log yet.</span></pre><div class="failedList" id="batchFailedList"></div><div class="errorbox" id="batchError"></div>
+        <div class="monitorActions"><button class="iconbtn danger" id="batchStop" onclick="stopBatch()" disabled>Stop Queue</button><button class="iconbtn" id="batchResume" onclick="resumeBatch()" disabled>Resume Queue</button><button class="iconbtn" onclick="openBatchOutput()">Open batch folder</button><button class="iconbtn" id="batchClear" onclick="clearBatch()">Clear Queue</button></div>
       </section>
     </div>
   </div>
@@ -169,37 +224,79 @@ Tänään puhutaan tästä aiheesta.</textarea>
   <div class="view" id="trainerView">
     <div class="trainergrid">
       <section class="card trainerSetup">
-        <div class="title">Train a character model</div>
-        <div class="sub" data-help-html="trainerIntro"></div>
-        <label class="small">Character name</label><input type="text" id="trainCharacter" placeholder="e.g. Kiritan">
-        <label class="small">Dataset folder</label>
-        <div class="row"><input class="grow" type="text" id="trainDataset" placeholder="C:\...\datasets\Kiritan"><button class="iconbtn browse" onclick="pickDataset()">Browse…</button></div>
-        <div class="datasetInfo" id="datasetInfo" data-help="formats"></div>
-        <div class="numberGrid">
-          <div><label class="small">Epochs</label><input type="number" id="trainEpochs" min="1" value="100"></div>
-          <div><label class="small">Batch size</label><input type="number" id="trainBatch" min="1" value="6"></div>
-          <div><label class="small">Save every</label><input type="number" id="trainSaveEvery" min="1" value="10"></div>
-          <div><label class="small">Workers</label><input type="number" id="trainWorkers" min="1" value="8"></div>
-          <div><label class="small">GPU</label><input type="text" id="trainGpu" value="0"></div>
+        <div class="title">Model Trainer</div>
+        <div class="modeRow"><button class="modeBtn active" id="trainEngineVits" type="button" onclick="setTrainEngine('vits')">VITS</button><button class="modeBtn" id="trainEngineRvc" type="button" onclick="setTrainEngine('rvc')">RVC</button></div>
+        <div id="trainVitsPanel">
+          <div class="sub" data-i18n="vitsTrainerSub"></div>
+          <label class="small" for="v2Mode">Training type</label>
+          <select id="v2Mode" onchange="updateTrainModeUi()"><option value="joint">Joint training</option><option value="finnish">Finnish fine-tuning</option><option value="style">Style fine-tuning</option></select>
+          <div class="hint" id="v2ModeHint"></div>
+          <div id="v2NamePanel"><label class="small" for="v2RunName">Model name</label><input type="text" id="v2RunName" placeholder="Zundamon_v2"><div class="hint" data-i18n="modelNameHint"></div></div>
+          <div id="v2BaseModelPanel"><label class="small" for="v2BaseModel">Base model</label><select id="v2BaseModel" onchange="v2BaseChanged()"></select></div>
+          <div id="v2ScratchPanel" hidden>
+            <div class="hint" data-i18n="scratchHint"></div>
+            <label class="small">Finnish folder (WAV + TXT)</label><div class="row"><input class="grow" type="text" id="v2FinnishDir" placeholder="C:\...\finnish" onchange="scanFinnishDir()"><button class="iconbtn browse" type="button" onclick="pickFolderInto('v2FinnishDir').then(scanFinnishDir)">Browse…</button></div><div class="hint" id="v2FinnishInfo"></div>
+            <label class="small">Emotion data (WAV + LAB)</label>
+            <div id="v2EmoRows"></div>
+            <button class="secondary" type="button" onclick="addEmoRow()">+</button>
+            <div class="hint" id="v2EmotionInfo"></div><div class="hint" data-i18n="emotionDirHint"></div>
+            <label class="small">Bridge RVC model (.pth)</label><div class="row"><input class="grow" type="text" id="v2BridgePth" placeholder="C:\...\Zundamon.pth" onchange="scanEmotionRows()"><button class="iconbtn browse" type="button" onclick="pickInto('v2BridgePth','pth','Select the RVC model (.pth)').then(scanEmotionRows)">Browse…</button></div><div class="hint" id="v2BridgeInfo"></div>
+            <label class="small" for="v2BridgeChar">Character</label><select id="v2BridgeChar"></select>
+            <div class="hint" data-i18n="bridgeRvcHint"></div>
+          </div>
+          <div id="v2SpeakerPanel" hidden><label class="small" for="v2TrainCharacter">Speaker</label><select id="v2TrainCharacter"><option value="zundamon">zundamon</option><option value="metan">metan</option><option value="itako">itako</option></select><div class="hint" data-i18n="speakerHint"></div></div>
+          <div id="v2TargetPanel" hidden><label class="small" for="v2TargetModel">Model</label><select id="v2TargetModel"></select><div class="hint" data-i18n="targetModelHint"></div></div>
+          <div id="v2BridgePanel">
+            <div class="rangehead"><span>RVC bridge share</span><span class="rangeval" id="v2Bridgev">25%</span></div><input type="range" id="v2Bridge" min="0" max="50" step="1" value="25">
+            <div class="hint" data-i18n="bridgeHint"></div>
+          </div>
+          <div id="v2FinnishPanel" hidden>
+            <div class="rangehead"><span>Share of the new data</span><span class="rangeval" id="v2DataRatiov">25%</span></div><input type="range" id="v2DataRatio" min="5" max="60" step="1" value="25">
+            <div class="hint" data-i18n="dataRatioHint"></div>
+          </div>
+          <div id="v2StylePanel" hidden>
+            <div class="numberGrid">
+              <div><label class="small" for="v2StyleName">Style name (a–z, 0–9, _)</label><input type="text" id="v2StyleName" placeholder="sad"></div>
+              <div><label class="small" for="v2StyleLabel">Display name</label><input type="text" id="v2StyleLabel" placeholder="Sad"></div>
+            </div>
+            <label class="small">Normal folder (WAV + LAB)</label><div class="row"><input class="grow" type="text" id="v2NormalDir" placeholder="C:\...\normal"><button class="iconbtn browse" type="button" onclick="pickFolderInto('v2NormalDir')">Browse…</button></div>
+            <label class="small">Style folder (WAV + LAB)</label><div class="row"><input class="grow" type="text" id="v2StyleDir" placeholder="C:\...\sad"><button class="iconbtn browse" type="button" onclick="pickFolderInto('v2StyleDir')">Browse…</button></div>
+          </div>
         </div>
-        <div class="fixedBadges"><span>RVC v2</span><span>40 kHz</span><span>F0 ON</span><span>RMVPE</span><span>HuBERT 768</span></div>
-        <label class="checkrow"><input type="checkbox" id="trainFresh" checked><span><b>Fresh training</b><br><span data-help="freshHelp"></span></span></label>
+        <div id="trainRvcPanel" hidden>
+          <div class="sub" data-i18n="rvcTrainerSub"></div>
+          <label class="small" for="rvcCharacter">Character name</label><input type="text" id="rvcCharacter" placeholder="e.g. Kiritan">
+        </div>
+        <div id="trainDatasetBlock" hidden>
+          <label class="small">Dataset folder</label><div class="row"><input class="grow" type="text" id="trainDataset" placeholder="C:\...\datasets\Kiritan"><button class="iconbtn browse" type="button" onclick="pickDataset()">Browse…</button></div><div class="datasetInfo" id="datasetInfo"></div>
+        </div>
+        <div id="v2NumbersBlock">
+        <div class="numberGrid" id="v2Numbers">
+          <div data-v2modes="joint finnish"><label class="small" for="v2Epochs">Epoch (VITS)</label><input type="number" id="v2Epochs" min="0.5" max="50" step="0.5" value="4.5"></div>
+          <div><label class="small" for="v2BranchEpochs">Epoch (Style)</label><input type="number" id="v2BranchEpochs" min="1" max="2000" step="1" value="80"></div>
+          <div><label class="small" for="v2Batch">Batch size</label><input type="number" id="v2Batch" min="1" max="64" step="1" value="10"></div>
+          <div data-v2modes="joint finnish"><label class="small" for="v2Workers">Workers</label><input type="number" id="v2Workers" min="0" max="16" step="1" value="4"></div>
+        </div>
+        <div class="hint" data-i18n="epochHint"></div>
+        <div class="hint" data-i18n="resourceHint"></div>
+        </div>
+        <input type="hidden" id="v2Lr" value="0.0001">
+        <div class="numberGrid" id="rvcNumbers" hidden>
+          <div><label class="small" for="rvcEpochs">Epochs</label><input type="number" id="rvcEpochs" min="1" value="100"></div>
+          <div><label class="small" for="rvcBatch">Batch size</label><input type="number" id="rvcBatch" min="1" value="6"></div>
+          <div hidden><label class="small" for="rvcSaveEvery">Save every (epochs)</label><input type="number" id="rvcSaveEvery" min="1" value="10"></div>
+          <div><label class="small" for="rvcWorkers">Workers</label><input type="number" id="rvcWorkers" min="1" value="8"></div>
+          <div hidden><label class="small" for="rvcGpu">GPU</label><input type="text" id="rvcGpu" value="0"></div>
+        </div>
+        <label class="checkrow" id="rvcFreshRow" hidden><input type="checkbox" id="rvcFresh" checked><span><b>Fresh training</b><br><span data-help="freshHelp"></span></span></label>
         <button class="generate" id="trainStart" onclick="startTraining()">◇ Start training</button>
       </section>
-
       <section class="card monitor">
         <div class="monitorHead"><div><div class="title">Training monitor</div><div class="phase" id="trainPhase">Ready</div></div><div class="sleepBadge" id="sleepBadge">● SLEEP PREVENTED</div></div>
-        <div class="progressTrack"><div class="progressFill" id="trainProgressFill"></div></div>
-        <div class="progressMeta"><span id="trainProgressText">0%</span><span id="trainCharacterStatus">No active job</span></div>
-        <div class="stats">
-          <div class="stat"><span>Epoch</span><b id="epochStat">0 / 100</b></div>
-          <div class="stat"><span>Audio files</span><b id="filesStat">0</b></div>
-          <div class="stat"><span>Phase</span><b id="phaseStat" style="font-size:14px">Idle</b></div>
-        </div>
-        <div class="logTitle"><span>Live log</span><span>auto-scroll</span></div>
-        <pre class="terminal" id="trainLog"><span class="empty" data-help="logEmpty"></span></pre>
-        <div class="result" id="trainResult"></div><div class="errorbox" id="trainError"></div>
-        <div class="monitorActions"><button class="iconbtn danger" id="stopTraining" onclick="stopTrainer()" disabled>Stop training</button><button class="iconbtn" onclick="openExports()">Open exports</button></div>
+        <div class="progressTrack"><div class="progressFill" id="trainProgressFill"></div></div><div class="progressMeta"><span id="trainProgressText">0%</span><span id="trainCharacterStatus">No active job</span></div>
+        <div class="stats"><div class="stat"><span id="stepStatLabel">Step</span><b id="epochStat">–</b></div><div class="stat"><span>Audio files</span><b id="filesStat">0</b></div><div class="stat"><span>Phase</span><b id="phaseStat" style="font-size:14px">Idle</b></div></div>
+        <div class="logTitle"><span>Live log</span><span>auto-scroll</span></div><pre class="terminal" id="trainLog"><span class="empty">Training output appears here.</span></pre><div class="result" id="trainResult"></div><div class="errorbox" id="trainError"></div>
+        <div class="monitorActions"><button class="iconbtn danger" id="stopTraining" onclick="stopTrainer()" disabled>Stop training</button><button class="iconbtn" onclick="openExports()">Open outputs</button></div>
       </section>
     </div>
   </div>
@@ -210,20 +307,21 @@ Tänään puhutaan tästä aiheesta.</textarea>
 <script>
 let state={voices:{},config:{},tts:{},trainer:{}};
 let trainerInitialized=false, lastTrainerDoneKey="", lastTrainerLog=[];
+let styleInitialized=false, styleSourceSeq=0, lastStyleLog=[];
 let datasetInfoState={type:"formats",count:0,message:""};
-let batchMode="lines", lastBatchLog=[], batchCsvHeader="filename,text,character,pitch,index_rate,protect,expression,seed";
+let batchMode="lines", lastBatchLog=[], batchCsvHeader="filename,text,noise_scale,length_scale,seed";
 let batchOptionsSyncedQueueId=null;
 let alignmentSyllables=[], alignmentAccentWords=[];
 let accentSupportInstalled=false;
 const $=id=>document.getElementById(id);
-const labels={chatterbox_repo:"Chatterbox repo",chatterbox_weights:"Finnish weights",reference_audio:"Reference audio",rvc_python:"RVC Python",rvc_repo:"RVC repo",exports_root:"RVC exports"};
+const labels={vits_checkpoint:"Default VITS checkpoint",rvc_python:"RVC Python",rvc_repo:"RVC repo",exports_root:"RVC exports"};
 
 const helpTexts={
   fi:{
     voiceIntro:"Kirjoita teksti suomeksi. Syötetty teksti muunnetaan suoraan valitun hahmon ääneksi.",alignmentIntro:"Puheen kohdistus käynnistyy automaattisesti äänen generoinnin jälkeen. Valitse sanakohtainen aksenttitavu ja säädä voimakkuutta.",alignmentReady:"Puheen kohdistus käynnistyy automaattisesti.",alignmentRunning:"Kohdistetaan puhetta Windows-natiivilla Aalto/Kaldilla…",alignmentComplete:"Puheen kohdistus valmis.",alignmentInputError:"Accent-käsittely epäonnistui. Tarkista syötetty teksti. Numeroita ja erikoismerkkejä ei voida tavuttaa.",alignmentWord:"Sana",alignmentPhone:"Foneemi",alignmentSyllable:"Tavu",alignmentWords:"Sanat",alignmentPhones:"Foneemit",alignmentSyllables:"Tavut",alignmentStart:"Alku",alignmentEnd:"Loppu",alignmentDuration:"Kesto",alignmentMeanF0:"F0-mediaani",alignmentF0Note:"F0: pYIN, soinnilliset kehykset; poikkeamat poistettu; mediaani",alignmentF0Warning:"F0-varoitus",alignmentF0Outlier:"poikkeava / epävarma",alignmentSource:"Lähde",alignmentTranscript:"Tavutus (alkuperäinen teksti)",alignmentPitchEdit:"Aksentti",alignmentLengthEdit:"Voimakkuus",alignmentPitchReset:"Ei muutosta",alignmentPitchResetAll:"Nollaa",alignmentPitchPreview:"Esikuuntele aksentti",alignmentPitchRendering:"Luodaan aksenttimuokattua ääntä WORLDilla…",alignmentPitchComplete:"Aksenttiesikatselu valmis.",alignmentPitchHint:"Valitse sanan aksenttitavu ja säädä aksentin voimakkuutta liukusäätimellä. 0 % ei muuta ääntä; 100 % käyttää voimakkainta aksenttia.",alignmentAccentWeak:"Heikko",alignmentAccentNormal:"Normaali",alignmentAccentStrong:"Vahva",alignmentAccentNone:"Ei muutosta",alignmentAccentWord:"Sana",alignmentAccentDetails:"Tekniset tiedot",importWav:"Import WAV",analyzeAccent:"Kohdista puhetta",importingWav:"Tuodaan WAV-tiedostoa…",importWavTxtComplete:"WAV + TXT tuotu",importWavComplete:"WAV tuotu",enterFinnishText:"Syötä vastaava suomenkielinen teksti ja valitse Kohdista puhetta.",accentSupportMissing:"Aksenttimoottori ei ole valmis.",accentSupportInstallHelp:"Aksenttimoottori asennetaan automaattisesti setup.bat-tiedoston mukana. Suorita setup.bat uudelleen. WSL2:ta tai Docker Desktopia ei tarvita.",accentSupportInstalling:"Aksentti-tuen asennus on käynnissä erillisessä ikkunassa…",accentSupportInstallerOpened:"Aksentti-tuen asennusohjelma avattiin. Suorita sen vaiheet loppuun tässä ikkunassa.",accentSupportReboot:"Windows on käynnistettävä uudelleen Aksentti-tuen asennuksen jatkamiseksi. Käynnistä uudelleen ja paina samaa painiketta uudelleen.",accentSupportInstallFailed:"Aksentti-tuen asennus ei valmistunut. Voit yrittää uudelleen painamalla asennuspainiketta.",
     batchIntro:"Luo pitkä äänijono automaattisesti. Halutessasi jokaiselle .wav-tiedostolle voidaan luoda myös samanniminen .txt-tiedosto tekstitystyön tueksi. Jono voidaan jättää ajettavaksi esimerkiksi yön yli, ja Windowsin lepotila estetään käsittelyn ajaksi.",
     batchLinesHelp:"Yksi ei-tyhjä rivi = yksi .wav-tiedosto (esim. 001_seed123456.wav). Jos Create subtitle TXT on käytössä, samalla luodaan samanniminen .txt-tiedosto. Kaikki rivit käyttävät alla olevia oletusasetuksia.",
-    batchCsvHelp:"CSV-sarakkeet: filename,text,character,pitch,index_rate,protect,expression,seed. Vain text on pakollinen. filename on valinnainen: tyhjä kenttä tuottaa esimerkiksi 001_seed123456.wav, ja intro tuottaa 001_intro_seed123456.wav. seed on valinnainen: tyhjä kenttä käyttää Batch-näkymän Seed / Fix seed -asetusta, ja numero kiinnittää kyseisen rivin TTS-seedin.",
+    batchCsvHelp:"CSV-sarakkeet: filename,text,style,strength,speed,seed. Vain text on pakollinen. Tyhjät style / strength / speed käyttävät alla olevia asetuksia; tyhjä seed käyttää Seed / Fix seed -asetusta.",
     batchDefaultsHelp:"Näitä oletusasetuksia käytetään, jos CSV-kenttä on tyhjä.",batchSeedHelp:"Kun Fix seed ei ole käytössä, jokaiselle jonon kohteelle valitaan uusi satunnainen seed. Kun Fix seed on käytössä, Seed-kentän arvoa käytetään kaikille kohteille. CSV-rivin seed-arvo ohittaa tämän asetuksen.",
     batchLogEmpty:"Jonon tapahtumat näkyvät tässä.",
     batchNoCurrent:"Ei aktiivista käsittelyä.",
@@ -232,7 +330,7 @@ const helpTexts={
     batchStopped:"Jono pysäytetty. Voit jatkaa myöhemmin Resume Queue -painikkeella.",
     batchComplete:"Jono valmis.",
     batchStartConfirm:"Aloitetaanko uusi jono? Nykyinen tallennettu jono korvataan.",
-    batchStopConfirm:"Pysäytetäänkö jono? Nykyinen TTS/RVC-prosessi keskeytetään ja keskeneräinen kohde jätetään odottamaan jatkamista.",
+    batchStopConfirm:"Pysäytetäänkö jono? Nykyinen VITS-prosessi keskeytetään ja keskeneräinen kohde jätetään odottamaan jatkamista.",
     batchClearConfirm:"Poistetaanko tallennetun jonon tila? Jo luotuja WAV-tiedostoja ei poisteta.",
     batchNeedText:"Lisää vähintään yksi tekstirivi tai CSV-rivi.",
     searchingModels:"Etsitään RVC-malleja…",
@@ -259,7 +357,8 @@ const helpTexts={
     logSleep:"Sleep     : lepotila estetty koulutuksen ajaksi",
     envHelp:"Paikallinen ympäristö määritetään automaattisesti. Muuta näitä polkuja vain, jos olet siirtänyt kansioita.",
     generating:"Luodaan Finnish TTS → RVC -ääntä…",
-    complete:"Valmis",subtitleTxtLabel:"Luo tekstityksen TXT",sourceAudioLabel:"Tallenna lähdeääni",subtitleTxtHelp:"Luo .wav-tiedoston rinnalle samannimisen .txt-tiedoston. Hyödyllinen tekstityksessä ja videoeditoinnin työnkuluissa.",sourceAudioHelp:"Tallentaa RVC:tä edeltävän suomalaisen TTS-äänen samaan kansioon *_source.wav-tiedostona myöhempää accent-muokkausta varten.",batchSourceAudioHelp:"Tallentaa RVC:tä edeltävät lähdeäänet batch-kansion source_audio-alikansioon myöhempää accent-muokkausta varten.",
+    generatingSourceOnly:"Luodaan vain Finnish TTS -lähdeääntä (RVC ohitetaan)…",
+    complete:"Valmis",subtitleTxtLabel:"Luo tekstityksen TXT",sourceAudioLabel:"Tallenna lähdeääni",subtitleTxtHelp:"Luo .wav-tiedoston rinnalle samannimisen .txt-tiedoston. Hyödyllinen tekstityksessä ja videoeditoinnin työnkuluissa.",sourceOnlyHelp:"Tallentaa Chatterbox-Finnishin puhtaan TTS-ulostulon suoraan lopulliseksi WAV-tiedostoksi. RVC ja automaattinen Accent-analyysi ohitetaan nopeampaa generointia varten.",batchSourceOnlyHelp:"Tallentaa jokaisen Chatterbox-Finnishin puhtaan TTS-ulostulon suoraan WAV-tiedostoksi ilman RVC:tä. Sopii erityisesti suurten Finnish TTS -aineistojen luontiin.",sourceAudioHelp:"Tallentaa RVC:tä edeltävän suomalaisen TTS-äänen samaan kansioon *_source.wav-tiedostona myöhempää accent-muokkausta varten.",batchSourceAudioHelp:"Tallentaa RVC:tä edeltävät lähdeäänet batch-kansion source_audio-alikansioon myöhempää accent-muokkausta varten.",batchSentenceSlicerHelp:"Jos yksi syöte sisältää useita lauseita, tunnistaa . ! ? -rajat ja käyttää Aalto Forced Alignmentin sanakohtaisia aikoja WAV- ja TXT-tiedostojen jakamiseen yksi lause per tiedosto. Jos kohdistus epäonnistuu, alkuperäinen koko WAV säilytetään.",
     choosingFolder:"Avataan kansionvalinta…",
     audioFilesFound:"✓ {count} äänitiedostoa löytyi.",
     noAudioFiles:"✕ Äänitiedostoja ei löytynyt.",
@@ -275,7 +374,7 @@ const helpTexts={
     voiceIntro:"フィンランド語の文章を入力すると、そのまま選択したキャラクター音声に変換します。",alignmentIntro:"音声生成後に強制アライメントを自動で行います。単語ごとにアクセントを置く音節を選び、強さを調整できます。",alignmentReady:"強制アライメントは音声生成後に自動で開始します。",alignmentRunning:"Windows ネイティブ Aalto/Kaldi で強制アライメントを実行中…",alignmentComplete:"強制アライメント完了",alignmentInputError:"Accent処理に失敗しました。入力したテキストを確認してください。数字や特殊記号は音節分解できません。",alignmentWord:"単語",alignmentPhone:"音素",alignmentSyllable:"音節",alignmentWords:"単語",alignmentPhones:"音素",alignmentSyllables:"音節",alignmentStart:"開始",alignmentEnd:"終了",alignmentDuration:"長さ",alignmentMeanF0:"F0中央値",alignmentF0Note:"F0: pYIN（有声音のみ・外れ値除外・中央値）",alignmentF0Warning:"F0警告",alignmentF0Outlier:"外れ値 / 判定不確実",alignmentSource:"対象",alignmentTranscript:"音節区切り（入力テキスト）",alignmentPitchEdit:"アクセント",alignmentLengthEdit:"強さ",alignmentPitchReset:"変更なし",alignmentPitchResetAll:"リセット",alignmentPitchPreview:"アクセントをプレビュー",alignmentPitchRendering:"WORLDでアクセント音声を生成中…",alignmentPitchComplete:"アクセントプレビューが完成しました。",alignmentPitchHint:"単語ごとにアクセント音節を選び、スライダーで強さを調整します。0%では音声を変更せず、100%で最大のアクセントを適用します。",alignmentAccentWeak:"弱",alignmentAccentNormal:"普通",alignmentAccentStrong:"強",alignmentAccentNone:"変更なし",alignmentAccentWord:"単語",alignmentAccentDetails:"技術情報",importWav:"WAVを読み込む",analyzeAccent:"強制アライメントを実行",importingWav:"WAVを読み込み中…",importWavTxtComplete:"WAV + TXTを読み込みました",importWavComplete:"WAVを読み込みました",enterFinnishText:"対応するフィンランド語テキストを入力して、強制アライメントを実行してください。",accentSupportMissing:"Accent エンジンのセットアップが完了していません。",accentSupportInstallHelp:"Accent エンジンは setup.bat で自動導入されます。setup.bat をもう一度実行してください。WSL2 / Docker Desktop は不要です。",accentSupportInstalling:"別ウィンドウで Accent support をインストールしています…",accentSupportInstallerOpened:"Accent support のインストーラを開きました。表示されたウィンドウの手順を完了してください。",accentSupportReboot:"Accent support のセットアップを続けるには Windows の再起動が必要です。再起動後、同じボタンをもう一度押してください。",accentSupportInstallFailed:"Accent support のインストールが完了していません。インストールボタンから再試行できます。",
     batchIntro:"大量の文章を順番に自動生成します。必要に応じて各.wavファイルと同名の.txtファイルも作成でき、字幕作成などの動画編集ワークフローに利用できます。夜間などに連続実行でき、処理中はWindowsのスリープを防止します。",
     batchLinesHelp:"空行を除き、1行 = 1つの.wavファイルとして 001_seed123456.wav のように生成します。Create subtitle TXT がONの場合は同名の.txtファイルも作成します。全行に下のデフォルト設定を使います。",
-    batchCsvHelp:"CSV列: filename,text,character,pitch,index_rate,protect,expression,seed。必須は text だけです。filename は任意で、空欄なら 001_seed123456.wav、intro なら 001_intro_seed123456.wav のように保存されます。seed は任意で、空欄ならBatch画面のSeed / Fix seed設定を使い、数値を入れるとその行のTTS Seedを固定します。",
+    batchCsvHelp:"CSV列: filename,text,style,strength,speed,seed。必須は text のみです。style / strength / speed が空欄なら下の設定を、seed が空欄なら Seed / Fix seed を使います。",
     batchDefaultsHelp:"CSVの項目が空欄の場合に使用されるデフォルト設定です。",batchSeedHelp:"Fix seed がOFFの場合はキューの各項目に新しいランダムSeedを使用します。ONの場合はSeed欄の値を全項目に使用します。CSVのseedに数値がある行では、その値が優先されます。",
     batchLogEmpty:"キューを開始するとログがここに表示されます。",
     batchNoCurrent:"現在処理中の項目はありません。",
@@ -284,7 +383,7 @@ const helpTexts={
     batchStopped:"キューを停止しました。Resume Queue で続きから再開できます。",
     batchComplete:"キューが完了しました。",
     batchStartConfirm:"新しいキューを開始しますか？保存されている現在のキュー状態は置き換えられます。",
-    batchStopConfirm:"キューを停止しますか？現在のTTS/RVC処理も停止し、その項目は再開待ちに戻します。",
+    batchStopConfirm:"キューを停止しますか？現在のVITS処理を停止し、その項目は再開待ちに戻します。",
     batchClearConfirm:"保存されているキュー状態を消去しますか？生成済みWAVは削除されません。",
     batchNeedText:"少なくとも1行の文章、またはCSVデータを入力してください。",
     searchingModels:"RVCモデルを検索中…",
@@ -311,7 +410,8 @@ const helpTexts={
     logSleep:"Sleep     : 学習中のスリープを防止中",
     envHelp:"今のローカル環境を自動設定しています。フォルダを移動したときだけ変更してください。",
     generating:"Finnish TTS → RVC を生成中…",
-    complete:"完成",subtitleTxtHelp:".wavファイルと同名の.txtファイルを作成します。字幕作成などの動画編集ワークフローに便利です。",sourceAudioHelp:"RVC前のフィンランド語TTS音声を、後から高品質にアクセント編集できるよう同じフォルダへ *_source.wav として保存します。",batchSourceAudioHelp:"RVC前の元音声を、Batch出力フォルダ内の source_audio フォルダへまとめて保存します。",
+    generatingSourceOnly:"Finnish TTS元音声のみを生成中（RVCをスキップ）…",
+    complete:"完成",sourceOnlyHelp:"Chatterbox-Finnishの元TTS音声をそのまま最終WAVとして保存します。RVCと生成直後の自動Accent解析をスキップするため、初回はモデル読み込みがありますが、2回目以降はモデルを再利用して高速化します。大量生成向けです。",batchSourceOnlyHelp:"各Chatterbox-Finnish元TTS音声をRVCなしでそのままWAV保存します。初回だけモデルを読み込み、その後は同じモデルを常駐再利用します。Finnish TTS学習データの大量生成向けです。",subtitleTxtHelp:".wavファイルと同名の.txtファイルを作成します。字幕作成などの動画編集ワークフローに便利です。",sourceAudioHelp:"RVC前のフィンランド語TTS音声を、後から高品質にアクセント編集できるよう同じフォルダへ *_source.wav として保存します。",batchSourceAudioHelp:"RVC前の元音声を、Batch出力フォルダ内の source_audio フォルダへまとめて保存します。",batchSentenceSlicerHelp:"1つの入力に複数文がある場合、. ! ? の文境界を検出し、Aalto Forced Alignmentの単語時刻を使って最終WAVとTXTを1文ずつに分割します。Alignment失敗時は元の全文WAVを残します。",
     choosingFolder:"フォルダ選択画面を開いています…",
     audioFilesFound:"✓ {count} 件の音声ファイルが見つかりました。",
     noAudioFiles:"✕ 音声ファイルが見つかりません。",
@@ -327,7 +427,7 @@ const helpTexts={
     voiceIntro:"Enter Finnish text to convert it directly into the selected character voice.",alignmentIntro:"Forced alignment runs automatically after voice generation. Choose the accented syllable for each word and adjust its strength.",alignmentReady:"Forced alignment starts automatically after voice generation.",alignmentRunning:"Aligning speech with native Windows Aalto/Kaldi…",alignmentComplete:"Forced alignment complete.",alignmentInputError:"Accent processing failed. Check the input text. Numbers and special characters cannot be syllabified.",alignmentWord:"Word",alignmentPhone:"Phone",alignmentSyllable:"Syllable",alignmentWords:"Words",alignmentPhones:"Phones",alignmentSyllables:"Syllables",alignmentStart:"Start",alignmentEnd:"End",alignmentDuration:"Duration",alignmentMeanF0:"Median F0",alignmentF0Note:"F0: pYIN, voiced frames only; outliers rejected; median",alignmentF0Warning:"F0 warning",alignmentF0Outlier:"outlier / uncertain",alignmentSource:"Source",alignmentTranscript:"Syllabified input text",alignmentPitchEdit:"Accent",alignmentLengthEdit:"Strength",alignmentPitchReset:"No change",alignmentPitchResetAll:"Reset",alignmentPitchPreview:"Preview accent",alignmentPitchRendering:"Rendering WORLD accent edits…",alignmentPitchComplete:"Accent preview is ready.",alignmentPitchHint:"Choose the accented syllable for each word, then set its strength with the slider. 0% leaves the audio unchanged; 100% applies the maximum accent.",alignmentAccentWeak:"Weak",alignmentAccentNormal:"Normal",alignmentAccentStrong:"Strong",alignmentAccentNone:"No change",alignmentAccentWord:"Word",alignmentAccentDetails:"Technical details",importWav:"Import WAV",analyzeAccent:"Analyze accent",importingWav:"Importing WAV…",importWavTxtComplete:"WAV + TXT imported",importWavComplete:"WAV imported",enterFinnishText:"Enter the corresponding Finnish text, then click Analyze accent.",accentSupportMissing:"The Accent engine is not ready.",accentSupportInstallHelp:"The Accent engine is installed automatically by setup.bat. Run setup.bat again. WSL2 and Docker Desktop are not required.",accentSupportInstalling:"Installing Accent support in a separate window…",accentSupportInstallerOpened:"The Accent support installer has opened. Complete the steps in that window.",accentSupportReboot:"Windows must be restarted to continue installing Accent support. Restart Windows, then click the same button again.",accentSupportInstallFailed:"Accent support installation is not complete. Click the install button to try again.",
     batchIntro:"Generate a long queue of voice clips automatically. Optionally create a same-name .txt file for each .wav file for subtitle and video editing workflows. It can run unattended overnight, with Windows sleep prevented while the queue is active.",
     batchLinesHelp:"Each non-empty line creates one .wav file such as 001_seed123456.wav. When Create subtitle TXT is enabled, a same-name .txt file is created too. All lines use the default settings below.",
-    batchCsvHelp:"CSV columns: filename,text,character,pitch,index_rate,protect,expression,seed. Only text is required. filename is optional: leave it blank for 001_seed123456.wav, or use intro to get 001_intro_seed123456.wav. seed is optional: leave it blank to use the Batch Seed / Fix seed setting, or enter a number to fix the TTS seed for that row.",
+    batchCsvHelp:"CSV columns: filename,text,style,strength,speed,seed. Only text is required. Blank style / strength / speed use the settings below; blank seed uses Seed / Fix seed.",
     batchDefaultsHelp:"These defaults are used when a CSV field is left blank.",batchSeedHelp:"When Fix seed is off, each queue item gets a new random seed. When enabled, the value in the Seed field is used for every item. A seed value in a CSV row overrides this setting.",
     batchLogEmpty:"Queue events will appear here after the batch starts.",
     batchNoCurrent:"Nothing is currently being processed.",
@@ -336,7 +436,7 @@ const helpTexts={
     batchStopped:"Queue stopped. Use Resume Queue to continue later.",
     batchComplete:"Queue complete.",
     batchStartConfirm:"Start a new queue? The currently saved queue state will be replaced.",
-    batchStopConfirm:"Stop the queue? The current TTS/RVC process will be terminated and that item will return to pending.",
+    batchStopConfirm:"Stop the queue? The current VITS process will be terminated and that item will return to pending.",
     batchClearConfirm:"Clear the saved queue state? Generated WAV files will not be deleted.",
     batchNeedText:"Enter at least one text line or CSV row.",
     searchingModels:"Searching for RVC models…",
@@ -363,7 +463,8 @@ const helpTexts={
     logSleep:"Sleep     : prevented while training",
     envHelp:"Local environment paths are configured automatically. Change them only if you move the folders.",
     generating:"Generating Finnish TTS → RVC…",
-    complete:"Complete",subtitleTxtLabel:"Create subtitle TXT",sourceAudioLabel:"Save source audio",subtitleTxtHelp:"Creates a same-name .txt file alongside each .wav file. Useful for subtitle and video editing workflows.",sourceAudioHelp:"Saves the pre-RVC Finnish TTS beside the final WAV as *_source.wav for high-quality accent editing later.",batchSourceAudioHelp:"Saves all pre-RVC source audio in a source_audio subfolder inside the Batch output folder.",
+    generatingSourceOnly:"Generating Finnish TTS source only (skipping RVC)…",
+    complete:"Complete",sourceOnlyHelp:"Saves the clean Chatterbox-Finnish TTS output directly as the final WAV. RVC and automatic Accent analysis are skipped. The first run loads the model; later Source-only runs reuse it for faster generation.",batchSourceOnlyHelp:"Saves each clean Chatterbox-Finnish TTS output directly as WAV without RVC. The model is loaded once and reused across the batch for fast bulk Finnish TTS dataset generation.",subtitleTxtLabel:"Create subtitle TXT",sourceAudioLabel:"Save source audio",subtitleTxtHelp:"Creates a same-name .txt file alongside each .wav file. Useful for subtitle and video editing workflows.",sourceAudioHelp:"Saves the pre-RVC Finnish TTS beside the final WAV as *_source.wav for high-quality accent editing later.",batchSourceAudioHelp:"Saves all pre-RVC source audio in a source_audio subfolder inside the Batch output folder.",batchSentenceSlicerHelp:"When one input contains multiple sentences, detects . ! ? boundaries and uses Aalto Forced Alignment word timings to split the final WAV and TXT into one file per sentence. If alignment fails, the original full WAV is kept.",
     choosingFolder:"Opening folder picker…",
     audioFilesFound:"✓ {count} audio files found.",
     noAudioFiles:"✕ No audio files found.",
@@ -379,6 +480,87 @@ const helpTexts={
 let helpLanguage=localStorage.getItem("zundanenHelpLanguage")||"fi";
 if(!["fi","ja","en"].includes(helpLanguage)) helpLanguage="fi";
 function ht(key){return (helpTexts[helpLanguage]&&helpTexts[helpLanguage][key])||helpTexts.fi[key]||key}
+const uiTexts={
+  en:{charsSuffix:" chars",noRvcModels:"No RVC models in exports",engineMissing:"Emotion model files are missing:",generate:"✦ Generate voice",generatingBtn:"Generating…",
+    statusGenerating:"Generating speech…",statusGeneratingRvc:"Generating speech and converting with RVC…",statusComplete:"✓ Complete",strengthWord:"strength",
+    statStep:"Step",statEpoch:"Epoch",noActiveJob:"No active job",trainComplete:"✓ Training complete",addedCharacter:"✓ Added to Voice Generation as Character:",
+    styleAdded:"✓ Style added to Voice Generation:",rvcSaved:"✓ RVC model saved. It can now be selected under “Use RVC voice conversion”.",
+    needRunName:"Enter a model name.",needStyle:"Enter a style name and choose the Normal and style folders.",needDataset:"Choose a dataset folder.",needRvcName:"Enter a character name.",
+    finnishTextSub:"Zundanen generates Finnish speech with the selected character and style.",
+    characterHint:"Each model trained in Model Trainer (Joint / Finnish fine-tuning) appears here under its model name.",
+    
+    fixSeedHint:"OFF generates a new seed for each utterance.",useRvcHint:"Converts the generated speech with an RVC model from the exports folder. Style and pitch are kept.",
+    
+    vitsTrainerSub:"Trains the Finnish emotion VITS model (FinBERT + VITS, style branch, voice-quality delta). Original data and models are never overwritten; results are saved in outputs/.",
+    hintJoint:"Retrains the base model on the joint data (Chatterbox Finnish + RVC bridge + Japanese emotion corpus), then the style branch and the voice-quality delta.",
+    hintFinnish:"Adds your WAV + same-name TXT folder (at least 20 pairs) as the chosen speaker's Finnish. Existing data is mixed in so Japanese and the styles are not forgotten.",
+    hintStyle:"Adds a new style from paired recordings: a Normal folder and a style folder (WAV + LAB, matched by the number in the file name, at least 20 pairs). A separate branch is trained, so the existing styles do not change. The style is added to Voice Generation automatically.",
+    modelNameHint:"When training finishes, this name appears as the Character in Voice Generation.",
+    scratchHint:"Builds a new model from random weights: Finnish pronunciation from the Finnish folder, voices and styles from the emotion folder, and Finnish in the character's voice from the RVC bridge. This takes much longer than continuing a model (often a day or more) and needs plenty of Finnish speech (about 20 hours or more for good pronunciation).",
+    emotionDirHint:"One row per speaker and style: the folder with the WAV files, the folder with their LAB files (empty = the same folder), the speaker name and the style. Add rows with +. Every speaker needs a Normal row. A LAB must have the same file name as its WAV; a row without its own LAB uses another row's LAB of the same style with the same file name (the same sentence). Normal and style recordings are paired by the number in the file name.",
+    bridgeRvcHint:"The RVC model converts every Finnish sentence of the folder (each at two pitch levels; about 1 s per file) into the character's voice so the character learns to speak Finnish; the RVC bridge share sets how often these are used in training. Character = the speaker of the emotion data this RVC voice belongs to (preselected when the file name matches, e.g. Zundamon.pth → zundamon). Its .index next to it is used if present, and the pitch shift is set automatically.",
+    speakerHint:"Whose voice the new Finnish data is (speaker id inside the model).",
+    targetModelHint:"The style is added to this model (and to other characters that share its base).",
+    bridgeHint:"Share of RVC-converted Finnish (Zundamon's voice) in each batch. Recommended 25%. More moves the voice toward Zundamon, but RVC artefacts can show in pronunciation; less keeps the Chatterbox pronunciation.",
+    dataRatioHint:"The rest is the existing joint data (the bridge share applies to it).",datasetFinnish:"WAV + same-name TXT (Finnish sentence), at least 20 pairs.",
+    rvcTrainerSub:"Same as Zundanen v1: trains an RVC v2 voice model (.pth + .index) from an audio folder and saves it to exports/<name>.",
+    vcIntro:"These settings are used by WAV conversion and Recording. The originals are never overwritten; results go to outputs/voice_conversion.",
+    vcFileHint:"Choose a WAV file to convert only that file, or a folder to convert every WAV in it (results go to a new folder).",
+    vcRecordHint:"Record from the microphone. When you stop, the recording is converted with the RVC model on the left and can be played and saved.",
+    vcRealtimeHint:"Converts the microphone live with the RVC model, Pitch and Index rate on the left (about 0.3 s delay).",
+    resourceHint:"Batch size = sentences per step: if you get an out-of-memory error, lower it (more GPU memory allows more; 10 works on a 12 GB GPU). Workers = CPU threads that load the data: lower it on a PC with few cores or little RAM. Changing the batch size keeps the epochs, so the number of steps adjusts itself.",
+    epochHint:"One epoch = one pass over all training rows (Finnish sentences + RVC bridge + emotion recordings); the trainer prints the resulting number of steps at the start of the log. Epoch (VITS): the base model; 4.5 continues an existing model for the usual length, a new model from scratch needs far more (35 by default). Epoch (Style): the style branch, over its own sentences (80 is plenty; with few pairs the step count is kept above a minimum)."},
+  fi:{finnishTextSub:"Zundanen luo suomenkielistä puhetta valitulla hahmolla ja tyylillä.",
+    characterHint:"Jokainen Mallin koulutuksessa koulutettu malli (yhteiskoulutus / suomen hienosäätö) näkyy tässä mallin nimellä.",
+    
+    fixSeedHint:"Pois päältä: jokainen lause saa uuden siemenen.",useRvcHint:"Muuntaa luodun puheen exports-kansion RVC-mallilla. Tyyli ja äänenkorkeus säilyvät.",
+    
+    vitsTrainerSub:"Kouluttaa suomenkielisen tunne-VITS-mallin (FinBERT + VITS, tyylihaara, äänenlaatuero). Alkuperäisiä aineistoja ja malleja ei korvata; tulokset tallennetaan kansioon outputs/.",
+    hintJoint:"Kouluttaa perusmallin uudelleen yhteisellä aineistolla (Chatterbox-suomi + RVC-silta + japanilainen tunneaineisto) ja sen jälkeen tyylihaaran ja äänenlaatueron.",
+    hintFinnish:"Lisää WAV + samanniminen TXT -kansion (vähintään 20 paria) valitun puhujan suomeksi. Nykyinen aineisto sekoitetaan mukaan, jotta japani ja tyylit eivät unohdu.",
+    hintStyle:"Lisää uuden tyylin pareittaisista äänitteistä: Normal-kansio ja tyylikansio (WAV + LAB, parit tiedostonimen numeron mukaan, vähintään 20 paria). Erillinen haara koulutetaan, joten nykyiset tyylit eivät muutu. Tyyli lisätään Äänen luontiin automaattisesti.",
+    modelNameHint:"Koulutuksen jälkeen tämä nimi näkyy hahmona (Character) Äänen luonnissa.",
+    scratchHint:"Luo uuden mallin satunnaisista painoista: suomen ääntämisen suomikansiosta, äänet ja tyylit tunnekansiosta ja suomen hahmon äänellä RVC-sillasta. Tämä kestää paljon kauemmin kuin olemassa olevan mallin jatkokoulutus (usein vuorokauden tai enemmän) ja vaatii paljon suomenkielistä puhetta (hyvään ääntämiseen noin 20 tuntia tai enemmän).",
+    emotionDirHint:"Yksi rivi puhujaa ja tyyliä kohden: WAV-tiedostojen kansio, niiden LAB-tiedostojen kansio (tyhjä = sama kansio), puhujan nimi ja tyyli. Lisää rivejä +-painikkeella. Jokainen puhuja tarvitsee Normal-rivin. LAB-tiedostolla on oltava sama nimi kuin WAV-tiedostolla; rivi ilman omia LAB-tiedostoja käyttää toisen saman tyylin rivin samannimistä LAB-tiedostoa (sama lause). Normal- ja tyylinauhoitukset paritetaan tiedostonimen numerolla.",
+    bridgeRvcHint:"RVC-malli muuntaa kansion jokaisen suomenkielisen lauseen (kukin kahdella korkeudella; noin 1 s tiedostoa kohden) hahmon äänelle, jotta hahmo oppii puhumaan suomea; RVC bridge share määrää, kuinka usein niitä käytetään koulutuksessa. Character = tunnedatan puhuja, jolle tämä RVC-ääni kuuluu (valitaan valmiiksi, kun tiedostonimi täsmää, esim. Zundamon.pth → zundamon). Vieressä oleva .index käytetään, jos se löytyy, ja sävelkorkeuden siirto asetetaan automaattisesti.",
+    speakerHint:"Kenen ääntä uusi suomenkielinen aineisto on (puhujatunnus mallin sisällä).",
+    targetModelHint:"Tyyli lisätään tähän malliin (ja muille hahmoille, joilla on sama perusmalli).",
+    bridgeHint:"RVC:llä muunnetun suomen (Zundamonin ääni) osuus jokaisessa erässä. Suositus 25 %. Suurempi osuus vie ääntä lähemmäs Zundamonia, mutta RVC:n virheet voivat näkyä ääntämisessä; pienempi pitää Chatterboxin ääntämyksen.",
+    dataRatioHint:"Loput ovat nykyistä yhteisaineistoa (RVC-sillan osuus koskee sitä).",datasetFinnish:"WAV + samanniminen TXT (suomenkielinen lause), vähintään 20 paria.",
+    rvcTrainerSub:"Kuten Zundanen v1: kouluttaa RVC v2 -äänimallin (.pth + .index) äänikansiosta ja tallentaa sen kansioon exports/<nimi>.",
+    vcIntro:"Näitä asetuksia käyttävät WAV-muunnos ja äänitys. Alkuperäisiä ei korvata; tulokset tallennetaan kansioon outputs/voice_conversion.",
+    vcFileHint:"Valitse WAV-tiedosto, niin vain se muunnetaan, tai kansio, niin kaikki sen WAV-tiedostot muunnetaan (tulokset uuteen kansioon).",
+    vcRecordHint:"Äänitä mikrofonilla. Kun lopetat, äänite muunnetaan vasemmalla valitulla RVC-mallilla, ja sen voi kuunnella ja tallentaa.",
+    vcRealtimeHint:"Muuntaa mikrofonin äänen reaaliajassa vasemmalla valitulla RVC-mallilla, Pitchillä ja Index ratella (viive noin 0,3 s).",
+    resourceHint:"Batch size = lauseiden määrä askelta kohden: jos tulee muistivirhe (out of memory), pienennä sitä (enemmän näytönohjaimen muistia sallii suuremman; 10 toimii 12 Gt:n kortilla). Workers = tietoa lataavat suoritinsäikeet: pienennä, jos koneessa on vähän ytimiä tai muistia. Eräkoon muutos säilyttää epookit, joten askelmäärä mukautuu itse.",
+    epochHint:"Yksi epookki = yksi läpikäynti kaikista harjoitusriveistä (suomenkieliset lauseet + RVC-silta + tunnenauhoitukset); kouluttaja tulostaa askelmäärän lokin alussa. Epoch (VITS): perusmalli; 4,5 jatkaa olemassa olevaa mallia tavallisen pituuden, uusi malli tyhjästä tarvitsee paljon enemmän (oletus 35). Epoch (Style): tyylihaara omien lauseidensa yli (80 riittää; vähillä pareilla askelmäärä pidetään vähimmäisrajan yläpuolella)."},
+  ja:{finnishTextSub:"選んだキャラクターとスタイルでフィンランド語の音声を生成します。",
+    characterHint:"モデル学習（ジョイント学習／フィンランド語ファインチューニング）で作ったモデルが、モデル名でここに追加されます。",
+    
+    fixSeedHint:"OFF のときは毎回新しいシードで生成します。",useRvcHint:"生成した音声を exports フォルダの RVC モデルで変換します。スタイルとピッチは保たれます。",
+    
+    vitsTrainerSub:"フィンランド語の感情 VITS（FinBERT + VITS、スタイル分岐、声質差分）を学習します。元のデータやモデルは上書きせず、結果は outputs/ に保存します。",
+    hintJoint:"ベースモデルから、ジョイントデータ（Chatterbox のフィンランド語 + RVC ブリッジ + 日本語感情コーパス）で再学習し、続けてスタイル分岐と声質差分を作ります。",
+    hintFinnish:"WAV と同名 TXT のフォルダ（20 組以上）を、選んだ話者のフィンランド語として追加学習します。日本語やスタイルを忘れないよう既存データも混ぜます。",
+    hintStyle:"Normal フォルダとスタイルフォルダ（WAV + LAB、ファイル名の番号で対応、20 組以上）から新しいスタイルを追加します。専用の分岐を学習するので既存スタイルは変わりません。終わると音声生成のスタイル一覧に自動で追加されます。",
+    modelNameHint:"学習が終わると、この名前が音声生成の Character に表示されます。",
+    scratchHint:"ランダムな初期値から新しいモデルを作ります。フィンランド語の発音はフィンランド語フォルダから、声とスタイルは感情フォルダから、キャラクターの声のフィンランド語は RVC ブリッジから学びます。既存のモデルの続きより大幅に時間がかかり（1 日以上かかることもあります）、フィンランド語の音声がたくさん必要です（良い発音には約 20 時間以上）。",
+    emotionDirHint:"話者とスタイルごとに 1 行です：WAV のフォルダ、その LAB のフォルダ（空欄なら同じフォルダ）、話者名、スタイル。+ で行を追加します。どの話者にも Normal の行が必要です。LAB は WAV と同じファイル名にしてください。自分の LAB がない行は、同じスタイルのほかの行にある同じ名前の LAB（同じ文）を使います。Normal とスタイルの録音は、ファイル名の番号で対応させます。",
+    bridgeRvcHint:"RVC モデルで、フォルダのフィンランド語の文を全部（それぞれ 2 つの高さ。1 ファイル約 1 秒）キャラクターの声に変換し、キャラクターにフィンランド語を覚えさせます。学習でそれをどれだけ使うかは RVC bridge share で決めます。Character は、この RVC の声が感情データのどの話者かです（ファイル名が合えば自動で選ばれます。例：Zundamon.pth → zundamon）。隣に .index があれば使い、ピッチのずらし幅は自動で決めます。",
+    speakerHint:"新しいフィンランド語データが誰の声か（モデル内の話者 ID）。",
+    targetModelHint:"このモデルにスタイルを追加します（同じベースを使う他のキャラクターにも出ます）。",
+    bridgeHint:"各バッチに入る RVC 変換フィンランド語（ずんだもんの声）の割合。推奨 25%。多いほど声はずんだもんに寄りますが、RVC 由来の崩れが発音に出ることがあります。少ないほど Chatterbox の発音に寄ります。",
+    dataRatioHint:"残りは既存のジョイントデータです（RVC ブリッジの割合はそちらに適用）。",datasetFinnish:"WAV と同名 TXT（フィンランド語の文）を 20 組以上。",
+    rvcTrainerSub:"v1 と同じです。音声フォルダから RVC v2 の声モデル（.pth + .index）を学習し、exports/<名前> に保存します。",
+    vcIntro:"ここの設定は WAV 変換と録音の両方で使います。元のファイルは上書きせず、結果は outputs/voice_conversion に保存します。",
+    vcFileHint:"WAV ファイルを選ぶとそのファイルだけ、フォルダを選ぶと中の WAV をすべて変換します（結果は新しいフォルダに保存）。",
+    vcRecordHint:"マイクで録音します。停止すると左の RVC モデルで変換し、再生と保存ができます。",
+    vcRealtimeHint:"マイクの声を、左の RVC モデル・Pitch・Index rate でリアルタイムに変換します（遅れは約 0.3 秒）。",
+    resourceHint:"Batch size = 1 ステップで使う文の数です。メモリ不足（out of memory）になったら小さくしてください（GPU のメモリが多いほど大きくできます。12 GB の GPU なら 10 で動きます）。Workers = データを読み込む CPU のスレッド数で、コア数やメモリが少ない PC では小さくしてください。Batch size を変えてもエポック数は保たれ、ステップ数が自動で変わります。",
+    epochHint:"1 エポック = 学習データの全部の行（フィンランド語の文 ＋ RVC ブリッジ ＋ 感情の録音）を 1 周すること。実際のステップ数は、ログの最初に表示されます。Epoch (VITS)：本体。既存のモデルの続きなら 4.5 で今までと同じ長さ、ゼロからの新しいモデルはずっと多く必要です（既定 35）。Epoch (Style)：スタイル分岐を、そのスタイルの文で何周するか（80 で十分です。組が少ないときは、ステップ数が最低ラインを下回らないようにします）。"}
+};
+function ut(key){return (uiTexts[helpLanguage]&&uiTexts[helpLanguage][key])??uiTexts.en[key]??key}
+
 function formatHelp(key,values={}){
   let out=ht(key);Object.entries(values).forEach(([k,v])=>{out=out.replaceAll("{"+k+"}",v)});return out;
 }
@@ -391,6 +573,7 @@ function formatStudioLogLine(line){
   if(line==='[PHASE] TRAIN') return ht('logTrain');
   if(line==='[PHASE] INDEX') return ht('logIndex');
   if(line==='TRAINING COMPLETE') return ht('logComplete');
+  if(line.startsWith('[V2PHASE] ')) return '▶ '+line.slice(10);
   if(line==='[STOPPED] Training was stopped by the user.') return ht('logStopped');
   if(line==='Sleep     : prevented while training') return ht('logSleep');
   let m=line.match(/^\[OK\] filelist\.txt: (\d+) training clips \+ 2 mute$/);
@@ -405,7 +588,7 @@ function renderTrainerLog(running=false){
     return;
   }
   const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<90;
-  box.textContent=lastTrainerLog.map(formatStudioLogLine).join('\n');
+  box.textContent=lastTrainerLog.filter(l=>!l.startsWith('[V2PROGRESS]')&&!l.startsWith('RESULT_JSON :')).map(formatStudioLogLine).join('\n');
   if(nearBottom||running) box.scrollTop=box.scrollHeight;
 }
 function renderDatasetInfo(){
@@ -416,7 +599,7 @@ function renderDatasetInfo(){
   if(datasetInfoState.type==='folderNotFound'){el.className='datasetInfo bad';el.textContent=ht('folderNotFound');return}
   if(datasetInfoState.type==='checking'){el.className='datasetInfo';el.textContent=ht('choosingFolder');return}
   if(datasetInfoState.type==='error'){el.className='datasetInfo bad';el.textContent=datasetInfoState.message||ht('datasetCheckFailed');return}
-  el.className='datasetInfo';el.textContent=ht('formats');
+  el.className='datasetInfo';el.textContent=trainEngine==='rvc'?ht('formats'):ut('datasetFinnish');
 }
 function setLocalizedStatus(el,key,prefix="",suffix=""){
   if(!el)return;
@@ -434,6 +617,8 @@ function applyHelpLanguage(){
   $('helpLanguage').value=helpLanguage;
   document.querySelectorAll('[data-help]').forEach(el=>{el.textContent=ht(el.dataset.help)});
   document.querySelectorAll('[data-help-html]').forEach(el=>{el.innerHTML=ht(el.dataset.helpHtml)});
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=ut(el.dataset.i18n)});
+  updateCharCount();updateTrainModeUi();updateV2RvcEmpty();
   refreshLocalizedStatuses();
   const names=Object.keys(state.voices||{});
   if(!names.length)$('modelhint').textContent=ht('noModels');
@@ -448,32 +633,28 @@ $('helpLanguage').addEventListener('change',e=>{
 });
 
 function showTab(name){
-  ['voice','batch','trainer'].forEach(n=>{
+  ['voice','conversion','batch','trainer'].forEach(n=>{
     $(n+'View').classList.toggle('active',name===n);
     $('tab'+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle('active',name===n);
   });
 }
-function syncRange(id,digits=2,signed=false){const el=$(id),out=$(id+'v');const go=()=>{let n=Number(el.value);out.textContent=signed?(n>=0?'+'+n:n):n.toFixed(digits)};el.addEventListener('input',go);go()}
-syncRange('pitch',0,true);syncRange('index');syncRange('protect');syncRange('expression');
-$('text').addEventListener('input',()=>{$('chars').textContent=$('text').value.length+' chars'});$('chars').textContent=$('text').value.length+' chars';
+function syncRange(id,digits=2,signed=false){const el=$(id),out=$(id+'v');if(!el||!out)return;const go=()=>{let n=Number(el.value);out.textContent=signed?(n>=0?'+'+n:n):n.toFixed(digits)};el.addEventListener('input',go);go()}
+syncRange('noiseScale');
+function updateCharCount(){$('chars').textContent=$('text').value.length+ut('charsSuffix')}
+$('text').addEventListener('input',updateCharCount);
 
 async function loadState(){
-  const previousVoice=$('voice').value; const r=await fetch('/api/state'); state=await r.json();
-  const sel=$('voice');sel.innerHTML='';const names=Object.keys(state.voices);
-  if(!names.length){sel.innerHTML='<option>No models found</option>';$('modelhint').textContent=ht('noModels')}
-  else{names.forEach(n=>{let o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o)});if(previousVoice&&names.includes(previousVoice))sel.value=previousVoice;applyVoice()}
-  const bsel=$('batchVoice'), previousBatchVoice=bsel.value;bsel.innerHTML='';
-  if(!names.length)bsel.innerHTML='<option>No models found</option>';else{names.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;bsel.appendChild(o)});bsel.value=(previousBatchVoice&&names.includes(previousBatchVoice))?previousBatchVoice:($('voice').value||names[0]);applyBatchVoiceDefaults()}
-  $('expression').value=state.tts.exaggeration??0.6;$('expression').dispatchEvent(new Event('input'));
-  $('batchExpression').value=state.tts.exaggeration??0.6;
-  if(!trainerInitialized){
-    const t=state.trainer||{};$('trainEpochs').value=t.epochs??100;$('trainBatch').value=t.batch_size??6;$('trainSaveEvery').value=t.save_every??10;$('trainWorkers').value=t.workers??8;$('trainGpu').value=t.gpu??'0';$('trainFresh').checked=t.fresh!==false;
-    trainerInitialized=true;
-  }
+  const r=await fetch('/api/state');state=await r.json();
+  const cp=state.config?.vits_checkpoint||'';if(!$('vitsCheckpoint').value)$('vitsCheckpoint').value=cp;if(!$('batchCheckpoint').value)$('batchCheckpoint').value=cp;
+  $('noiseScale').value=state.vits?.noise_scale??0.4;$('noiseScale').dispatchEvent(new Event('input'));
+  const spd=Math.min(1.5,Math.max(0.7,Math.round(20/(state.vits?.length_scale||1))/20));$('speed').value=spd;$('batchSpeed').value=spd;refreshRanges();
+  $('batchNoiseScale').value=state.vits?.noise_scale??0.4;
+  // Populate hidden legacy voice controls only for importing old RVC sidecars.
+  const names=Object.keys(state.voices||{}),sel=$('voice'),bsel=$('batchVoice');if(sel){sel.innerHTML='';names.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o)})}if(bsel){bsel.innerHTML=sel?sel.innerHTML:''}
+  await loadV2Options();
 }
-$('voice').addEventListener('change',applyVoice);
-function updateVoiceModelHint(){const v=state.voices[$('voice').value];if(!v)return;$('modelhint').textContent=$('voice').value+'  •  '+v.pth.split(/[\\/]/).pop()}
-function applyVoice(){const v=state.voices[$('voice').value];if(!v)return;$('pitch').value=v.pitch;$('index').value=v.index_rate;$('protect').value=v.protect;['pitch','index','protect'].forEach(x=>$(x).dispatchEvent(new Event('input')));updateVoiceModelHint()}
+function updateVoiceModelHint(){}
+function applyVoice(){}
 
 function renderAccentSupportState(j){
   accentSupportInstalled=!!(j&&j.ready);
@@ -493,18 +674,117 @@ async function checkAccentSupport(){
   }catch(e){console.error(e)}
 }
 
-async function generateVoice(){
-  const btn=$('generate'),status=$('status');btn.disabled=true;btn.textContent='Generating…';$('player').classList.remove('show');setLocalizedStatus(status,'generating');
-  clearLocalizedStatus($('alignmentStatus'));$('alignmentResult').innerHTML='';const analyzeBtn=$('analyzeAccent');if(analyzeBtn)analyzeBtn.style.display='none';
-  try{
-    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:$('text').value,voice:$('voice').value,pitch:Number($('pitch').value),index_rate:Number($('index').value),protect:Number($('protect').value),expression:Number($('expression').value),seed:Number($('seed').value),fix_seed:$('fixSeed').checked})});
-    const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Generation failed');
-    if(Number.isInteger(j.seed))$('seed').value=j.seed;
-    const a=$('audio');a.src=j.audio_url+'?t='+Date.now();$('saveAs').dataset.filename=j.filename||'Zundanen.wav';$('player').classList.add('show');setLocalizedStatus(status,'complete','✓ ');a.play().catch(()=>{});
-    if(accentSupportInstalled)await runAccentAnalysis(false);
-  }catch(e){clearLocalizedStatus(status);clearLocalizedStatus(status);status.textContent='✕ '+e.message;alert(e.message)}finally{btn.disabled=false;btn.textContent='✦ Generate voice'}
+function updateSourceOnlyUi(){}
+function updateBatchSourceOnlyUi(){}
+async function pickInto(id,kind,title){try{const r=await fetch('/api/pick-file',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind,title,initial:$(id).value})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'File picker failed');if(j.path)$(id).value=j.path}catch(e){alert(e.message)}}
+let v2Opts={characters:[],rvc_voices:[]},trainEngine='vits',v2Saved=null,v2TrainerInitialized=false;
+try{v2Saved=JSON.parse(localStorage.getItem('zundanenV2')||'null')}catch(_){}
+// v2.0.0: RVC Protect default 0.5 -> 0.15 (lower = protects voiceless consonants; measured better Finnish). One-time: a saved value equal to the old default 0.5 becomes 0.15.
+try{if(!localStorage.getItem('zundanenProtect015')){if(v2Saved){if(String(v2Saved.rvcProtect)==='0.5')v2Saved.rvcProtect='0.15';if(String(v2Saved.batchRvcProtect)==='0.5')v2Saved.batchRvcProtect='0.15'}localStorage.setItem('zundanenProtect015','1')}}catch(_){}
+function v2Store(){try{localStorage.setItem('zundanenV2',JSON.stringify({character:$('v2Character').value,style:$('v65Style').value,strength:$('v65Strength').value,pitch:$('v65Level').value,useRvc:$('v2UseRvc').checked,rvcVoice:$('v2RvcVoice').value,rvcPitch:$('v2RvcPitch').value,rvcIndex:$('v2RvcIndex').value,rvcProtect:$('v2RvcProtect').value,
+  batchCharacter:$('batchCharacter').value,batchStyle:$('batchStyle').value,batchStrength:$('batchStrength').value,batchPitch:$('batchLevel').value,batchUseRvc:$('batchUseRvc').checked,batchRvcVoice:$('batchRvcVoice').value,batchRvcPitch:$('batchRvcPitch').value,batchRvcIndex:$('batchRvcIndex').value,batchRvcProtect:$('batchRvcProtect').value,engine:trainEngine}))}catch(_){}}
+function v2Char(id){return (v2Opts.characters||[]).find(c=>c.id===id)}
+function v2Style(charId,styleId){return (v2Char(charId)?.styles||[]).find(s=>s.id===styleId)}
+function charLevel(id){return v2Char(id)?.level_st??-6.66}
+function fillSelect(sel,items,keep){const old=keep??sel.value;sel.innerHTML='';items.forEach(([v,t])=>sel.appendChild(new Option(t,v)));if(items.some(([v])=>v===old))sel.value=old}
+function fillStyles(sel,charId,keep){fillSelect(sel,(v2Char(charId)?.styles||[]).map(s=>[s.id,s.builtin?s.label:s.label+' ★']),keep)}
+function refreshRanges(){document.querySelectorAll('input[type=range][data-fmt]').forEach(el=>{const out=$(el.id+'v');if(!out)return;const n=Number(el.value);out.textContent=el.dataset.fmt==='int'?((n>0?'+':'')+Math.round(n)):n.toFixed(Number(el.dataset.fmt))})}
+document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('input[type=range][data-fmt]'))refreshRanges()});
+function fmtSigned(v){const n=Number(v);return (n>0?'+':'')+n.toFixed(1)}
+async function loadV2Options(){
+  try{const r=await fetch('/api/v2/options');v2Opts=await r.json()}catch(e){console.error(e);return}
+  const first=!$('v2Character').dataset.ready,sv=first?(v2Saved||{}):{};const chars=(v2Opts.characters||[]).map(c=>[c.id,c.label]);
+  fillSelect($('v2Character'),chars,sv.character);fillStyles($('v65Style'),$('v2Character').value,sv.style);
+  fillSelect($('batchCharacter'),chars,sv.batchCharacter);fillStyles($('batchStyle'),$('batchCharacter').value,sv.batchStyle);
+  applyCharEngine($('v2Character'),$('v65Level'),$('v2RvcPitch'));applyCharEngine($('batchCharacter'),$('batchLevel'),$('batchRvcPitch'));
+  const trainChars=(v2Opts.characters||[]).filter(c=>c.engine!=='vits').map(c=>[c.id,c.label]);   // v73: Chatterbox is not a trainable v65 model
+  fillSelect($('v2BaseModel'),trainChars.concat([['__new__','New model (from scratch)']]));fillSelect($('v2TargetModel'),trainChars);
+  const voices=(v2Opts.rvc_voices||[]).map(n=>[n,n]);fillSelect($('v2RvcVoice'),voices,sv.rvcVoice);fillSelect($('batchRvcVoice'),voices,sv.batchRvcVoice);
+  updateV2RvcEmpty();
+  if(first){
+    $('v2Character').dataset.ready='1';
+    const st=v2Style($('v2Character').value,$('v65Style').value),bst=v2Style($('batchCharacter').value,$('batchStyle').value);
+    $('v65Strength').value=sv.strength??(st?st.strength:0);$('v65Level').value=sv.pitch??0;
+    $('batchStrength').value=sv.batchStrength??(bst?bst.strength:0);$('batchLevel').value=sv.batchPitch??0;
+    $('v2UseRvc').checked=!!sv.useRvc;$('v2RvcPitch').value=sv.rvcPitch??0;$('v2RvcIndex').value=sv.rvcIndex??0.1;$('v2RvcProtect').value=sv.rvcProtect??0.15;
+    $('batchUseRvc').checked=!!sv.batchUseRvc;$('batchRvcPitch').value=sv.batchRvcPitch??0;$('batchRvcIndex').value=sv.batchRvcIndex??0.1;$('batchRvcProtect').value=sv.batchRvcProtect??0.15;
+    ['v65Strength','v65Level','batchStrength','batchLevel'].forEach(id=>$(id).dispatchEvent(new Event('input')));
+    $('v65Strength').disabled=$('v65Style').value==='normal';$('batchStrength').disabled=$('batchStyle').value==='normal';
+    updateV2RvcUi();updateBatchRvcUi();refreshRanges();
+  }
+  if(!v2TrainerInitialized){
+    v2TrainerInitialized=true;const t=v2Opts.vits_v2_trainer||{},rt=v2Opts.rvc_trainer||{};
+    const cpus=v2Opts.cpu_count||4;if(t.epochs)$('v2Epochs').value=t.epochs;if(t.branch_epochs)$('v2BranchEpochs').value=t.branch_epochs;
+    $('v2Batch').value=t.batch_size??10;$('v2Workers').value=t.workers??Math.min(4,cpus);
+    $('v2Bridge').value=Math.round(100*(t.bridge_ratio??v2Opts.bridge_recommended??0.25));$('v2DataRatio').value=Math.round(100*(t.data_ratio??0.25));
+    $('rvcEpochs').value=rt.epochs??100;$('rvcBatch').value=rt.batch_size??6;$('rvcWorkers').value=rt.workers??Math.min(8,cpus);$('rvcFresh').checked=rt.fresh??true;
+    ['v2Bridge','v2DataRatio'].forEach(id=>$(id).dispatchEvent(new Event('input')));
+    setTrainEngine((v2Saved&&v2Saved.engine)||'vits');
+  }
+  if(v2Opts.engine_ok===false)$('status').textContent='✕ '+ut('engineMissing')+' '+(v2Opts.engine_error||'');
 }
+function updateV2RvcEmpty(){['v2RvcVoice','batchRvcVoice'].forEach(id=>{const sel=$(id);if(sel&&!(v2Opts.rvc_voices||[]).length){sel.innerHTML='';sel.appendChild(new Option(ut('noRvcModels'),''))}})}
+function updateV2RvcUi(){$('v2RvcPanel').hidden=!$('v2UseRvc').checked;v2Store()}
+function updateBatchRvcUi(){$('batchRvcPanel').hidden=!$('batchUseRvc').checked;v2Store()}
+// v73: Character "Chatterbox" (Finnish VITS 100k VITS, engine 'vits') has no pitch control and only Normal;
+// with RVC its natural Zundamon level is +8, so the RVC pitch follows 0 <-> +8 unless the user changed it.
+function applyCharEngine(charSel,levelEl,rvcPitchEl){const c=v2Char(charSel.value),vits=c?.engine==='vits';levelEl.disabled=vits;const had=charSel.dataset.prevVits;if(had!==undefined&&(had==='1')!==vits&&rvcPitchEl){const hint=Number(c?.rvc_pitch_hint??8),cur=Number(rvcPitchEl.value);if(vits&&cur===0)rvcPitchEl.value=hint;else if(!vits&&cur===8)rvcPitchEl.value=0;rvcPitchEl.dispatchEvent(new Event('input'))}charSel.dataset.prevVits=vits?'1':'0'}
+function v2CharacterChanged(){fillStyles($('v65Style'),$('v2Character').value);applyCharEngine($('v2Character'),$('v65Level'),$('v2RvcPitch'));v65StyleChanged()}
+function v65StyleChanged(){const s=v2Style($('v2Character').value,$('v65Style').value);$('v65Strength').value=s?s.strength:1;$('v65Strength').dispatchEvent(new Event('input'));$('v65Strength').disabled=$('v65Style').value==='normal';v2Store()}
+function batchCharacterChanged(){fillStyles($('batchStyle'),$('batchCharacter').value);applyCharEngine($('batchCharacter'),$('batchLevel'),$('batchRvcPitch'));batchStyleChanged()}
+function batchStyleChanged(){const s=v2Style($('batchCharacter').value,$('batchStyle').value);$('batchStrength').value=s?s.strength:1;$('batchStrength').dispatchEvent(new Event('input'));$('batchStrength').disabled=$('batchStyle').value==='normal';v2Store()}
+function initV65Ui(){
+  [['v65Strength','v65Strengthv'],['batchStrength','batchStrengthv']].forEach(([id,out])=>{const el=$(id);el.addEventListener('input',()=>{$(out).textContent=Number(el.value).toFixed(2);v2Store()})});
+  [['v65Level','v65Levelv'],['batchLevel','batchLevelv']].forEach(([id,out])=>{const el=$(id);el.addEventListener('input',()=>{$(out).textContent=fmtSigned(el.value);v2Store()})});
+  [['v2Bridge','v2Bridgev'],['v2DataRatio','v2DataRatiov']].forEach(([id,out])=>{const el=$(id);el.addEventListener('input',()=>{$(out).textContent=el.value+'%'})});
+}
+// ---- Model Trainer (VITS v2 / RVC v1)
+function setTrainEngine(e){trainEngine=e==='rvc'?'rvc':'vits';$('trainEngineVits').classList.toggle('active',trainEngine==='vits');$('trainEngineRvc').classList.toggle('active',trainEngine==='rvc');updateTrainModeUi();v2Store()}
+function updateTrainModeUi(){
+  if(!$('v2Mode'))return;const rvc=trainEngine==='rvc',mode=$('v2Mode').value;
+  $('trainVitsPanel').hidden=rvc;$('trainRvcPanel').hidden=!rvc;$('rvcNumbers').hidden=!rvc;$('v2NumbersBlock').hidden=rvc;$('rvcFreshRow').hidden=!rvc;
+  $('v2ModeHint').textContent=ut({joint:'hintJoint',finnish:'hintFinnish',style:'hintStyle'}[mode]);
+  $('v2NamePanel').hidden=mode==='style';$('v2BaseModelPanel').hidden=mode==='style';$('v2SpeakerPanel').hidden=mode!=='finnish';$('v2TargetPanel').hidden=mode!=='style';
+  $('v2BridgePanel').hidden=mode==='style';$('v2FinnishPanel').hidden=mode!=='finnish';$('v2StylePanel').hidden=mode!=='style';
+  const nm=$('v2BaseModel').querySelector('option[value="__new__"]');if(nm){nm.hidden=mode!=='joint';if(mode!=='joint'&&$('v2BaseModel').value==='__new__')$('v2BaseModel').selectedIndex=0}
+  $('v2ScratchPanel').hidden=!(mode==='joint'&&$('v2BaseModel').value==='__new__');
+  document.querySelectorAll('[data-v2modes]').forEach(el=>{el.hidden=!el.dataset.v2modes.split(' ').includes(mode)});
+  $('trainDatasetBlock').hidden=!(rvc||mode==='finnish');
+  $('v2RunName').placeholder={joint:'Zundamon_v2',finnish:'Metan'}[mode]||'';
+  $('trainDataset').placeholder=rvc?'C:\\...\\datasets\\Kiritan':'C:\\...\\dataset';
+  $('stepStatLabel').textContent=ut(rvc?'statEpoch':'statStep');renderDatasetInfo();
+}
+// v2: Joint training "New model (from scratch)": Finnish WAV+TXT + emotion WAV+LAB + RVC bridge.
+// A scratch base needs far more epochs than continuing a model, so the epoch default follows the choice.
+function v2BaseChanged(){const scratch=$('v2BaseModel').value==='__new__',ep=$('v2Epochs');if(scratch&&!document.querySelector('#v2EmoRows .emoRow'))addEmoRow();if(scratch&&Number(ep.value)===4.5)ep.value=35;else if(!scratch&&Number(ep.value)===35)ep.value=4.5;updateTrainModeUi()}
+async function scanFinnishDir(){const d=$('v2FinnishDir').value.trim(),o=$('v2FinnishInfo');if(!d){o.textContent='';return}try{const j=await (await fetch('/api/v2/scan-finnish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:d})})).json();o.textContent=j.ok?(j.pairs+' WAV + TXT · RVC bridge ≈ '+(j.pairs*2/3600).toFixed(1)+' h ('+(j.pairs*2)+' files)'):'Folder not found.'}catch(e){o.textContent=e.message}}
+// Emotion data = rows of (WAV folder, LAB folder, speaker, style); "+" adds a row, "×" removes it.
+// The bridge Character is one of the entered speakers (preselected when the .pth name matches).
+let emoRowN=0,emoScanTimer=null;
+function addEmoRow(v){v=v||{};const n=++emoRowN,d=document.createElement('div');d.className='emoRow';d.dataset.n=n;
+  d.innerHTML=`<div class="row"><input class="grow" type="text" id="emo${n}w" data-k="wav_dir" placeholder="WAV folder"><button class="iconbtn browse" type="button" onclick="pickFolderInto('emo${n}w').then(scheduleEmoScan)">Browse…</button></div>`
+   +`<div class="row"><input class="grow" type="text" id="emo${n}l" data-k="lab_dir" placeholder="LAB folder (empty = WAV folder)"><button class="iconbtn browse" type="button" onclick="pickFolderInto('emo${n}l').then(scheduleEmoScan)">Browse…</button></div>`
+   +`<div class="row"><input type="text" data-k="speaker" placeholder="Speaker"><select data-k="style"><option value="normal">Normal</option><option value="ama">Ama</option><option value="tsun">Tsun</option><option value="sexy">Sexy</option></select><button class="iconbtn" type="button" title="Remove" onclick="this.closest('.emoRow').remove();scheduleEmoScan()">×</button></div><div class="hint emoRowInfo"></div>`;
+  $('v2EmoRows').appendChild(d);d.querySelectorAll('[data-k]').forEach(el=>{el.value=v[el.dataset.k]??el.value;el.addEventListener('change',scheduleEmoScan)});return d}
+function emoRows(){return [...document.querySelectorAll('#v2EmoRows .emoRow')].map(d=>{const o={};d.querySelectorAll('[data-k]').forEach(el=>o[el.dataset.k]=el.value.trim());return o})}
+function scheduleEmoScan(){clearTimeout(emoScanTimer);emoScanTimer=setTimeout(scanEmotionRows,300)}
+async function scanEmotionRows(){const rows=emoRows(),o=$('v2EmotionInfo'),b=$('v2BridgeInfo'),pth=$('v2BridgePth').value.trim(),sel=$('v2BridgeChar');
+  if(!rows.some(r=>r.wav_dir)){o.textContent='';fillSelect(sel,[]);return}
+  try{const j=await (await fetch('/api/v2/scan-emotion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows,rvc_pth:pth})})).json();if(!j.ok)throw new Error(j.error||'Scan failed');
+    [...document.querySelectorAll('#v2EmoRows .emoRow')].forEach((d,i)=>{const r=(j.rows||[])[i];d.querySelector('.emoRowInfo').textContent=r&&rows[i].wav_dir?(r.wavs+' WAV · '+r.with_lab+' with LAB'):''});
+    const sp=j.speakers||{};o.textContent=Object.entries(sp).map(([k,v])=>k+': '+['normal','ama','tsun','sexy'].map(s=>v.counts[s]).join(' / ')).join(' · ')+(j.problems&&j.problems.length?' — '+j.problems.join('; '):'');
+    const keep=sel.value;fillSelect(sel,Object.keys(sp).map(k=>[k,k]),keep);if(!keep&&j.rvc_speaker&&sp[j.rvc_speaker])sel.value=j.rvc_speaker;
+    b.textContent=pth?((j.rvc_index?j.rvc_index:'(no .index)')):''}catch(e){o.textContent=e.message}}
+async function pickFolderInto(id){try{const r=await fetch('/api/pick-folder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initial:$(id).value})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Folder picker failed');if(j.path)$(id).value=j.path}catch(e){alert(e.message)}}
 
+async function generateVoice(){
+  const btn=$('generate'),status=$('status'),useRvc=$('v2UseRvc').checked,ch=$('v2Character').value;btn.disabled=true;btn.textContent=ut('generatingBtn');$('player').classList.remove('show');status.textContent=ut(useRvc?'statusGeneratingRvc':'statusGenerating');clearLocalizedStatus($('alignmentStatus'));$('alignmentResult').innerHTML='';const analyzeBtn=$('analyzeAccent');if(analyzeBtn)analyzeBtn.style.display='none';
+  try{if(useRvc&&!$('v2RvcVoice').value)throw new Error(ut('noRvcModels'));
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:$('text').value,engine:'v65',character:ch,noise_scale:0.4,length_scale:1/Number($('speed').value),seed:Number($('seed').value),fix_seed:$('fixSeed').checked,emotion_style:$('v65Style').value,v65_strength:Number($('v65Strength').value),v65_level:charLevel(ch)+Number($('v65Level').value),use_rvc:useRvc,rvc_voice:$('v2RvcVoice').value,rvc_pitch:Number($('v2RvcPitch').value),rvc_index_rate:Number($('v2RvcIndex').value),rvc_protect:Number($('v2RvcProtect').value)})});
+    const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Generation failed');if(Number.isInteger(j.seed))$('seed').value=j.seed;const a=$('audio');a.src=j.audio_url+'?t='+Date.now();$('saveAs').dataset.filename=j.filename||'Zundanen.wav';$('player').classList.add('show');
+    const st=v2Style(j.v65.character,j.v65.style);status.textContent=ut('statusComplete')+' · '+(v2Char(j.v65.character)?.label||j.v65.character)+' · '+(st?.label||j.v65.style)+(j.v65.style==='normal'?'':' · '+ut('strengthWord')+' '+Number(j.v65.strength).toFixed(2))+(j.rvc?' · RVC '+j.rvc.voice:'')+(j.warning?' · '+j.warning:'');a.play().catch(()=>{});if(accentSupportInstalled)await runAccentAnalysis(false);
+  }catch(e){status.textContent='✕ '+e.message;alert(e.message)}finally{btn.disabled=false;btn.textContent=ut('generate')}
+}
 
 async function importWav(){
   const btn=$('importWav'),status=$('status'),alignmentStatus=$('alignmentStatus');
@@ -663,7 +943,7 @@ async function saveAccentAs(){
   const btn=$('alignmentPitchSave'),status=$('alignmentPitchStatus');if(!btn)return;btn.disabled=true;
   try{
     const r=await fetch('/api/save-accent-preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      filename:accentSaveFilename(),text:$('text').value,create_subtitle_txt:$('voiceSubtitleTxt').checked,save_source_audio:$('voiceSourceAudio').checked,
+      filename:accentSaveFilename(),text:$('text').value,create_subtitle_txt:$('voiceSubtitleTxt').checked,save_source_audio:false,
       voice:$('voice').value,pitch:Number($('pitch').value),index_rate:Number($('index').value),protect:Number($('protect').value),expression:Number($('expression').value),seed:Number($('seed').value)
     })});
     const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Save failed');
@@ -675,7 +955,7 @@ async function saveAccentAs(){
 async function saveVoiceAs(){
   const btn=$('saveAs'),status=$('status');btn.disabled=true;
   try{
-    const r=await fetch('/api/save-preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:btn.dataset.filename||'Zundanen.wav',text:$('text').value,create_subtitle_txt:$('voiceSubtitleTxt').checked,save_source_audio:$('voiceSourceAudio').checked})});
+    const r=await fetch('/api/save-preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:btn.dataset.filename||'Zundanen.wav',text:$('text').value,create_subtitle_txt:$('voiceSubtitleTxt').checked,save_source_audio:false})});
     const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Save failed');
     if(j.cancelled)return;
     setLocalizedStatus(status,'complete','✓ ',': '+j.path);
@@ -704,29 +984,24 @@ function updateBatchModeHelp(){
   }
 
   const voiceLabel=$('batchVoiceLabel');
-  if(voiceLabel)voiceLabel.textContent=isCsv?'Default Character':'Character';
+  
 
   const contentLabel=$('batchContentLabel');
   if(contentLabel)contentLabel.textContent=isCsv?'CSV':'Text';
 }
-function applyBatchVoiceDefaults(){
-  const v=state.voices[$('batchVoice').value];if(!v)return;
-  $('batchPitch').value=v.pitch??0;$('batchIndex').value=v.index_rate??0.55;$('batchProtect').value=v.protect??0.15;
-  if(!$('batchExpression').value)$('batchExpression').value=state.tts.exaggeration??0.6;
-}
-$('batchVoice').addEventListener('change',applyBatchVoiceDefaults);
+function applyBatchVoiceDefaults(){ /* legacy no-op: Batch Generation is VITS-only */ }
+
 $('batchCsvFile').addEventListener('change',async e=>{
   const f=e.target.files?.[0];if(!f)return;
   const raw=(await f.text()).replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   const lines=raw.split('\n');
-  batchCsvHeader=(lines.shift()||'filename,text,character,pitch,index_rate,protect,expression,seed').trim();
+  batchCsvHeader=(lines.shift()||'filename,text,noise_scale,length_scale,seed').trim();
   $('batchText').value=lines.join('\n').replace(/\n+$/,'');
   setBatchMode('csv');
   e.target.value='';
 });
 function downloadCsvTemplate(){
-  const text='filename,text,character,pitch,index_rate,protect,expression,seed\n,"Hyvää päivää!",,8,0.60,0.05,1.00,\n,"Minun nimeni on Zundamon.",Zundamon,8,0.65,0.10,1.20,12345\n,"Tänään puhutaan tästä aiheesta.",Metan,7,0.70,0.05,1.00,\n';
-  const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zundanen_batch_template.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  const text='filename,text,style,strength,speed,seed\n001.wav,"Hyvää päivää!",ama,1.5,1.00,12345\n002.wav,"Minun nimeni on Zundamon.",,,1.00,\n';const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zundanen_vits_batch_template.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 function getBatchContentForSubmit(){
   const visible=$('batchText').value;
@@ -737,7 +1012,7 @@ function getBatchContentForSubmit(){
   const headerFields=firstLine.replace(/"/g,'').split(',').map(x=>x.trim().toLowerCase());
   if(headerFields.includes('text'))return visible;
 
-  const header=(batchCsvHeader||'filename,text,character,pitch,index_rate,protect,expression,seed').trim();
+  const header=(batchCsvHeader||'filename,text,noise_scale,length_scale,seed').trim();
   return header+(visible.trim()?'\n'+visible:'');
 }
 function formatBatchLogLine(line){
@@ -758,15 +1033,9 @@ function renderBatchLog(running=false){
   box.textContent=lastBatchLog.map(formatBatchLogLine).join('\n');if(nearBottom||running)box.scrollTop=box.scrollHeight;
 }
 async function startBatch(){
-  if(!$('batchText').value.trim()){alert(ht('batchNeedText'));return}
-  if(!confirm(ht('batchStartConfirm')))return;
-  $('batchStart').disabled=true;$('batchError').classList.remove('show');
-  try{
-    const body={mode:batchMode,content:getBatchContentForSubmit(),voice:$('batchVoice').value,pitch:Number($('batchPitch').value),index_rate:Number($('batchIndex').value),protect:Number($('batchProtect').value),expression:Number($('batchExpression').value),seed:Number($('batchSeed').value),fix_seed:$('batchFixSeed').checked,create_subtitle_txt:$('batchSubtitleTxt').checked,save_source_audio:$('batchSourceAudio').checked};
-    const r=await fetch('/api/batch/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    const raw=await r.text();let j;try{j=JSON.parse(raw)}catch(_){throw new Error('Batch server error ('+r.status+'). Check temp\\desktop_server.log.')}
-    if(!r.ok||!j.ok)throw new Error(j.error||'Could not start batch');showTab('batch');await pollBatch();
-  }catch(e){alert(e.message);$('batchStart').disabled=false}
+  if(!$('batchText').value.trim()){alert('Enter batch text or CSV.');return}if($('batchUseRvc').checked&&!$('batchRvcVoice').value){alert(ut('noRvcModels'));return}if(!confirm('Start batch generation?'))return;$('batchStart').disabled=true;$('batchError').classList.remove('show');
+  const ch=$('batchCharacter').value;
+  try{const body={engine:'v65',mode:batchMode,content:getBatchContentForSubmit(),character:ch,style:$('batchStyle').value,strength:Number($('batchStrength').value),level:charLevel(ch)+Number($('batchLevel').value),noise_scale:0.4,length_scale:1/Number($('batchSpeed').value),seed:Number($('batchSeed').value),fix_seed:$('batchFixSeed').checked,create_subtitle_txt:$('batchSubtitleTxt').checked,sentence_slicer:$('batchSentenceSlicer').checked,use_rvc:$('batchUseRvc').checked,rvc_voice:$('batchRvcVoice').value,rvc_pitch:Number($('batchRvcPitch').value),rvc_index_rate:Number($('batchRvcIndex').value),rvc_protect:Number($('batchRvcProtect').value)};const r=await fetch('/api/batch/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const raw=await r.text();let j;try{j=JSON.parse(raw)}catch(_){throw new Error('Batch server error ('+r.status+').')}if(!r.ok||!j.ok)throw new Error(j.error||'Could not start batch');showTab('batch');await pollBatch()}catch(e){alert(e.message);$('batchStart').disabled=false}
 }
 async function stopBatch(){if(!confirm(ht('batchStopConfirm')))return;const r=await fetch('/api/batch/stop',{method:'POST'}),j=await r.json();if(!r.ok||!j.ok)alert(j.error||'Stop failed')}
 async function resumeBatch(){const r=await fetch('/api/batch/resume',{method:'POST'}),j=await r.json();if(!r.ok||!j.ok)alert(j.error||'Resume failed');await pollBatch()}
@@ -776,7 +1045,7 @@ async function pollBatch(){
   try{
     const r=await fetch('/api/batch/status'),b=await r.json();
     const pct=Math.max(0,Math.min(100,Number(b.progress||0)));$('batchProgressFill').style.width=pct.toFixed(1)+'%';$('batchProgressText').textContent=pct.toFixed(1)+'%';
-    $('batchQueueId').textContent=b.queue_id||'No queue';$('batchDoneStat').textContent=(b.completed||0)+' / '+(b.total||0);$('batchFailedStat').textContent=b.failed||0;$('batchPendingStat').textContent=b.pending||0;
+    $('batchQueueId').textContent=b.queue_id||'No queue';$('batchDoneStat').textContent=b.total?(b.completed||0)+' / '+b.total:'–';$('batchFailedStat').textContent=b.failed||0;$('batchPendingStat').textContent=b.pending||0;
     $('batchSleepBadge').classList.toggle('show',!!b.running);$('batchStop').disabled=!b.running;$('batchResume').disabled=!!b.running||!b.resumable;$('batchStart').disabled=!!b.running;$('batchClear').disabled=!!b.running;
     // Hydrate saved queue options only once per queue. Re-applying them on every
     // status poll would undo checkbox/seed edits the user is making for the next batch.
@@ -785,6 +1054,9 @@ async function pollBatch(){
     }else if(batchOptionsSyncedQueueId!==b.queue_id){
       if(typeof b.create_subtitle_txt==='boolean')$('batchSubtitleTxt').checked=b.create_subtitle_txt;
       if(typeof b.save_source_audio==='boolean')$('batchSourceAudio').checked=b.save_source_audio;
+      if(typeof b.source_only==='boolean')$('batchSourceOnly').checked=b.source_only;
+      if(typeof b.sentence_slicer==='boolean')$('batchSentenceSlicer').checked=b.sentence_slicer;
+      updateBatchSourceOnlyUi();
       if(typeof b.fix_seed==='boolean')$('batchFixSeed').checked=b.fix_seed;
       if(Number.isInteger(b.seed))$('batchSeed').value=b.seed;
       batchOptionsSyncedQueueId=b.queue_id;
@@ -796,6 +1068,7 @@ async function pollBatch(){
     if(b.error){$('batchError').textContent=b.error;$('batchError').classList.add('show')}else{$('batchError').classList.remove('show')}
   }catch(e){console.error(e)}
 }
+
 
 async function pickDataset(){
   datasetInfoState={type:'checking',count:0,message:''};renderDatasetInfo();
@@ -811,7 +1084,7 @@ async function inspectDataset(){
   const path=$('trainDataset').value.trim();
   if(!path){datasetInfoState={type:'formats',count:0,message:''};renderDatasetInfo();return null}
   try{
-    const r=await fetch('/api/dataset-info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path})});
+    const r=await fetch('/api/dataset-info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,kind:trainEngine==='rvc'?'rvc':'pairs'})});
     const j=await r.json();
     if(!r.ok||!j.ok){
       datasetInfoState={type:j.error_code==='folder_not_found'?'folderNotFound':'error',count:0,message:j.error||''};
@@ -827,27 +1100,30 @@ async function inspectDataset(){
 $('trainDataset').addEventListener('change',inspectDataset);$('trainDataset').addEventListener('blur',inspectDataset);
 
 async function startTraining(){
-  const character=$('trainCharacter').value.trim(),dataset=$('trainDataset').value.trim();
-  if(!character){alert(ht('characterRequired'));return} if(!dataset){alert(ht('datasetRequired'));return}
-  const audioCount=await inspectDataset();if(audioCount===null||audioCount===0)return;
-  if($('trainFresh').checked&&!confirm(formatHelp('freshConfirm',{character})))return;
+  let body;
+  if(trainEngine==='rvc'){
+    const character=$('rvcCharacter').value.trim(),dataset=$('trainDataset').value.trim();if(!character){alert(ut('needRvcName'));return}if(!dataset){alert(ut('needDataset'));return}
+    if($('rvcFresh').checked&&!confirm(formatHelp('freshConfirm',{character})))return;
+    body={engine:'rvc',character,dataset,epochs:Number($('rvcEpochs').value),batch_size:Number($('rvcBatch').value),save_every:Number($('rvcSaveEvery').value),workers:Number($('rvcWorkers').value),gpu:$('rvcGpu').value.trim()||'0',fresh:$('rvcFresh').checked};
+  }else{
+    const mode=$('v2Mode').value;
+    body={engine:'vits',mode,run_name:$('v2RunName').value.trim(),base_model:$('v2BaseModel').value,character:$('v2TrainCharacter').value,model:$('v2TargetModel').value,epochs:Number($('v2Epochs').value),branch_epochs:Number($('v2BranchEpochs').value),batch_size:Number($('v2Batch').value),workers:Number($('v2Workers').value),lr:Number($('v2Lr').value),bridge_ratio:Number($('v2Bridge').value)/100,data_ratio:Number($('v2DataRatio').value)/100,finnish_dir:$('v2FinnishDir').value.trim(),emotion_rows:emoRows().filter(r=>r.wav_dir),rvc_pth:$('v2BridgePth').value.trim(),target_speaker:$('v2BridgeChar').value};
+    if(mode==='style'){Object.assign(body,{style_name:$('v2StyleName').value.trim(),style_label:$('v2StyleLabel').value.trim(),normal_dir:$('v2NormalDir').value.trim(),style_dir:$('v2StyleDir').value.trim()});if(!body.style_name||!body.normal_dir||!body.style_dir){alert(ut('needStyle'));return}body.run_name=body.style_name}
+    else if(!body.run_name){alert(ut('needRunName'));return}
+    if(mode==='finnish'){body.dataset=$('trainDataset').value.trim();if(!body.dataset){alert(ut('needDataset'));return}}
+  }
   $('trainStart').disabled=true;$('trainError').classList.remove('show');$('trainResult').classList.remove('show');lastTrainerLog=[];$('trainLog').textContent=ht('logStarting');
-  try{const r=await fetch('/api/trainer/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character,dataset,epochs:Number($('trainEpochs').value),batch_size:Number($('trainBatch').value),save_every:Number($('trainSaveEvery').value),workers:Number($('trainWorkers').value),gpu:$('trainGpu').value,fresh:$('trainFresh').checked})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Could not start trainer');showTab('trainer');await pollTrainer()}catch(e){$('trainStart').disabled=false;alert(e.message)}
+  try{const r=await fetch('/api/trainer/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Could not start trainer');showTab('trainer');await pollTrainer()}catch(e){$('trainStart').disabled=false;alert(e.message)}
 }
+function renderTrainResult(t){const res=t.result||{};let h='<b>'+escapeHtml(ut('trainComplete'))+'</b>';
+  if(t.engine==='rvc'){h+='<br>PTH: '+escapeHtml(res.pth||'')+'<br>INDEX: '+escapeHtml(res.index||'')+'<br>'+escapeHtml(ut('rvcSaved'))}
+  else if(t.engine==='vits_v2'){if(res.mode==='style')h+='<br>'+escapeHtml(ut('styleAdded')+' '+(res.label||res.style||'')+' ('+(res.model||'')+')')+'<br>tempo ×'+escapeHtml(res.tempo)+' · pitch '+escapeHtml(res.level_offset_st)+' st · range ×'+escapeHtml(res.range_ratio)+' · pairs '+escapeHtml(res.pairs);
+    else h+='<br>'+escapeHtml(ut('addedCharacter')+' '+(res.character||''))+'<br>BASE: '+escapeHtml(res.base_name||'')+' · BRANCH: '+escapeHtml(res.branch_name||'')+' · speaker '+escapeHtml(res.speaker||'')}
+  else h+='<br>CHECKPOINT: '+escapeHtml(res.checkpoint||'');
+  $('trainResult').innerHTML=h;$('trainResult').classList.add('show')}
 
 async function pollTrainer(){
-  try{
-    const r=await fetch('/api/trainer/status');const t=await r.json();
-    const pct=Math.max(0,Math.min(100,Number(t.progress||0)));$('trainProgressFill').style.width=pct.toFixed(1)+'%';$('trainProgressText').textContent=pct.toFixed(1)+'%';
-    $('trainPhase').textContent=t.phase_label||'Ready';$('phaseStat').textContent=(t.phase||'idle').toUpperCase();$('epochStat').textContent=(t.epoch||0)+' / '+(t.epochs||100);$('filesStat').textContent=t.audio_files||0;$('trainCharacterStatus').textContent=t.character?(t.character+' • '+(t.dataset||'')):'No active job';
-    $('sleepBadge').classList.toggle('show',!!t.running);$('stopTraining').disabled=!t.running;$('trainStart').disabled=!!t.running;
-    if((t.log||[]).length){lastTrainerLog=t.log||[];renderTrainerLog(!!t.running)}
-    if(t.error){$('trainError').textContent=t.error;$('trainError').classList.add('show')}else{$('trainError').classList.remove('show')}
-    if(t.done){
-      const p=t.result?.pth||'',i=t.result?.index||'';$('trainResult').innerHTML='<b>✓ Training complete</b><br>PTH: '+escapeHtml(p)+'<br>INDEX: '+escapeHtml(i);$('trainResult').classList.add('show');
-      const key=(t.character||'')+'|'+p+'|'+i;if(key!==lastTrainerDoneKey){lastTrainerDoneKey=key;await loadState()}
-    }else if(t.running){$('trainResult').classList.remove('show')}
-  }catch(e){console.error(e)}
+  try{const r=await fetch('/api/trainer/status');const t=await r.json();const pct=Math.max(0,Math.min(100,Number(t.progress||0)));$('trainProgressFill').style.width=pct.toFixed(1)+'%';$('trainProgressText').textContent=pct.toFixed(1)+'%';$('trainPhase').textContent=t.phase_label||'Ready';$('phaseStat').textContent=(t.phase||'idle').toUpperCase();$('epochStat').textContent=t.steps?(t.step||0)+' / '+t.steps:'–';$('filesStat').textContent=t.audio_files||0;$('trainCharacterStatus').textContent=t.character?(t.character+(t.dataset?' • '+t.dataset:'')):ut('noActiveJob');$('sleepBadge').classList.toggle('show',!!t.running);$('stopTraining').disabled=!t.running;$('trainStart').disabled=!!t.running;if((t.log||[]).length){lastTrainerLog=t.log||[];renderTrainerLog(!!t.running)}if(t.error){$('trainError').textContent=t.error;$('trainError').classList.add('show')}else{$('trainError').classList.remove('show')}if(t.done){const key=(t.character||'')+'|'+JSON.stringify(t.result||{});if(key!==lastTrainerDoneKey){lastTrainerDoneKey=key;renderTrainResult(t);await loadV2Options();vcRefreshModels()}}else if(t.running){$('trainResult').classList.remove('show')}}catch(e){console.error(e)}
 }
 async function stopTrainer(){if(!confirm(ht('stopConfirm')))return;const r=await fetch('/api/trainer/stop',{method:'POST'});const j=await r.json();if(!r.ok||!j.ok)alert(j.error||'Stop failed')}
 function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -857,7 +1133,116 @@ function closeSettings(){$('modal').classList.remove('show')}
 async function saveSettings(){const body={};Object.keys(labels).forEach(k=>body[k]=$('cfg_'+k).value);await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeSettings();await loadState()}
 async function openExports(){await fetch('/api/open-exports',{method:'POST'})}
 
-applyHelpLanguage();loadState();checkAccentSupport();pollTrainer();pollBatch();setInterval(pollTrainer,1000);setInterval(pollBatch,1000);
+
+// Voice Conversion: WAV / folder conversion, microphone recording -> RVC, official realtime RVC launcher.
+let vcLast={file:'',recording:''},vcRec=null,vcSaved={};
+try{vcSaved=JSON.parse(localStorage.getItem('zundanenVC')||'{}')||{}}catch(_){}
+try{if(!localStorage.getItem('zundanenVcProtect015')){if(String(vcSaved.protect)==='0.5')vcSaved.protect='0.15';localStorage.setItem('zundanenVcProtect015','1')}}catch(_){}
+const vcJson = async (url, body=null) => {
+  const opts = body === null ? {} : {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)};
+  const response = await fetch(url, opts);
+  const payload = await response.json();
+  if (!response.ok || !payload.ok) throw new Error(payload.error || ('HTTP '+response.status));
+  return payload;
+};
+function vcStore(){try{localStorage.setItem('zundanenVC',JSON.stringify({model:$('vcModel').value,pitch:$('vcPitch').value,index:$('vcIndexRate').value,protect:$('vcProtect').value,rtIn:$('vcRtInput').value,rtOut:$('vcRtOutput').value}))}catch(_){}}
+function vcSettings(){return {model:$('vcModel').value,pitch:Number($('vcPitch').value),index_rate:Number($('vcIndexRate').value),protect:Number($('vcProtect').value)}}
+async function vcRefreshModels(){
+  try{const response=await vcJson('/api/vc/models');const names=Object.keys(response.models||{});
+    fillSelect($('vcModel'),names.map(n=>[n,n]),$('vcModel').value||vcSaved.model);
+    if(!names.length){$('vcModel').innerHTML='';$('vcModel').appendChild(new Option('No RVC models found in exports',''))}
+    if(vcSaved.pitch!==undefined){$('vcPitch').value=vcSaved.pitch;$('vcIndexRate').value=vcSaved.index;$('vcProtect').value=vcSaved.protect;vcSaved={model:vcSaved.model}}
+    refreshRanges();
+  }catch(e){$('vcStatus').textContent='Model scan failed: '+e.message}
+}
+async function vcConvertWav(){
+  if(!$('vcInput').value.trim()){alert('Select a WAV file or a folder.');return}
+  if(!$('vcModel').value){alert('Select an RVC model.');return}
+  $('vcConvert').disabled=true;$('vcResult').classList.remove('show');$('vcStatus').textContent='Starting RVC conversion…';
+  try{const r=await vcJson('/api/vc/convert',{input_wav:$('vcInput').value,...vcSettings()});$('vcStatus').textContent=r.kind==='folder'?'Converting '+r.count+' files with RVC…':'Converting WAV with RVC…'}
+  catch(e){$('vcStatus').textContent='Error: '+e.message;$('vcConvert').disabled=false}
+}
+function vcEncodeWav(chunks,sr){
+  const n=chunks.reduce((a,c)=>a+c.length,0),buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+  const str=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+  str(0,'RIFF');v.setUint32(4,36+n*2,true);str(8,'WAVE');str(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);str(36,'data');v.setUint32(40,n*2,true);
+  let o=44;for(const c of chunks)for(let i=0;i<c.length;i++,o+=2){const x=Math.max(-1,Math.min(1,c[i]));v.setInt16(o,x<0?x*0x8000:x*0x7fff,true)}
+  return new Blob([buf],{type:'audio/wav'});
+}
+async function vcRecordStart(){
+  if(!$('vcModel').value){alert('Select an RVC model.');return}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    const ctx=new (window.AudioContext||window.webkitAudioContext)(),src=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,1,1),chunks=[];
+    proc.onaudioprocess=e=>chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));src.connect(proc);proc.connect(ctx.destination);
+    vcRec={stream,ctx,src,proc,chunks,t0:Date.now()};
+    vcRec.timer=setInterval(()=>{$('vcRecStatus').textContent='● Recording… '+((Date.now()-vcRec.t0)/1000).toFixed(1)+' s'},200);
+    $('vcRecStart').disabled=true;$('vcRecStop').disabled=false;$('vcRecResult').classList.remove('show');
+  }catch(e){$('vcRecStatus').textContent='Microphone error: '+e.message}
+}
+async function vcRecordStop(){
+  if(!vcRec)return;const r=vcRec;vcRec=null;clearInterval(r.timer);
+  try{r.proc.disconnect();r.src.disconnect()}catch(_){}r.stream.getTracks().forEach(t=>t.stop());const sr=r.ctx.sampleRate;await r.ctx.close();
+  $('vcRecStop').disabled=true;
+  const seconds=r.chunks.reduce((a,c)=>a+c.length,0)/sr;if(seconds<0.3){$('vcRecStatus').textContent='Recording was too short.';$('vcRecStart').disabled=false;return}
+  $('vcRecStatus').textContent='Converting '+seconds.toFixed(1)+' s with RVC…';
+  try{const fd=new FormData();fd.append('audio',vcEncodeWav(r.chunks,sr),'recording.wav');Object.entries(vcSettings()).forEach(([k,v])=>fd.append(k,v));
+    const resp=await fetch('/api/vc/convert-recording',{method:'POST',body:fd});const j=await resp.json();if(!resp.ok||!j.ok)throw new Error(j.error||'Conversion failed');
+  }catch(e){$('vcRecStatus').textContent='Error: '+e.message;$('vcRecStart').disabled=false}
+}
+async function vcPoll(){
+  try{
+    const j=await vcJson('/api/vc/status');const rec=j.kind==='recording',status=rec?$('vcRecStatus'):$('vcStatus');
+    const busy=j.status==='running';$('vcConvert').disabled=busy;if(!vcRec)$('vcRecStart').disabled=busy;
+    if(busy){status.textContent='Converting with '+(j.model||'RVC')+(j.kind==='folder'?' ('+j.count+' files)':'')+'…'}
+    else if(j.status==='done'){
+      if(j.kind==='folder'){
+        if(vcLast.folder!==j.job_id){vcLast.folder=j.job_id;$('vcStatus').textContent='✓ '+j.count+' files converted';$('vcAudio').hidden=true;$('vcFileSave').hidden=true;$('vcSavedPath').textContent=j.output;$('vcResult').classList.add('show')}
+      }else{
+        const box=rec?$('vcRecResult'):$('vcResult'),audio=rec?$('vcRecAudio'):$('vcAudio'),src=j.audio_url+'?v='+encodeURIComponent(j.job_id);
+        if(audio.dataset.src!==src){audio.src=src;audio.dataset.src=src;status.textContent='✓ Complete';vcLast[rec?'recording':'file']=j.output.split(/[\\/]/).pop();
+          if(!rec){$('vcAudio').hidden=false;$('vcFileSave').hidden=false;$('vcSavedPath').textContent=j.output}box.classList.add('show')}
+      }
+    }else if(j.status==='error'){status.textContent='Error: '+j.error}
+  }catch(e){$('vcStatus').textContent='Status unavailable: '+e.message}
+}
+async function vcSaveAs(kind){const filename=vcLast[kind];if(!filename)return;try{const j=await vcJson('/api/vc/save-as',{filename});if(!j.cancelled)(kind==='recording'?$('vcRecStatus'):$('vcStatus')).textContent='✓ Saved: '+j.path}catch(e){alert(e.message)}}
+let vcRtDevicesLoaded=false;
+async function vcLoadRtDevices(){
+  if(vcRtDevicesLoaded)return;vcRtDevicesLoaded=true;
+  try{const j=await vcJson('/api/vc/realtime/devices');const label=d=>d.name+' · '+d.hostapi.replace('Windows ','');
+    const keepIn=$('vcRtInput').value||vcSaved.rtIn||'',keepOut=$('vcRtOutput').value||vcSaved.rtOut||'';
+    fillSelect($('vcRtInput'),[['','Auto']].concat(j.devices.filter(d=>d.inputs>0).map(d=>[String(d.index),label(d)])),keepIn);
+    fillSelect($('vcRtOutput'),[['','Auto']].concat(j.devices.filter(d=>d.outputs>0).map(d=>[String(d.index),label(d)])),keepOut);
+  }catch(e){vcRtDevicesLoaded=false;$('vcRealtimeStatus').textContent='Device scan failed: '+e.message}
+}
+async function vcStartRealtime(){
+  if(!$('vcModel').value){alert('Select an RVC model.');return}
+  try{const st=JSON.parse(localStorage.getItem('zundanenVC')||'{}');st.rtIn=$('vcRtInput').value;st.rtOut=$('vcRtOutput').value;localStorage.setItem('zundanenVC',JSON.stringify(st))}catch(_){}
+  $('vcRealtimeStatus').textContent='Loading the RVC model…';
+  try{await vcJson('/api/vc/realtime/start',{model:$('vcModel').value,pitch:Number($('vcPitch').value),index_rate:Number($('vcIndexRate').value),input_device:$('vcRtInput').value,output_device:$('vcRtOutput').value});await vcPollRealtime()}
+  catch(e){$('vcRealtimeStatus').textContent='Error: '+e.message}
+}
+async function vcStopRealtime(){
+  try{await vcJson('/api/vc/realtime/stop',{});$('vcRealtimeStatus').textContent='Stopped';await vcPollRealtime()}
+  catch(e){$('vcRealtimeStatus').textContent='Error: '+e.message}
+}
+async function vcPollRealtime(){
+  try{const r=await vcJson('/api/vc/realtime/status');
+    $('vcRealtimeStart').disabled=!!r.running;$('vcRealtimeStop').disabled=!r.running;
+    if(r.error){$('vcRealtimeStatus').textContent='Error: '+r.error}
+    else if(r.ready){$('vcRealtimeStatus').textContent='● Running · '+r.model+' · '+(r.info.input||'')+' → '+(r.info.output||'')}
+    else if(r.running){$('vcRealtimeStatus').textContent='Loading the RVC model…'}
+  }catch(e){}
+}
+async function vcOpenOutput(){try{await vcJson('/api/vc/open-output',{})}catch(e){alert(e.message)}}
+vcRefreshModels();vcPoll();vcPollRealtime();
+document.getElementById('tabConversion').addEventListener('click',()=>{vcLoadRtDevices();vcRefreshModels()});
+['tabVoice','tabBatch'].forEach(id=>document.getElementById(id).addEventListener('click',loadV2Options));
+setInterval(()=>{if($('conversionView').classList.contains('active')){vcPoll();vcPollRealtime()}},1200);
+
+initV65Ui();applyHelpLanguage();loadState();checkAccentSupport();pollTrainer();pollBatch();setInterval(pollTrainer,1000);setInterval(pollBatch,1000);
 </script>
 </body>
 </html>

@@ -20,7 +20,7 @@ jobs:
       - name: Parse PowerShell scripts
         shell: powershell
         run: |
-          $files = @('setup.ps1', 'doctor.ps1', 'install_accent_support.ps1', 'prepare_aalto_native_assets.ps1', 'build_kaldi_windows.ps1', 'package_v1_1_0.ps1', 'package_native_aalto_runtime.ps1')
+          $files = @('setup.ps1', 'doctor.ps1', 'install_accent_support.ps1', 'prepare_aalto_native_assets.ps1', 'build_kaldi_windows.ps1', 'package_native_aalto_runtime.ps1')
           foreach ($file in $files) {
             $tokens = $null
             $errors = $null
@@ -35,7 +35,7 @@ jobs:
       - name: Compile Python sources
         shell: powershell
         run: |
-          python -m py_compile app.py aalto_alignment.py aalto_native_alignment.py aalto_native_probe.py desktop_launcher.py rvc_locale.py trainer_worker.py tts_worker.py world_accent_worker.py
+          python -m py_compile app.py aalto_alignment.py aalto_native_alignment.py aalto_native_probe.py desktop_launcher.py rvc_locale.py trainer_worker.py tts_worker.py world_accent_worker.py emotion_engine.py emotion_worker.py emotion_trainer_worker.py dataset_scan.py vits_persistent_worker.py vits_trainer_worker.py tts_persistent_worker.py rvc_realtime_worker.py sentence_slicer.py style_models.py voice_conversion_routes.py
 
       - name: Compile small launcher
         shell: powershell
@@ -60,7 +60,7 @@ jobs:
               Start-Sleep -Milliseconds 500
               try {
                 $r = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/api/state
-                if ($r.StatusCode -eq 200 -and $r.Content -match '"version"\s*:\s*"1\.1\.0"') { $ok = $true; break }
+                if ($r.StatusCode -eq 200 -and $r.Content -match '"version"\s*:\s*"2\.0\.0"') { $ok = $true; break }
               } catch {}
             }
             if (-not $ok) { throw 'UI did not answer /api/state' }

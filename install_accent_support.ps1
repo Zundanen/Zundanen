@@ -81,7 +81,7 @@ function Install-NativeAaltoRuntime([string]$Source) {
 }
 
 try {
-    Write-Host "Zundanen v1.1.0 - Accent components" -ForegroundColor Green
+    Write-Host "Zundanen v2.0.0 - Accent components" -ForegroundColor Green
     Write-Host "These components are normally installed automatically by setup.bat."
     Write-Status "starting" "Checking Accent components."
 

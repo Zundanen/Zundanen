@@ -1,0 +1,28 @@
+{
+  "schema": "zundanen-v65-preset-v3",
+  "note": "Default settings of the emotion models. Character files (models/characters/<Name>.pt) and models trained with the Model Trainer are listed automatically; the Chatterbox character is built into the app.",
+  "base_name": "",
+  "branch_name": "",
+  "speaker": "zundamon",
+  "pitch_level_st": -6.66,
+  "pitch_range_st": 12.0,
+  "range_k": 1.0,
+  "z_strength": 0.5,
+  "noise_scale": 0.4,
+  "style_strength": {
+    "normal": 0.0,
+    "ama": 1.5,
+    "sexy": 1.5,
+    "tsun": 1.0
+  },
+  "duration_mode": "global_tempo",
+  "style_tempo": {
+    "normal": 1.0,
+    "ama": 1.068,
+    "sexy": 1.1,
+    "tsun": 0.923
+  },
+  "dur_detail": 0.0,
+  "characters": {},
+  "extra_styles": {}
+}

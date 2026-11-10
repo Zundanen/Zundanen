@@ -1,47 +1,54 @@
-# Zundanen v1.1.0
+# Zundanen v2.0.0
 
 **[Suomi](README.md) | [日本語](README_JA.md) | English**
 
-Zundanen is a local Windows application that converts Finnish text through **Finnish-NLP/Chatterbox-Finnish → RVC** and produces WAV files with your local RVC voice models.
+Zundanen is a local Windows app that turns Finnish text into WAV files.
 
-The same UI also includes **Batch Generation**, optional word-level **Accent** editing, and a **Model Trainer** for creating RVC v2 `.pth + .index` models from an audio folder.
+v2.0.0 replaces the speech synthesis with **its own VITS models (with FinBERT features)**. This repository includes the **Chatterbox** model (Finnish VITS, Normal only). With `Use RVC voice conversion` and an RVC model of your own it speaks in another voice (for example Zundamon). Character models with emotion styles (Normal / Ama / Tsun / Sexy) are trained with the Model Trainer from your own data; no character models are included.
 
-![Zundanen UI](docs/Zundanen-UI_englanti.png)
+The same UI includes **Batch Generation**, per-word **Accent** editing, the **Model Trainer** (RVC v2 and VITS fine-tuning) and **Voice Conversion** (WAV / folder conversion, recording, real-time conversion).
 
-## Tutorial video
+> The screenshots in `docs/` are from v1.1.0.
+
+## Tutorial video (v1)
 
 [https://youtu.be/e5rfWdmxM20?si=ouU6rzhPJ9XnrOmY](https://youtu.be/e5rfWdmxM20?si=ouU6rzhPJ9XnrOmY)
+
+## Main changes from v1
+
+- Speech synthesis: v1 used "Chatterbox-Finnish → RVC"; v2 uses a **Finnish VITS with emotion styles**.
+- **Character**: choose a trained model.
+  - **Chatterbox** (included): a Finnish VITS in the Chatterbox voice (Normal only). Turn on `Use RVC` to convert it to Zundamon or another voice.
+  - **Models you train yourself** (Model Trainer → VITS): a character's voice with emotion styles. No character models are included (see “Model files”).
+- **Style**: Normal / Ama / Tsun / Sexy, with adjustable Style strength.
+- **Pitch / Speed / Seed**.
+- **Use RVC voice conversion**: optional RVC conversion of the generated speech.
+- **Batch Generation** supports Character / Style / RVC.
+- **Model Trainer**: RVC (as in v1) plus VITS fine-tuning (Joint / Finnish / Style).
+- New **Voice Conversion** tab: RVC conversion of a WAV or a folder, record-and-convert, in-app real-time conversion.
 
 ## Requirements
 
 - Windows 11 x64
-- WinGet (normally provided by Windows 11 App Installer)
-- NVIDIA GPU recommended
-- Model Trainer currently requires an NVIDIA CUDA GPU
-- Voice Generation can run on CPU, but may be very slow
-- Several GB of free disk space recommended
-- **Accent in v1.1.0 uses a native Windows Aalto/Kaldi backend — WSL2 and Docker Desktop are normally not required**
-
-Voice Generation, Batch Generation, Model Trainer, and Accent run without Docker. `setup.bat` installs the Windows-native Aalto/Kaldi Accent engine together with the normal Zundanen environment.
+- WinGet (usually included in Windows 11 App Installer)
+- NVIDIA GPU recommended (developed and tested on an RTX 3060 12 GB)
+- Model Trainer requires an NVIDIA CUDA GPU
+- Voice Generation also starts on CPU but can be very slow
+- Free disk space: tens of GB recommended (environments, models, outputs)
+- **On the first voice generation** the app downloads the Finnish BERT model (`TurkuNLP/bert-large-finnish-cased-v1`, about 1.4 GB) from Hugging Face (internet connection needed).
 
 ## Installation
 
-Download the repository with `Code → Download ZIP` and extract it to a short path such as:
+Same as v1: download with `Code → Download ZIP`, extract to a short path such as `C:\Zundanen`, then double-click `setup.bat`.
 
-```text
-C:\Zundanen
-```
-
-Then double-click `setup.bat`.
-
-The normal setup prepares the main environment, including:
+The normal setup prepares:
 
 ```text
 Microsoft Visual C++ Redistributable
 Microsoft Edge WebView2 Runtime
 Git
 FFmpeg
-Python 3.11 + Finnish-NLP/Chatterbox-Finnish
+Python 3.11 + Finnish-NLP/Chatterbox-Finnish (TTS environment; VITS and FinBERT also run here)
 Python 3.12 + RVC-WebUI
 HuBERT / RMVPE / RVC pretrained assets
 PyWORLD / WORLD vocoder
@@ -49,271 +56,138 @@ Windows-native Aalto/Kaldi runtime
 Intel oneMKL runtime when required
 ```
 
-TTS and RVC use separate virtual environments under `runtime/`.
-
-> In v1.1.0, `setup.bat` also installs the Accent engine. No separate Accent installation step is required, and normal Accent use does not require WSL2 or Docker Desktop.
-
-### Windows path length
-
-Some Python packages contain long internal paths. Extracting Zundanen too deeply may cause `WinError 206`. A short path such as `C:\Zundanen` is recommended.
-
-### Re-running setup
-
-If setup stops, fix the cause and run `setup.bat` again. Existing components are reused where possible.
-
-To rebuild the environment from scratch:
+Re-running setup, a full rebuild and the `doctor.ps1` check work as in v1:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Force
+powershell -ExecutionPolicy Bypass -File .\doctor.ps1
 ```
 
-## Launch
+## Model files
 
-After setup, double-click `Zundanen.exe`.
-
-It starts the local server in the background and opens the UI in a dedicated WebView2 window. Closing the window also stops the local server.
-
-> `Zundanen.exe` is currently unsigned, so Windows SmartScreen may show a warning. The small Windows launcher source is included in `launcher_src/`.
-
-For the browser version, run `run_ui.bat` and open:
+Included in this repository:
 
 ```text
-http://127.0.0.1:8765
+models/
+└─ chatterbox.pt     Chatterbox, about 68 MB
 ```
 
-Use `install_desktop.bat` if you only need to add the desktop UI dependency to an existing installation.
+- Inference-only weights (no discriminator / optimizer states), stored as float16 so that the file stays under GitHub's 100 MB limit; the app loads them in float32.
+- **Not included**: character models with emotion styles (for example Zundamon or Shikoku Metan) and RVC models (`.pth` / `.index`). Their training data belongs to the respective rights holders. Train your own with the Model Trainer from data you are allowed to use; a trained model is added to `Character` automatically.
+- **Character models** (not part of this repository): the Zundamon and Shikoku Metan emotion models and RVC models are distributed separately for research on [Hugging Face (Zundanen/finnish-emotion-vits)](https://huggingface.co/Zundanen/finnish-emotion-vits). Non-commercial research use only; follow the [terms of the SSS multimodal database](https://zunko.jp/multimodal_dev/login.php) when you use them. Put a character file `<name>.pt` in `models/characters` and its RVC model (`<name>.pth` and `.index`) in `runtime/rvc/exports/<name>/`, then restart the app: the character appears in `Character`, and the RVC model in the RVC model lists. Each character is one file.
+- Put RVC models in `runtime/rvc/exports/<name>/` as in v1.
 
-### Rebuilding the EXE launcher
+## Start
 
-The repository includes the small launcher source:
-
-```text
-launcher_src/zundanen_launcher.go
-```
-
-Run `build_launcher.bat` to build:
-
-```text
-dist\Zundanen.exe
-```
-
-The Go toolchain is required only when rebuilding the launcher. Normal users do not need Go. TTS, RVC, and model files remain in the project's `runtime/` directory and are not bundled into the EXE.
+As in v1: `Zundanen.exe` (recommended) or `run_ui.bat` (browser, `http://127.0.0.1:8765`).
 
 ## Voice Generation
 
-1. Choose `Character`
-2. Enter Finnish text
-3. Adjust `Pitch` / `Index rate` / `Protect` / `Expression` if needed
-4. Check `Seed`. With `Fix seed` off, each generation uses a new random seed; with it on, the entered seed is reused
-5. Click `Generate voice`
-6. Optionally edit Accent
-7. Save with `Save As...`
+1. Choose a `Character`
+2. Choose `Style` and `Style strength` (Chatterbox: Normal only)
+3. Enter Finnish text
+4. Adjust `Pitch` (semitones from the character's base level, ±10) and `Speed` (1.0 = normal, larger = faster) if needed
+5. Check the `Seed` (with `Fix seed` OFF every generation gets a new seed)
+6. Optionally turn on `Use RVC voice conversion` and choose the RVC model and `Pitch` / `Index rate` / `Protect`
+7. Click `Generate voice`
+8. Edit the Accent if needed and save with `Save As...`
 
-The suggested filename includes date/time and the TTS seed:
+### Recommended settings
 
-```text
-Zundamon_20260916_180000_seed123456.wav
-```
+| Purpose | Character | Style | RVC |
+|---|---|---|---|
+| Clearest Normal | Chatterbox | Normal | your RVC model (Zundamon: Pitch **+8**), Index rate 0.1, Protect 0.15 |
+| Emotion styles | a model you trained | Ama / Tsun / Sexy | none |
 
-Save options:
+- When you select Chatterbox, an RVC Pitch of 0 is set to +8 (Zundamon's level) automatically. Chatterbox has no pitch control, so the upper `Pitch` slider is disabled for it.
+- A high RVC `Index rate` makes the pronunciation more Japanese-like; about 0.1 is recommended for Finnish.
 
-- `Create subtitle TXT` — creates a same-name `.txt`; enabled by default
-- `Save source audio` — saves the clean pre-RVC Finnish TTS for later high-quality Accent editing; disabled by default
+### Pronunciation (development measurement)
 
-With source audio enabled:
+Character error rate (CER, lower is better) of Whisper large-v2 on 60 Finnish Tatoeba sentences never used in training, 2 seeds each.
 
-```text
-Zundamon_20260916_180000_seed123456.wav
-Zundamon_20260916_180000_seed123456.txt             # if TXT is enabled
-Zundamon_20260916_180000_seed123456_source.wav
-Zundamon_20260916_180000_seed123456_source.json
-```
+| Voice | CER |
+|---|---:|
+| Original Chatterbox-Finnish audio (practical ceiling) | 2.5% |
+| Chatterbox | 2.3% |
+| Chatterbox + Zundamon RVC (+8, Protect 0.15) | 4.7% |
+| Zundamon Normal | 7.1% |
+| Zundamon Ama / Tsun / Sexy | 9.2% / 7.8% / 8.1% |
 
-The `_source.json` file stores metadata used to restore the original RVC settings later.
+The Zundamon rows are the Zundamon emotion model distributed separately for research on Hugging Face.
 
-RVC models are normally detected from layouts such as:
-
-```text
-runtime/rvc/exports/
-├─ CharacterA/
-│  ├─ CharacterA.pth
-│  └─ CharacterA.index
-└─ CharacterB/
-   ├─ CharacterB.pth
-   └─ CharacterB.index
-```
-
-## Accent
-
-Accent is installed as part of the normal `setup.bat` flow. Setup installs/downloads the Windows-native Aalto/Kaldi runtime, PyWORLD/WORLD, and Intel oneMKL when the packaged Kaldi build needs it. WSL2, Docker Desktop, and the Aalto Docker image are not required.
-
-After setup completes, forced alignment runs automatically after Voice Generation. Zundanen aligns the Finnish text to the audio and displays syllable buttons for each word.
-
-- choose the accented syllable for each word
-- adjust `Strength`
-- use `Reset` to clear changes
-- use `Preview` to listen to the edited result
-
-The editor uses native Windows Aalto/Kaldi alignment for syllable timing and WORLD/PyWORLD for the pre-RVC audio edit before running RVC.
-
-### Import WAV
-
-`Import WAV` can reopen earlier Voice Generation or Batch Generation results.
-
-- a same-name `.txt` is loaded automatically when present
-- Voice Generation `*_source.wav` / `*_source.json` files are detected automatically
-- matching Batch sources inside `source_audio/` are detected automatically
-- when source audio exists, Zundanen can use the higher-quality pre-RVC → WORLD → RVC path
-- older/external WAV files without source audio fall back to WORLD editing directly on the finished WAV
+Words with h + consonant (e.g. *tyhjä*, *kissanhiekka*) are known to be weak in Zundamon's voice.
 
 ## Batch Generation
 
-Batch Generation processes many texts sequentially and prevents Windows automatic sleep while the queue is running.
-
-Input modes:
-
-```text
-One line = one WAV
-CSV
-```
-
-Each output filename includes its seed, for example:
-
-```text
-001_seed123456.wav
-002_seed987654.wav
-```
+Generates several texts in a row with the same Character / Style / Style strength / Pitch / Speed / Seed / RVC as Voice Generation. Chatterbox can be selected as well.
 
 CSV columns:
 
 ```text
-filename,text,character,pitch,index_rate,protect,expression,seed
+filename,text,style,strength,speed,seed
 ```
 
-Only `text` is required. With a blank `filename`, an item is saved as `001_seed123456.wav`; with `intro`, it becomes `001_intro_seed123456.wav`.
-
-With `Fix seed` off, every queue item receives a new random seed. With it enabled, the Batch Seed value is reused. A CSV row `seed` overrides the Batch setting.
-
-Save options:
-
-- `Create subtitle TXT` — creates same-name `.txt` files; enabled by default
-- `Save source audio` — saves the pre-RVC Finnish TTS; disabled by default
-
-When source audio is enabled, all Batch sources are collected under `source_audio/`:
-
-```text
-outputs/batches/20260916_180000_ab12cd/
-├─ 001_seed123456.wav
-├─ 001_seed123456.txt
-├─ 002_seed987654.wav
-├─ 002_seed987654.txt
-├─ source_audio/
-│  ├─ 001_seed123456_source.wav
-│  ├─ 001_seed123456_source.json
-│  ├─ 002_seed987654_source.wav
-│  └─ 002_seed987654_source.json
-└─ failed_items.csv            # only when failures occurred
-```
-
-Queue state is saved automatically, and a stopped/interrupted queue can continue with `Resume Queue`.
+Only `text` is required; empty fields use the screen settings, and each row can have its own style (`speed` 1.0 = normal; old `length_scale` columns are still read).
 
 ## Model Trainer
 
-The `Model Trainer` tab lets you configure:
+Switch with `VITS` / `RVC` at the top.
 
-- Character name
-- Dataset folder
-- Epochs
-- Batch size
-- Save every
-- Workers
-- GPU
-- Fresh training
+- **RVC**: as in v1 (Character name, Dataset folder, Epochs, Batch size, Workers, Fresh training). Creates `.pth` and `.index` in `runtime/rvc/exports/<Character>/`.
+- **VITS** (advanced):
+  - `Joint training` / `Finnish fine-tuning` train the base model → style branch → voice-quality deltas and add the result to Character under its Model name. **They continue a model you trained before (none is included); start with `New model (from scratch)` below.**
+  - `Style fine-tuning` adds a new style to a chosen model from paired Normal and style recordings (WAV + LAB, matched by number, at least 20 pairs).
+  - **New model (from scratch)**: choose `New model (from scratch)` as the `Base model` of `Joint training` to train from random weights. Inputs:
+    - **Finnish folder**: Finnish WAV files with same-name TXT (at least 50 pairs; about 20 hours or more for good pronunciation)
+    - **Emotion data**: one row per speaker and style (WAV folder, LAB folder – empty = the same folder –, speaker name and style Normal / Ama / Tsun / Sexy); add rows with `+`. Every speaker needs a Normal row. A LAB has the same file name as its WAV; a row without its own LABs uses the same-name LAB of another row of the same style.
+    - **Bridge RVC model (.pth)** (Browse…) and **Character**: every Finnish sentence of the folder is converted to this RVC voice (each at two pitch levels, about 1 s per file; 20,000 sentences ≈ 11 h) so the character learns Finnish. Character is chosen from the entered speakers (preselected when the file name matches, e.g. Zundamon.pth → zundamon). `RVC bridge share` sets how often the converted sentences are used in training. Its .index next to it is used if present; the pitch shift is set automatically (Index 0.1 / Protect 0.15).
+    - Epoch (VITS) defaults to 35. This takes much longer than continuing a model (often a day or more).
+  - Training length is given in epochs (Epoch (VITS) default 4.5, Epoch (Style) default 80); Batch size and Workers can be set for your PC.
 
-Training pipeline:
+## Voice Conversion
 
-```text
-Audio dataset
-  ↓
-Preprocess / 40 kHz
-  ↓
-RMVPE F0
-  ↓
-HuBERT v2 / 768-dim
-  ↓
-RVC v2 training
-  ↓
-FAISS index
-  ↓
-runtime/rvc/exports/<Character>/<Character>.pth
-runtime/rvc/exports/<Character>/<Character>.index
-```
+- Left: RVC model and Pitch / Index rate / Protect
+- WAV conversion: one file or every audio file in a folder (saved to `outputs/voice_conversion/`; originals are not overwritten)
+- Recording: record, convert and save with `Save As...`
+- Realtime voice conversion: choose input and output devices and press Start / Stop (no extra window; latency about 0.3 s)
 
-Windows automatic sleep is prevented during training and restored after training finishes or stops.
+## Accent
 
-## UI languages
+Same as v1.1.0 (Windows-native Aalto/Kaldi forced alignment, editing with WORLD/PyWORLD; no WSL2 / Docker Desktop).
 
-Explanatory/help text can be switched between `Suomi / 日本語 / English`. Suomi is the default, and the selected language is stored locally.
+## UI language
 
-Buttons, technical labels, and some status text intentionally remain in English.
+Help texts switch between `Suomi / 日本語 / English`. Buttons and field names stay in English.
 
-## Setup diagnostics
+## Not included in GitHub
 
-Run:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\doctor.ps1
-```
-
-The doctor checks the required TTS/RVC environment plus PyWORLD and the Windows-native Aalto/Kaldi Accent engine.
-
-## GitHub Actions
-
-The repository includes:
+`.gitignore` excludes:
 
 ```text
-.github/workflows/windows-smoke.yml
+runtime/  config.json  outputs/  temp/  __pycache__/  *.pt (except models/chatterbox.pt)  *.pth  *.index  *.safetensors  *.wav  local_state/
 ```
 
-On each push / pull request, GitHub checks items including:
+## Rights of voices, characters and training data
 
-- PowerShell syntax for `setup.ps1`, `doctor.ps1`, and `install_accent_support.ps1`
-- compilation of the small Go-based Windows launcher
-- the lightweight CI setup and compilation of key Python files
-- Flask UI startup
-- an HTTP 200 response from `/api/state`
+The MIT license of Zundanen does not grant any rights to third-party character voices, training data, trained models or RVC models.
 
-Standard GitHub-hosted runners do not run the full CUDA TTS/RVC pipeline or the full Aalto/Kaldi alignment stack. The native Windows Aalto/Kaldi path has been validated on Windows 11 with Finnish TTS audio, producing word, phone, and syllable timestamps without Docker.
+The included Chatterbox model (`models/chatterbox.pt`) was trained only on Finnish speech generated with Chatterbox-Finnish (MIT) from Finnish Tatoeba sentences (CC BY 2.0 FR). Its voice prompt was the reference audio bundled with Chatterbox-Finnish (`samples/reference_finnish.wav`, from Mozilla Common Voice, CC0 1.0). No Japanese character corpora were used for it.
 
-## Files excluded from GitHub
-
-`.gitignore` excludes items such as:
-
-```text
-runtime/
-config.json
-outputs/
-temp/
-__pycache__/
-```
-
-Downloaded models, virtual environments, user configuration, RVC models, and generated audio are therefore not normally committed.
-
-## Voice and character rights
-
-The MIT license for Zundanen itself does not grant rights to third-party character voices, training data, or RVC models.
-
-If you use, publish, or redistribute third-party audio, datasets, `.pth`, or `.index` files, check the applicable terms from the rights holder, voice library, and dataset.
+Models you train yourself and RVC models are subject to the terms of their training data. Check the terms of each rights holder before using, publishing or redistributing them (`THIRD_PARTY_NOTICES.md`).
 
 ## Upstream projects
 
 - Finnish-NLP/Chatterbox-Finnish: https://huggingface.co/Finnish-NLP/Chatterbox-Finnish
 - ResembleAI Chatterbox: https://github.com/resemble-ai/chatterbox
+- VITS: https://github.com/jaywalnut310/vits
+- TurkuNLP FinBERT: https://huggingface.co/TurkuNLP/bert-large-finnish-cased-v1
 - RVC: https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI
 - Aalto Finnish Forced Alignment: https://github.com/aalto-speech/finnish-forced-alignment
 - Lingsoft aalto-kaldi-align-elg: https://github.com/lingsoft/aalto-kaldi-align-elg
 - WORLD: https://github.com/mmorise/World
 - PyWORLD: https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder
 - FFmpeg: https://ffmpeg.org/
+- Tatoeba: https://tatoeba.org/
 
-See `THIRD_PARTY_NOTICES.md` for licensing notes.
+See also `THIRD_PARTY_NOTICES.md`.

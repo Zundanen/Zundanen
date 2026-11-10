@@ -1,6 +1,6 @@
 config.json
 runtime/
-outputs/
+outputs/*
 temp/
 .ci-venv/
 __pycache__/
@@ -10,3 +10,14 @@ build/
 *.spec
 .DS_Store
 Thumbs.db
+
+# never commit model weights or audio (see README)
+*.pt
+*.pth
+*.index
+*.safetensors
+*.wav
+local_state/
+
+# the one model shipped in the repository (Chatterbox; float16, about 68 MB)
+!models/chatterbox.pt

@@ -1,11 +1,24 @@
-﻿# Third-party notices
+# Third-party notices
 
-Zundanen v1.1.0 uses several third-party projects. This source archive does not include the large generated `runtime/` environments. The Windows-native Aalto/Kaldi runtime may be distributed as a separate Zundanen release asset prepared from the projects listed below; retain the applicable upstream license notices with any redistributed binaries or model assets.
+Zundanen v2.0.0 uses several third-party projects. This source repository does not include the large generated `runtime/` environments, character models or RVC models; the only model weights it contains are `models/chatterbox.pt` (see below). The Windows-native Aalto/Kaldi runtime may be distributed as a separate Zundanen release asset prepared from the projects listed below; retain the applicable upstream license notices with any redistributed binaries or model assets.
 
 - **Finnish-NLP/Chatterbox-Finnish** — MIT license  
-  https://huggingface.co/Finnish-NLP/Chatterbox-Finnish
+  https://huggingface.co/Finnish-NLP/Chatterbox-Finnish  
+  Used to generate the Finnish training speech of the included Chatterbox model (and installed by setup as the TTS environment). The voice prompt was the reference audio bundled with Chatterbox-Finnish, `samples/reference_finnish.wav`, which comes from Mozilla Common Voice (CC0 1.0).  
+  Training data of Chatterbox-Finnish, as listed on its model card: Mozilla Common Voice 15.0 (CC0 1.0), Filmot (CC BY), YouTube (CC BY) and Finnish Parliament data (CLARIN PUB +BY +PRIV). Attribution to these sources is given here.
 - **ResembleAI Chatterbox** — MIT license  
   https://github.com/resemble-ai/chatterbox
+- **VITS** (Jaehyeon Kim) — MIT license  
+  https://github.com/jaywalnut310/vits  
+  Selected model files are vendored in `research/vendor/VITS/` (see `research/vendor/VITS/LICENSE` and `LICENSES/VITS-MIT.txt`).
+- **TurkuNLP FinBERT** (`TurkuNLP/bert-large-finnish-cased-v1`) — Apache License 2.0  
+  https://huggingface.co/TurkuNLP/bert-large-finnish-cased-v1  
+  Downloaded from Hugging Face on first use; not redistributed in this repository.
+- **Hugging Face Transformers** — Apache License 2.0  
+  https://github.com/huggingface/transformers
+- **Tatoeba** — sentences under CC BY 2.0 FR (attribution to the Tatoeba contributors)  
+  https://tatoeba.org/  
+  Finnish Tatoeba sentences were used as training and evaluation text for the v2 models. No sentence list is included in this repository.
 - **Retrieval-based-Voice-Conversion-WebUI (RVC)** — MIT license / upstream notices apply  
   https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI
 - **FFmpeg (Gyan Windows build)** — FFmpeg/Gyan build licensing applies  
@@ -17,29 +30,32 @@ Zundanen v1.1.0 uses several third-party projects. This source archive does not 
   https://pytorch.org/
 - **Docker Desktop** — Docker Subscription Service Agreement applies  
   https://docs.docker.com/subscription-billing/desktop-license/  
-  Used only by the legacy Accent compatibility fallback. Docker Desktop is not redistributed
-  or installed by the normal v1.1.0 setup. Developers may install it separately when explicitly
-  testing the legacy Docker backend.
+  Used only by the legacy Accent compatibility fallback. Docker Desktop is not redistributed or installed by the normal setup.
 - **Aalto Speech / Finnish Forced Alignment** — MIT license  
   https://github.com/aalto-speech/finnish-forced-alignment
 - **Lingsoft / aalto-kaldi-align-elg** — MIT license  
   https://github.com/lingsoft/aalto-kaldi-align-elg  
-  Source used by the v1.1 Windows-native runtime preparation workflow to export selected Aalto Finnish alignment model/configuration/G2P assets. The Docker image itself is not redistributed. The separate native runtime asset includes the applicable Aalto MIT license and Lingsoft source notice.
+  Source used by the Windows-native runtime preparation workflow to export selected Aalto Finnish alignment model/configuration/G2P assets. The Docker image itself is not redistributed. The separate native runtime asset includes the applicable Aalto MIT license and Lingsoft source notice.
 - **Kaldi** — Apache License 2.0  
   https://github.com/kaldi-asr/kaldi  
-  Zundanen v1.1 uses selected Kaldi Windows executables for the native Aalto alignment backend. Kaldi binaries are distributed separately in `Zundanen-Aalto-Native-v1.1.0.zip`; that runtime asset includes the Apache 2.0 license and a Kaldi attribution notice.
+  Selected Kaldi Windows executables are used by the native Aalto alignment backend and distributed separately in `Zundanen-Aalto-Native-v1.1.0.zip`; that runtime asset includes the Apache 2.0 license and a Kaldi attribution notice.
 - **Intel oneMKL** — Intel software license terms apply  
   https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html  
-  The tested Windows Kaldi build uses oneMKL. The Accent support installer can install oneMKL through WinGet when the packaged Kaldi executables require it. oneMKL is not included in this source archive.
+  The tested Windows Kaldi build uses oneMKL. The Accent support installer can install oneMKL through WinGet when the packaged Kaldi executables require it. oneMKL is not included in this repository.
 - **WORLD Vocoder** — modified BSD license  
   https://github.com/mmorise/World  
   Used by the optional Accent editor for speech analysis, manipulation, and resynthesis.
 - **PyWORLD** — MIT license  
   https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder  
-  Python wrapper installed into the local RVC environment by the v1.1.0 setup for Accent editing; not redistributed in this repository or native runtime asset.
+  Python wrapper installed into the local RVC environment by setup for Accent editing; not redistributed in this repository or the native runtime asset.
 
-Character voices, datasets, RVC `.pth` files and `.index` files may carry separate rights or usage conditions that are not granted by this application's license.
+## Voices, characters, datasets and trained models
 
+Character voices, datasets, trained model weights, RVC `.pth` files and `.index` files may carry separate rights or usage conditions that are not granted by this application's license.
+
+**Included model: `models/chatterbox.pt`** (Chatterbox; inference-only, float16 weights). It was trained only on Finnish speech generated by Chatterbox-Finnish (MIT, see above) from Finnish Tatoeba sentences (CC BY 2.0 FR, attribution to the Tatoeba contributors), with the Common Voice (CC0 1.0) reference audio above as the voice prompt. No Japanese character corpora and no RVC conversion were used for it. Model code: VITS (MIT) and Zundanen (MIT); text features at run time: TurkuNLP FinBERT (Apache 2.0).
+
+**Not included:** character models with emotion styles and RVC models. The developer's emotion models were trained with Japanese emotional speech corpora of the Tohoku Zunko / Zundamon project (Zundamon, Shikoku Metan, Tohoku Itako, Kyushu Sora) and are **not** included in this repository. The Zundamon and Shikoku Metan models are distributed separately for non-commercial research on Hugging Face (https://huggingface.co/Zundanen/finnish-emotion-vits) under the terms of the SSS multimodal database (https://zunko.jp/multimodal_dev/login.php); credit: ©SSS. Models that users train with the Model Trainer are subject to the terms of the data they use; anyone using or distributing such models must follow the terms of the respective rights holders.
 
 ## Desktop launcher and UI dependencies
 
