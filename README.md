@@ -31,9 +31,9 @@ Samassa käyttöliittymässä ovat **Batch Generation**, sanakohtainen **Accent*
 
 - Windows 11 x64
 - WinGet (yleensä mukana Windows 11:n App Installerissa)
-- NVIDIA GPU suositeltu (kehitetty ja testattu RTX 3060 12 GB:llä)
-- Model Trainer vaatii NVIDIA CUDA GPU:n
-- Voice Generation käynnistyy myös CPU:lla, mutta voi olla hyvin hidas
+- NVIDIA GPU ei ole pakollinen: puheen luonti toimii myös pelkällä CPU:lla (testattu koneella ilman GPU:ta)
+- Model Trainer vaatii NVIDIA CUDA GPU:n (kehitetty ja testattu RTX 3060 12 GB:llä)
+- Reaaliaikaiseen äänenmuunnokseen suositellaan NVIDIA GPU:ta
 - Vapaata levytilaa suositellaan kymmeniä gigatavuja (ympäristöt, mallit, tuotokset)
 - **Ensimmäisellä puheen luonnilla** sovellus lataa Hugging Facesta suomen BERT-mallin (`TurkuNLP/bert-large-finnish-cased-v1`, noin 1,4 Gt); internet-yhteys tarvitaan.
 

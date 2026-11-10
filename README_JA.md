@@ -31,9 +31,9 @@ v2.0.0 では，フィンランド語の音声合成を **独自の VITS モデ�
 
 - Windows 11 x64
 - WinGet（通常は Windows 11 の「アプリ インストーラー」に含まれます）
-- NVIDIA GPU 推奨（開発・確認は RTX 3060 12 GB）
-- Model Trainer は NVIDIA CUDA GPU 必須
-- Voice Generation は CPU でも起動できますが，生成は非常に遅くなる場合があります
+- NVIDIA GPU は必須ではありません．音声生成は CPU だけでも動きます（GPU のない環境で確認）
+- Model Trainer（学習）は NVIDIA CUDA GPU 必須（開発・確認は RTX 3060 12 GB）
+- リアルタイム変換には NVIDIA GPU を推奨します
 - 空き容量：数十 GB を推奨（環境・モデル・生成物）
 - **初回の音声生成時に**，フィンランド語 BERT（`TurkuNLP/bert-large-finnish-cased-v1`，約 1.4 GB）を Hugging Face から自動でダウンロードします（インターネット接続が必要です）
 

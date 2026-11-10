@@ -31,9 +31,9 @@ The same UI includes **Batch Generation**, per-word **Accent** editing, the **Mo
 
 - Windows 11 x64
 - WinGet (usually included in Windows 11 App Installer)
-- NVIDIA GPU recommended (developed and tested on an RTX 3060 12 GB)
-- Model Trainer requires an NVIDIA CUDA GPU
-- Voice Generation also starts on CPU but can be very slow
+- NVIDIA GPU not required: voice generation also runs on CPU only (tested on a machine without a GPU)
+- Model Trainer requires an NVIDIA CUDA GPU (developed and tested on an RTX 3060 12 GB)
+- NVIDIA GPU recommended for real-time voice conversion
 - Free disk space: tens of GB recommended (environments, models, outputs)
 - **On the first voice generation** the app downloads the Finnish BERT model (`TurkuNLP/bert-large-finnish-cased-v1`, about 1.4 GB) from Hugging Face (internet connection needed).
 
