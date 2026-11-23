@@ -171,7 +171,7 @@ runtime/  config.json  outputs/  temp/  __pycache__/  *.pt (paitsi models/chatte
 
 ## Äänten, hahmojen ja koulutusdatan oikeudet
 
-Zundanenin MIT-lisenssi ei anna oikeuksia kolmansien osapuolten hahmoääniin, koulutusdataan, koulutettuihin malleihin tai RVC-malleihin.
+Zundasen MIT-lisenssi ei anna oikeuksia kolmansien osapuolten hahmoääniin, koulutusdataan, koulutettuihin malleihin tai RVC-malleihin.
 
 Mukana oleva Chatterbox-malli (`models/chatterbox.pt`) on koulutettu pelkästään puheella, jonka Chatterbox-Finnish (MIT) on luonut suomenkielisistä Tatoeba-lauseista (CC BY 2.0 FR). Äänimallina käytettiin Chatterbox-Finnishin mukana tulevaa referenssiääntä (`samples/reference_finnish.wav`, Mozilla Common Voice, CC0 1.0). Japanilaisia hahmoäänikorpuksia ei käytetty.
 
