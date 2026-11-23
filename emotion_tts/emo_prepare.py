@@ -74,6 +74,39 @@ def energy_trim(wav: np.ndarray, *, top_db: float = 40.0, pad_s: float = 0.15) -
     return wav[a:b]
 
 
+# Start of Finnish training WAVs (Model Trainer option "Align the start of the Finnish WAVs"): every file gets
+# the same digital silence, then a short fade into the audio from just before the first voice.  The onset is
+# the first 10 ms frame louder than -35 dB below the loudest frame that starts a run of 3 such frames; the
+# cut keeps a margin before it (longer for sentences that start with a soft consonant).  The end is unchanged.
+LEAD_THR_DB, LEAD_RUN, LEAD_FADE_MS = -35.0, 3, 15
+LEAD_MARGIN_MS, LEAD_MARGIN_SOFT_MS, LEAD_SOFT = 50, 100, frozenset("hsfšz")
+
+
+def first_letter(text: str) -> str:
+    return next((ch for ch in text.lower() if ch.isalpha()), "")
+
+
+def align_lead(audio: np.ndarray, sr: int, text: str, lead_ms: int = 100) -> tuple[np.ndarray, dict]:
+    """audio (samples, channels) float -> (lead_ms of silence + LEAD_FADE_MS fade-in + audio from onset - margin, info)."""
+    frame = sr // 100
+    mono = audio.mean(axis=1) if audio.ndim == 2 else audio
+    n = len(mono) // frame
+    if n <= LEAD_RUN:
+        return audio, {"onset_ms": 0, "cut_ms": 0, "removed_ms": 0, "note": "too short, unchanged"}
+    e = np.sqrt((mono[: n * frame].reshape(n, frame).astype(np.float64) ** 2).mean(1) + 1e-12)
+    above = 20 * np.log10(e / e.max()) > LEAD_THR_DB
+    onset = next((i for i in range(n - LEAD_RUN) if above[i:i + LEAD_RUN].all()), int(np.argmax(above)))
+    margin = LEAD_MARGIN_SOFT_MS if first_letter(text) in LEAD_SOFT else LEAD_MARGIN_MS
+    cut = max(0, onset * frame - margin * sr // 1000)
+    out = audio[cut:].astype(np.float32).copy()
+    fade = min(len(out), LEAD_FADE_MS * sr // 1000)
+    ramp = np.linspace(0.0, 1.0, fade, dtype=np.float32)
+    out[:fade] *= ramp[:, None] if out.ndim == 2 else ramp
+    out = np.concatenate([np.zeros((lead_ms * sr // 1000,) + out.shape[1:], np.float32), out])
+    cut_ms = round(cut * 1000 / sr)
+    return out, {"onset_ms": onset * 10, "cut_ms": cut_ms, "removed_ms": cut_ms - lead_ms, "note": ""}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(HERE.parent))

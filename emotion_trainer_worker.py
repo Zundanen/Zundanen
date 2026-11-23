@@ -13,6 +13,10 @@ from __future__ import annotations
             z-delta, tempo and pitch offsets are learned and the style is
             registered in emotion_tts/emotion_preset.json (existing styles untouched).
 
+--lead-ms N (finnish / scratch): before anything else, every Finnish WAV of the user's folder is copied
+into the run folder with its start aligned (N ms of silence, then the speech; emo_prepare.align_lead) and
+the copies are used from then on, also for the RVC bridge.  The user's folder is only read.
+
 Progress protocol for app.py:  "[V2PHASE] label", "[V2PROGRESS] pct",
 "RESULT_JSON : {...}", "TRAINING COMPLETE".  Nothing outside outputs/ is written
 except the style registration in emotion_preset.json (backed up first).
@@ -202,6 +206,52 @@ def pitch_fields(stat, ref_hz):
     return {"pitch_level_st": "0", "pitch_range_st": "", "pitch_ok": "0"}
 
 
+def align_lead_folder(src: Path, dst: Path, lead_ms: int, log_csv: Path, lo: float, hi: float) -> Path:
+    """Finnish WAV + same-name TXT folder -> dst: each paired WAV with its start aligned (same sample rate and
+    channels), its TXT copied next to it.  Unpaired files are left out (they are not used for training)."""
+    import numpy as np
+    import soundfile as sf
+    from emo_prepare import align_lead
+    wavs, txts = {}, {}
+    for p in src.rglob("*"):
+        if p.is_file() and p.suffix.lower() in (".wav", ".txt"):
+            (wavs if p.suffix.lower() == ".wav" else txts).setdefault(p.stem, []).append(p)
+    stems = sorted(s for s in wavs if s in txts)
+    dup = [s for s in stems if len(wavs[s]) > 1 or len(txts[s]) > 1]
+    if dup:
+        raise SystemExit(f"[FAIL] Finnish folder: the name '{dup[0]}' is used by more than one WAV or TXT")
+    dst.mkdir(parents=True, exist_ok=True)
+    rows, removed, kept = [], [], 0
+    for k, s in enumerate(stems):
+        w, t = wavs[s][0], txts[s][0]
+        out = dst / w.relative_to(src).parent / f"{s}.wav"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            info = sf.info(str(w))
+            audio, sr = sf.read(str(w), dtype="float32", always_2d=True)
+            y, d = align_lead(audio, sr, t.read_text(encoding="utf-8-sig"), lead_ms)
+            sub = info.subtype if info.subtype in ("PCM_16", "PCM_24", "PCM_32", "FLOAT", "DOUBLE") else "PCM_16"
+            sf.write(str(out), y if y.shape[1] > 1 else y[:, 0], sr, subtype=sub)
+            removed.append(d["removed_ms"])
+        except Exception as exc:                  # unreadable: passed on as it is (the dataset step reports it)
+            shutil.copy2(w, out)
+            d = {"onset_ms": "", "cut_ms": "", "removed_ms": "", "note": f"unchanged: {exc}"}
+            kept += 1
+        shutil.copy2(t, out.with_suffix(".txt"))
+        rows.append({"stem": s, "source_wav": str(w), **d})
+        if k % 200 == 199 or k == len(stems) - 1:
+            say(f"[V2PROGRESS] {lo + (hi - lo) * (k + 1) / len(stems):.1f}")
+    with open(log_csv, "w", encoding="utf-8-sig", newline="") as f:
+        wr = csv.DictWriter(f, fieldnames=["stem", "source_wav", "onset_ms", "cut_ms", "removed_ms", "note"])
+        wr.writeheader()
+        wr.writerows(rows)
+    if removed:
+        q = np.percentile(removed, [10, 50, 90])
+        say(f"[V2] start aligned: {len(removed)} WAVs, {lead_ms} ms silence; start shortened by median {q[1]:.0f} ms "
+            f"(p10 {q[0]:.0f}, p90 {q[2]:.0f}; negative = silence added)" + (f"; {kept} unreadable, unchanged" if kept else ""))
+    return dst
+
+
 def ref_hz(character):
     stats = json.loads((ROOT / "outputs/v63/v63_main/data/pitch_stats.json").read_text(encoding="utf-8"))
     return stats["reference_hz"][character]
@@ -225,6 +275,9 @@ def cmd_finnish(args):
     move_aside(work, "finnish", run)
     work.mkdir(parents=True)
     src = Path(args.dataset)
+    if args.lead_ms >= 0:
+        phase("Aligning the start of the Finnish WAVs", 1.0)
+        src = align_lead_folder(src, work / "lead_aligned", args.lead_ms, work / "lead_align_log.csv", 1.0, 2.0)
     phase("Preparing the Finnish dataset (FinBERT)", 2.0)
     run_stage([TTS_PY, "-u", ROOT / "research/finnish_style_tts/prepare_dataset.py", "--wav-dir", src, "--label-dir", src,
                "--out", work / "prepared", "--source-name", run, "--eval-count", "1"], 2.0, 6.0, "Preparing the Finnish dataset (FinBERT)")
@@ -350,6 +403,9 @@ def cmd_scratch(args):
     data = work / "data"
     data.mkdir(parents=True)
     (work / "emotion_rows.json").write_text(json.dumps(spec, ensure_ascii=False, indent=1), encoding="utf-8")
+    if args.lead_ms >= 0:
+        phase("Aligning the start of the Finnish WAVs", 0.2)
+        fdir = align_lead_folder(fdir, work / "lead_aligned", args.lead_ms, work / "lead_align_log.csv", 0.2, 1.0)
 
     # 1. Finnish dataset (FinBERT features, held-out eval split)
     run_stage([TTS_PY, "-u", ROOT / "research/finnish_style_tts/prepare_dataset.py", "--wav-dir", fdir,
@@ -725,13 +781,19 @@ def main() -> int:
     ap.add_argument("--rvc-index", default="", help="scratch: its .index ('' = none)")
     ap.add_argument("--target-speaker", default="", help="scratch: speaker in the emotion folder the RVC voice is")
     ap.add_argument("--bridge-sentences", type=int, default=0, help="scratch: 0 = every Finnish sentence (testing: fewer)")
+    ap.add_argument("--lead-ms", type=int, default=-1,
+                    help="finnish/scratch: align the start of every Finnish WAV to this much silence (ms); -1 = off")
     args = ap.parse_args()
+    if args.lead_ms > 1000:
+        raise SystemExit("[FAIL] --lead-ms: at most 1000 ms")
     if not re.fullmatch(r"[A-Za-z0-9_\-]{1,40}", args.run_name):
         raise SystemExit("[FAIL] model name: letters, digits, _ and - only")
     if args.mode in ("joint", "finnish", "scratch") and args.run_name.lower() in {k.lower() for k in chars()}:
         raise SystemExit(f"[FAIL] a character named '{args.run_name}' already exists; choose another model name")
     t0 = time.time()
     res = {"joint": cmd_joint, "finnish": cmd_finnish, "style": cmd_style, "scratch": cmd_scratch}[args.mode](args)
+    if args.mode in ("finnish", "scratch"):
+        res["lead_ms"] = args.lead_ms if args.lead_ms >= 0 else "off"
     res["minutes"] = round((time.time() - t0) / 60, 1)
     (V2 / "results").mkdir(parents=True, exist_ok=True)
     out = V2 / "results" / f"{args.mode}_{args.run_name}.json"

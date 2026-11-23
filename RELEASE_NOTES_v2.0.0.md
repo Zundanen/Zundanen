@@ -7,7 +7,7 @@ Finnish speech is now synthesized by Zundanen's own **VITS models with FinBERT f
 - **Chatterbox** (**included** as `models/chatterbox.pt`, 68 MB, float16): Finnish VITS in the Chatterbox voice (Normal only). With `Use RVC voice conversion` and your own RVC model (for Zundamon at Pitch +8) it can speak in another voice.
 - **Character models with emotion styles** (**Normal / Ama / Tsun / Sexy**, adjustable style strength, pitch and speed) are trained with the Model Trainer from your own data. No character models are included.
 
-Measured on 60 held-out Finnish Tatoeba sentences (Whisper large-v2 CER, lower is better): original Chatterbox-Finnish audio 2.5%, Chatterbox 2.3%, Chatterbox + Zundamon RVC (Protect 0.15) 4.7%; the Zundamon emotion model (distributed separately for research on Hugging Face): Normal 7.1%, Ama / Tsun / Sexy 9.2% / 7.8% / 8.1%.
+Measured on 60 held-out Finnish Tatoeba sentences (Whisper large-v2 CER, lower is better): original Chatterbox-Finnish audio 2.5%, Chatterbox 1.9%, Chatterbox + Zundamon RVC (Protect 0.15) 3.4%. The character models (distributed separately for research on Hugging Face), Normal / Ama / Tsun / Sexy: Zundamon 6.1% / 7.5% / 7.0% / 6.5%, Shikoku Metan 6.4% / 7.6% / 6.8% / 8.0%.
 
 ## UI
 
@@ -16,6 +16,7 @@ Measured on 60 held-out Finnish Tatoeba sentences (Whisper large-v2 CER, lower i
 - Batch Generation: same settings; CSV columns `filename,text,style,strength,speed,seed` (old `length_scale` columns are still read).
 - Model Trainer: RVC (as in v1.1.0) and VITS (Joint training, Finnish fine-tuning, Style fine-tuning; training length in epochs). Joint / Finnish continue a model you trained before; start with `New model (from scratch)`.
 - Model Trainer → Joint training → Base model `New model (from scratch)`: a new model from random weights out of a Finnish WAV+TXT folder, emotion WAV+LAB rows (folder, LAB folder, speaker, style; more rows with +) and an RVC model (.pth) with its Character chosen from the entered speakers for the Finnish bridge (every Finnish sentence of the folder; RVC bridge share sets how often it is used; pitch shift set automatically, the character's own style tempo measured from its recordings).
+- Model Trainer → VITS: `Align the start of the Finnish WAVs` (Finnish fine-tuning and New model, on by default) evens out the silence at the start of the Finnish WAVs before training, leaving `Silence before the first word (ms)` (default 100 ms, 0–500). Training uses aligned copies; the original files are not changed.
 - Voice Conversion: RVC conversion of a WAV file or a whole folder, record-and-convert with Save As, in-app real-time conversion (no extra window, about 0.3 s latency).
 - Accent: unchanged from v1.1.0.
 
@@ -23,8 +24,18 @@ Measured on 60 held-out Finnish Tatoeba sentences (Whisper large-v2 CER, lower i
 
 The repository contains one model, `models/chatterbox.pt` (Chatterbox). Character models and RVC models are **not** included; the Zundamon and Shikoku Metan character models are distributed separately for non-commercial research on Hugging Face, https://huggingface.co/Zundanen/finnish-emotion-vits, under the terms of the SSS multimodal database (put a character file `<name>.pt` in `models/characters` and its RVC model in `runtime/rvc/exports/<name>/`, then restart). See README (“Model files”).
 
+## Replaces the first v2.0.0 upload
+
+This release replaces the first v2.0.0 upload. Changes since then:
+
+- Retrained Chatterbox model (`models/chatterbox.pt`): CER 2.3% → 1.9%, with Zundamon RVC 4.7% → 3.4%.
+- In the emotion models, s before y (e.g. *syönyt*) sounded close to "sh". Generation now corrects it automatically.
+- The `Align the start of the Finnish WAVs` option in the Model Trainer (see above).
+- Updated Zundamon and Shikoku Metan models on Hugging Face (Zundamon before: 7.1% / 9.2% / 7.8% / 8.1%). Shikoku Metan now uses the same style tempo as Zundamon.
+
+If you downloaded v2.0.0 before, get the source again (`Code → Download ZIP`, or `git pull`) and copy it over your Zundanen folder. `runtime/`, `config.json`, `outputs/` and `models/characters/` are not part of the repository, so they are kept. The Python environments are unchanged, so setup does not need to be run again. Replace `models/characters/Zundamon.pt` and `Metan.pt` with the new files from Hugging Face; the RVC models are unchanged.
+
 ## Known limitations
 
-- Words with h + consonant (e.g. *tyhjä*) were weak in the developer's Zundamon model; RVC also weakens /h/.
 - The first generation downloads the FinBERT model (about 1.4 GB).
 - Screenshots in `docs/` are still from v1.1.0.

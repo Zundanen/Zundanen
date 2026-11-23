@@ -270,6 +270,10 @@ Minun nimeni on Zundamon.</textarea>
         <div id="trainDatasetBlock" hidden>
           <label class="small">Dataset folder</label><div class="row"><input class="grow" type="text" id="trainDataset" placeholder="C:\...\datasets\Kiritan"><button class="iconbtn browse" type="button" onclick="pickDataset()">Browse…</button></div><div class="datasetInfo" id="datasetInfo"></div>
         </div>
+        <div id="v2LeadBlock" hidden>
+          <label class="checkrow"><input type="checkbox" id="v2LeadTrim" checked onchange="updateLeadUi()"><span><b>Align the start of the Finnish WAVs</b><br><span data-i18n="leadTrimHint"></span></span></label>
+          <div class="numberGrid"><div><label class="small" for="v2LeadMs">Silence before the first word (ms)</label><input type="number" id="v2LeadMs" min="0" max="500" step="10" value="100"></div></div>
+        </div>
         <div id="v2NumbersBlock">
         <div class="numberGrid" id="v2Numbers">
           <div data-v2modes="joint finnish"><label class="small" for="v2Epochs">Epoch (VITS)</label><input type="number" id="v2Epochs" min="0.5" max="50" step="0.5" value="4.5"></div>
@@ -502,7 +506,8 @@ const uiTexts={
     speakerHint:"Whose voice the new Finnish data is (speaker id inside the model).",
     targetModelHint:"The style is added to this model (and to other characters that share its base).",
     bridgeHint:"Share of RVC-converted Finnish (Zundamon's voice) in each batch. Recommended 25%. More moves the voice toward Zundamon, but RVC artefacts can show in pronunciation; less keeps the Chatterbox pronunciation.",
-    dataRatioHint:"The rest is the existing joint data (the bridge share applies to it).",datasetFinnish:"WAV + same-name TXT (Finnish sentence), at least 20 pairs.",
+    dataRatioHint:"The rest is the existing joint data (the bridge share applies to it).",
+    leadTrimHint:"Makes every Finnish WAV start the same way: the audio before the first voice is removed (keeping 50 ms before it, 100 ms when the sentence starts with h, s, f, š or z) and the silence set below is added in front. Uneven silence or breaths before the first word make the first word less clear. The trimmed copies are saved in the training folder and also used for the RVC bridge; your own files are not changed.",leadMsRange:"Silence before the first word: enter 0–500 ms.",datasetFinnish:"WAV + same-name TXT (Finnish sentence), at least 20 pairs.",
     rvcTrainerSub:"Same as Zundanen v1: trains an RVC v2 voice model (.pth + .index) from an audio folder and saves it to exports/<name>.",
     vcIntro:"These settings are used by WAV conversion and Recording. The originals are never overwritten; results go to outputs/voice_conversion.",
     vcFileHint:"Choose a WAV file to convert only that file, or a folder to convert every WAV in it (results go to a new folder).",
@@ -526,7 +531,8 @@ const uiTexts={
     speakerHint:"Kenen ääntä uusi suomenkielinen aineisto on (puhujatunnus mallin sisällä).",
     targetModelHint:"Tyyli lisätään tähän malliin (ja muille hahmoille, joilla on sama perusmalli).",
     bridgeHint:"RVC:llä muunnetun suomen (Zundamonin ääni) osuus jokaisessa erässä. Suositus 25 %. Suurempi osuus vie ääntä lähemmäs Zundamonia, mutta RVC:n virheet voivat näkyä ääntämisessä; pienempi pitää Chatterboxin ääntämyksen.",
-    dataRatioHint:"Loput ovat nykyistä yhteisaineistoa (RVC-sillan osuus koskee sitä).",datasetFinnish:"WAV + samanniminen TXT (suomenkielinen lause), vähintään 20 paria.",
+    dataRatioHint:"Loput ovat nykyistä yhteisaineistoa (RVC-sillan osuus koskee sitä).",
+    leadTrimHint:"Tasaa jokaisen suomenkielisen WAV-tiedoston alun: ensimmäistä ääntä edeltävä osa poistetaan (sitä ennen jätetään 50 ms, h-, s-, f-, š- ja z-alkuisissa lauseissa 100 ms) ja alkuun lisätään alla asetettu hiljaisuus. Epätasainen hiljaisuus tai hengitys ennen ensimmäistä sanaa heikentää ensimmäisen sanan selkeyttä. Tasatut kopiot tallennetaan koulutuskansioon ja niitä käytetään myös RVC-siltaan; omia tiedostojasi ei muuteta.",leadMsRange:"Hiljaisuus ennen ensimmäistä sanaa: anna 0–500 ms.",datasetFinnish:"WAV + samanniminen TXT (suomenkielinen lause), vähintään 20 paria.",
     rvcTrainerSub:"Kuten Zundanen v1: kouluttaa RVC v2 -äänimallin (.pth + .index) äänikansiosta ja tallentaa sen kansioon exports/<nimi>.",
     vcIntro:"Näitä asetuksia käyttävät WAV-muunnos ja äänitys. Alkuperäisiä ei korvata; tulokset tallennetaan kansioon outputs/voice_conversion.",
     vcFileHint:"Valitse WAV-tiedosto, niin vain se muunnetaan, tai kansio, niin kaikki sen WAV-tiedostot muunnetaan (tulokset uuteen kansioon).",
@@ -550,7 +556,8 @@ const uiTexts={
     speakerHint:"新しいフィンランド語データが誰の声か（モデル内の話者 ID）。",
     targetModelHint:"このモデルにスタイルを追加します（同じベースを使う他のキャラクターにも出ます）。",
     bridgeHint:"各バッチに入る RVC 変換フィンランド語（ずんだもんの声）の割合。推奨 25%。多いほど声はずんだもんに寄りますが、RVC 由来の崩れが発音に出ることがあります。少ないほど Chatterbox の発音に寄ります。",
-    dataRatioHint:"残りは既存のジョイントデータです（RVC ブリッジの割合はそちらに適用）。",datasetFinnish:"WAV と同名 TXT（フィンランド語の文）を 20 組以上。",
+    dataRatioHint:"残りは既存のジョイントデータです（RVC ブリッジの割合はそちらに適用）。",
+    leadTrimHint:"フィンランド語の WAV の文頭をそろえます。最初の声より前の部分を削り（声の 50 ms 手前まで残します。h・s・f・š・z で始まる文は 100 ms）、下で指定した長さの無音を先頭に足します。文頭の無音や息の長さがばらばらだと、最初の単語がはっきりしにくくなります。そろえた音声は学習用フォルダにコピーして使い、RVC ブリッジもそこから作ります。元のファイルは変更しません。",leadMsRange:"最初の単語の前の無音は 0〜500 ms で入力してください。",datasetFinnish:"WAV と同名 TXT（フィンランド語の文）を 20 組以上。",
     rvcTrainerSub:"v1 と同じです。音声フォルダから RVC v2 の声モデル（.pth + .index）を学習し、exports/<名前> に保存します。",
     vcIntro:"ここの設定は WAV 変換と録音の両方で使います。元のファイルは上書きせず、結果は outputs/voice_conversion に保存します。",
     vcFileHint:"WAV ファイルを選ぶとそのファイルだけ、フォルダを選ぶと中の WAV をすべて変換します（結果は新しいフォルダに保存）。",
@@ -717,6 +724,7 @@ async function loadV2Options(){
     const cpus=v2Opts.cpu_count||4;if(t.epochs)$('v2Epochs').value=t.epochs;if(t.branch_epochs)$('v2BranchEpochs').value=t.branch_epochs;
     $('v2Batch').value=t.batch_size??10;$('v2Workers').value=t.workers??Math.min(4,cpus);
     $('v2Bridge').value=Math.round(100*(t.bridge_ratio??v2Opts.bridge_recommended??0.25));$('v2DataRatio').value=Math.round(100*(t.data_ratio??0.25));
+    $('v2LeadTrim').checked=t.lead_trim??true;$('v2LeadMs').value=t.lead_ms??100;
     $('rvcEpochs').value=rt.epochs??100;$('rvcBatch').value=rt.batch_size??6;$('rvcWorkers').value=rt.workers??Math.min(8,cpus);$('rvcFresh').checked=rt.fresh??true;
     ['v2Bridge','v2DataRatio'].forEach(id=>$(id).dispatchEvent(new Event('input')));
     setTrainEngine((v2Saved&&v2Saved.engine)||'vits');
@@ -750,10 +758,12 @@ function updateTrainModeUi(){
   $('v2ScratchPanel').hidden=!(mode==='joint'&&$('v2BaseModel').value==='__new__');
   document.querySelectorAll('[data-v2modes]').forEach(el=>{el.hidden=!el.dataset.v2modes.split(' ').includes(mode)});
   $('trainDatasetBlock').hidden=!(rvc||mode==='finnish');
+  $('v2LeadBlock').hidden=rvc||!(mode==='finnish'||(mode==='joint'&&$('v2BaseModel').value==='__new__'));updateLeadUi();
   $('v2RunName').placeholder={joint:'Zundamon_v2',finnish:'Metan'}[mode]||'';
   $('trainDataset').placeholder=rvc?'C:\\...\\datasets\\Kiritan':'C:\\...\\dataset';
   $('stepStatLabel').textContent=ut(rvc?'statEpoch':'statStep');renderDatasetInfo();
 }
+function updateLeadUi(){$('v2LeadMs').disabled=!$('v2LeadTrim').checked}
 // v2: Joint training "New model (from scratch)": Finnish WAV+TXT + emotion WAV+LAB + RVC bridge.
 // A scratch base needs far more epochs than continuing a model, so the epoch default follows the choice.
 function v2BaseChanged(){const scratch=$('v2BaseModel').value==='__new__',ep=$('v2Epochs');if(scratch&&!document.querySelector('#v2EmoRows .emoRow'))addEmoRow();if(scratch&&Number(ep.value)===4.5)ep.value=35;else if(!scratch&&Number(ep.value)===35)ep.value=4.5;updateTrainModeUi()}
@@ -1107,7 +1117,8 @@ async function startTraining(){
     body={engine:'rvc',character,dataset,epochs:Number($('rvcEpochs').value),batch_size:Number($('rvcBatch').value),save_every:Number($('rvcSaveEvery').value),workers:Number($('rvcWorkers').value),gpu:$('rvcGpu').value.trim()||'0',fresh:$('rvcFresh').checked};
   }else{
     const mode=$('v2Mode').value;
-    body={engine:'vits',mode,run_name:$('v2RunName').value.trim(),base_model:$('v2BaseModel').value,character:$('v2TrainCharacter').value,model:$('v2TargetModel').value,epochs:Number($('v2Epochs').value),branch_epochs:Number($('v2BranchEpochs').value),batch_size:Number($('v2Batch').value),workers:Number($('v2Workers').value),lr:Number($('v2Lr').value),bridge_ratio:Number($('v2Bridge').value)/100,data_ratio:Number($('v2DataRatio').value)/100,finnish_dir:$('v2FinnishDir').value.trim(),emotion_rows:emoRows().filter(r=>r.wav_dir),rvc_pth:$('v2BridgePth').value.trim(),target_speaker:$('v2BridgeChar').value};
+    body={engine:'vits',mode,run_name:$('v2RunName').value.trim(),base_model:$('v2BaseModel').value,character:$('v2TrainCharacter').value,model:$('v2TargetModel').value,epochs:Number($('v2Epochs').value),branch_epochs:Number($('v2BranchEpochs').value),batch_size:Number($('v2Batch').value),workers:Number($('v2Workers').value),lr:Number($('v2Lr').value),bridge_ratio:Number($('v2Bridge').value)/100,data_ratio:Number($('v2DataRatio').value)/100,finnish_dir:$('v2FinnishDir').value.trim(),emotion_rows:emoRows().filter(r=>r.wav_dir),rvc_pth:$('v2BridgePth').value.trim(),target_speaker:$('v2BridgeChar').value,lead_trim:$('v2LeadTrim').checked,lead_ms:Number($('v2LeadMs').value)};
+    if(body.lead_trim&&!$('v2LeadBlock').hidden&&!(body.lead_ms>=0&&body.lead_ms<=500)){alert(ut('leadMsRange'));return}
     if(mode==='style'){Object.assign(body,{style_name:$('v2StyleName').value.trim(),style_label:$('v2StyleLabel').value.trim(),normal_dir:$('v2NormalDir').value.trim(),style_dir:$('v2StyleDir').value.trim()});if(!body.style_name||!body.normal_dir||!body.style_dir){alert(ut('needStyle'));return}body.run_name=body.style_name}
     else if(!body.run_name){alert(ut('needRunName'));return}
     if(mode==='finnish'){body.dataset=$('trainDataset').value.trim();if(!body.dataset){alert(ut('needDataset'));return}}

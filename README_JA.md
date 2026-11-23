@@ -109,14 +109,14 @@ v1 と同じく `Zundanen.exe`（推奨）または `run_ui.bat`（ブラウザ�
 | 音声 | CER |
 |---|---:|
 | Chatterbox-Finnish の元の音声（上限の目安） | 2.5% |
-| Chatterbox | 2.3% |
-| Chatterbox ＋ ずんだもん RVC（+8，Protect 0.15） | 4.7% |
-| Zundamon Normal | 7.1% |
-| Zundamon Ama / Tsun / Sexy | 9.2% / 7.8% / 8.1% |
+| Chatterbox | 1.9% |
+| Chatterbox ＋ ずんだもん RVC（+8，Protect 0.15） | 3.4% |
+| Zundamon Normal | 6.1% |
+| Zundamon Ama / Tsun / Sexy | 7.5% / 7.0% / 6.5% |
+| Shikoku Metan Normal | 6.4% |
+| Shikoku Metan Ama / Tsun / Sexy | 7.6% / 6.8% / 8.0% |
 
-Zundamon の行は，Hugging Face で研究用に配布しているずんだもんの感情モデルの値です．
-
-h ＋子音（例：*tyhjä*，*kissanhiekka*）を含む単語は，ずんだもんの声で崩れやすいことが分かっています．
+Zundamon と Shikoku Metan の行は，Hugging Face で研究用に配布している感情モデル（2026-11-23 更新）の値です．
 
 ## Batch Generation
 
@@ -143,6 +143,7 @@ filename,text,style,strength,speed,seed
     - **Emotion data**：話者とスタイルごとに 1 行（WAV のフォルダ，LAB のフォルダ（空欄なら同じフォルダ），話者名，スタイル Normal / Ama / Tsun / Sexy）．`+` で行を追加します．どの話者にも Normal の行が必要です．LAB は WAV と同じファイル名にします．自分の LAB がない行は，同じスタイルのほかの行にある同じ名前の LAB を使います．
     - **Bridge RVC model (.pth)**（Browse…）と **Character**：フォルダのフィンランド語の文を全部その RVC の声に変換して（それぞれ 2 つの高さ．1 ファイル約 1 秒．20,000 文で約 11 時間），キャラクターにフィンランド語を覚えさせます．Character は入力した話者から選びます（ファイル名が合えば自動で選ばれます．例：Zundamon.pth → zundamon）．学習でそれをどれだけ使うかは `RVC bridge share` で決めます．隣に .index があれば使い，ピッチのずらし幅は自動で決めます（Index 0.1 / Protect 0.15）．
     - Epoch (VITS) の既定は 35 になります．既存のモデルの続きよりずっと長くかかります（1 日以上かかることもあります）．
+  - `Align the start of the Finnish WAVs`（`Finnish fine-tuning` と `New model (from scratch)`．既定でオン）：学習の前に，フィンランド語の WAV の頭の無音をそろえ，最初の単語の前を `Silence before the first word (ms)`（既定 100 ms，0〜500）にします．頭の無音が長かったりばらばらだったりすると，最初の単語の発音が崩れやすくなるためです．元のファイルは変更せず，コピーを使って学習します．
   - 長さはエポック数で指定します（Epoch (VITS) 既定 4.5，Epoch (Style) 既定 80）．Batch size と Workers は PC に合わせて変えられます．
 
 ## Voice Conversion

@@ -151,6 +151,8 @@ def main() -> int:
     ap.add_argument("--flow-cond", action="store_true", help="v65b: F0 conditions the flow couplings")
     ap.add_argument("--out-name", default="base")
     ap.add_argument("--extra-csv", action="append", default=[], help="v2: extra manifest(s) (mixed as group 'extra')")
+    ap.add_argument("--group-csv", action="append", default=[], metavar="NAME=CSV",
+                    help="v82: manifest mixed as its own group NAME (give NAME a share in --mix)")
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()
     if args.smoke:
@@ -173,6 +175,15 @@ def main() -> int:
             r["group"] = "extra"
         rows += ex
         print(f"[DATA] extra rows from {extra}: {len(ex)}")
+    for spec in args.group_csv:          # v82: named group, e.g. self=outputs/v82/self_pitch.csv
+        name, _, path = spec.partition("=")
+        if not name or not path or name in ("fi", "bridge", "ja", "extra"):
+            raise SystemExit(f"[FAIL] --group-csv needs NAME=CSV with a new group name: {spec}")
+        ex = read_csv(Path(path))
+        for r in ex:
+            r["group"] = name
+        rows += ex
+        print(f"[DATA] group '{name}' rows from {path}: {len(ex)}")
     have = sum(1 for r in rows if (F0_DIR / (f0_key(r["wav_path"]) + ".npy")).exists())
     print(f"[F0] frame F0 available for {have}/{len(rows)} training rows")
     if have < 0.95 * len(rows) and not args.smoke:

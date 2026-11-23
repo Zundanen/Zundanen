@@ -109,14 +109,14 @@ Character error rate (CER, lower is better) of Whisper large-v2 on 60 Finnish Ta
 | Voice | CER |
 |---|---:|
 | Original Chatterbox-Finnish audio (practical ceiling) | 2.5% |
-| Chatterbox | 2.3% |
-| Chatterbox + Zundamon RVC (+8, Protect 0.15) | 4.7% |
-| Zundamon Normal | 7.1% |
-| Zundamon Ama / Tsun / Sexy | 9.2% / 7.8% / 8.1% |
+| Chatterbox | 1.9% |
+| Chatterbox + Zundamon RVC (+8, Protect 0.15) | 3.4% |
+| Zundamon Normal | 6.1% |
+| Zundamon Ama / Tsun / Sexy | 7.5% / 7.0% / 6.5% |
+| Shikoku Metan Normal | 6.4% |
+| Shikoku Metan Ama / Tsun / Sexy | 7.6% / 6.8% / 8.0% |
 
-The Zundamon rows are the Zundamon emotion model distributed separately for research on Hugging Face.
-
-Words with h + consonant (e.g. *tyhjä*, *kissanhiekka*) are known to be weak in Zundamon's voice.
+The Zundamon and Shikoku Metan rows are the emotion models distributed separately for research on Hugging Face (updated 2026-11-23).
 
 ## Batch Generation
 
@@ -143,6 +143,7 @@ Switch with `VITS` / `RVC` at the top.
     - **Emotion data**: one row per speaker and style (WAV folder, LAB folder – empty = the same folder –, speaker name and style Normal / Ama / Tsun / Sexy); add rows with `+`. Every speaker needs a Normal row. A LAB has the same file name as its WAV; a row without its own LABs uses the same-name LAB of another row of the same style.
     - **Bridge RVC model (.pth)** (Browse…) and **Character**: every Finnish sentence of the folder is converted to this RVC voice (each at two pitch levels, about 1 s per file; 20,000 sentences ≈ 11 h) so the character learns Finnish. Character is chosen from the entered speakers (preselected when the file name matches, e.g. Zundamon.pth → zundamon). `RVC bridge share` sets how often the converted sentences are used in training. Its .index next to it is used if present; the pitch shift is set automatically (Index 0.1 / Protect 0.15).
     - Epoch (VITS) defaults to 35. This takes much longer than continuing a model (often a day or more).
+  - `Align the start of the Finnish WAVs` (`Finnish fine-tuning` and `New model (from scratch)`, on by default): the silence at the start of the Finnish WAVs is evened out before training, leaving `Silence before the first word (ms)` (default 100 ms, 0–500) before the first word. A long or uneven leading silence weakens the first word. The original files are not changed; training uses copies.
   - Training length is given in epochs (Epoch (VITS) default 4.5, Epoch (Style) default 80); Batch size and Workers can be set for your PC.
 
 ## Voice Conversion

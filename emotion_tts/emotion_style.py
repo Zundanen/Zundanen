@@ -205,23 +205,65 @@ def cmd_zdelta(args):
     print(f"[PASS] z-delta {pairs} pairs")
 
 
+def _frame_hiss(y: np.ndarray) -> np.ndarray:
+    """share of the 0.3-11.5 kHz power above 4 kHz in each 256-sample frame (16 ms window from the frame start)"""
+    n, f = 384, np.fft.rfftfreq(1024, 1 / 24000)
+    hi, band = (f >= 4000) & (f < 11500), (f >= 300) & (f < 11500)
+    out = []
+    for k in range(0, max(0, len(y) - n) + 1, 256):
+        P = np.abs(np.fft.rfft(y[k:k + n] * np.hanning(n), 1024)) ** 2
+        out.append(P[hi].sum() / (P[band].sum() + 1e-20))
+    return np.array(out)
+
+
+def _s_hiss_window(voiced: np.ndarray, hiss: np.ndarray, s0: int, s1: int) -> tuple[int, int]:
+    """Frames of the /s/ hiss of the letter 's' at frames [s0, s1).  The model starts that hiss inside the PREVIOUS
+    letter's frames and its later 's' frames already carry the next vowel, so: the unvoiced run (pitch predictor)
+    nearest s0 (searched from 6 frames before it, at most 20 frames to the left), plus up to 4 more frames of
+    hiss (>= 50 % of the power above 4 kHz in the first render) that the voicing flag already calls voiced."""
+    cand = [t for t in range(max(0, s0 - 6), min(s1, len(voiced))) if not voiced[t]]
+    if not cand:
+        return s0, s0
+    t = min(cand, key=lambda x: abs(x - s0))
+    a = t
+    while a > 0 and not voiced[a - 1] and t - a < 20:
+        a -= 1
+    b = t
+    while b + 1 < len(voiced) and not voiced[b + 1]:
+        b += 1
+    b += 1
+    b0 = b
+    while a < b < min(len(hiss), b0 + 4, s1) and hiss[b] >= 0.5:
+        b += 1
+    return a, b
+
+
 @torch.no_grad()
 def synth(model, zd, tok, bert, *, style, strength, z, level_st, range_k, pitch, speaker="zundamon", lang="fi",
           noise=0.4, seed=1234, device="cuda", length_scale=1.0, tempo=None, dur_detail=0.0, token_scale=None,
-          unvoiced_tokens=None):
+          unvoiced_tokens=None, s_fix=None):
     """tempo=None: per-token style durations from the branch (v65 original).
     tempo=float: keep the Normal per-token rhythm and scale the whole sentence by
     `tempo` (v67 fix: the branch's per-token durations scattered +-30% and broke
     Finnish long/short contrast); dur_detail in [0,1] re-adds that fraction of
-    the branch's per-token deviation from its own sentence mean."""
+    the branch's per-token deviation from its own sentence mean.
+    s_fix=(id of 's', id of 'y', id of a vowel), e.g. vocab 's', 'y', 'ä' (v91, 2026-11-17; None = unchanged):
+    the training voice says /s/ before 'y' almost without hiss, so 'sy' sounds like Japanese 'シュ'.  The
+    sentence is also rendered with that 'y' replaced by the vowel (same durations, pitch and noise) and only the
+    latent frames of each such /s/ hiss are taken from that render."""
     tok = tok.unsqueeze(0).to(device)
     bert = bert.unsqueeze(0).to(device)
     tl = torch.tensor([tok.size(1)], device=device)
-    h, mp, lp, xm, dlogw, _ = model.prior(
-        tok, bert, tl, speaker_id=torch.tensor([model.speakers.index(speaker)], device=device),
-        lang_id=torch.tensor([model.langs.index(lang)], device=device), has_bert=torch.ones(1, device=device),
-        style_mix=style_mix_tensor(model.styles, style, strength, device=device),
-        pitch=torch.tensor([pitch], dtype=torch.float32, device=device))
+    prior_kw = dict(speaker_id=torch.tensor([model.speakers.index(speaker)], device=device),
+                    lang_id=torch.tensor([model.langs.index(lang)], device=device), has_bert=torch.ones(1, device=device),
+                    style_mix=style_mix_tensor(model.styles, style, strength, device=device),
+                    pitch=torch.tensor([pitch], dtype=torch.float32, device=device))
+    h, mp, lp, xm, dlogw, _ = model.prior(tok, bert, tl, **prior_kw)
+    s_pos = []
+    if s_fix:
+        s_id, y_id, v_id = (int(x) for x in s_fix)
+        ids = tok[0].tolist()
+        s_pos = [k for k in range(len(ids) - 1) if ids[k] == s_id and ids[k + 1] == y_id]
     if tempo is None:
         logw = model.log_duration(h, xm, dlogw)
     else:
@@ -247,12 +289,31 @@ def synth(model, zd, tok, bert, *, style, strength, z, level_st, range_k, pitch,
             sel = torch.where(tok == int(tid), torch.ones_like(sel), sel)
         frames = torch.einsum("bx,bxy->by", sel, attn).clamp(max=1.0)    # [1, Ty] 1 on those frames
         feat = torch.stack([feat[:, 0], feat[:, 1] * (1 - frames)], dim=1)
-    m = m + model.base.f0.f0_proj(feat) * ym
+    fp = model.base.f0.f0_proj(feat) * ym
+    m = m + fp
     g = torch.Generator(device=device).manual_seed(int(seed))
-    zz = flow_apply(model.base, (m + torch.randn(m.shape, generator=g, device=device) * torch.exp(logs) * noise) * ym,
-                    ym, feat, reverse=True) * ym
-    if z and style != "normal":
-        zz = zz + z * frame_delta(zd, model, tok, attn, speaker, style) * ym
+    eps = torch.randn(m.shape, generator=g, device=device)
+    zz = flow_apply(model.base, (m + eps * torch.exp(logs) * noise) * ym, ym, feat, reverse=True) * ym
+    dz = z * frame_delta(zd, model, tok, attn, speaker, style) * ym if z and style != "normal" else None
+    if dz is not None:
+        zz = zz + dz
+    y = model.base.generator(zz)[0, 0].float().cpu().numpy()
+    if not s_pos:
+        return y
+    tok2 = tok.clone()
+    tok2[0, [k + 1 for k in s_pos]] = v_id
+    _h2, mp2, lp2, *_r = model.prior(tok2, bert, tl, **prior_kw)
+    m2, logs2 = expand_prior(attn, mp2, lp2)
+    zz2 = flow_apply(model.base, (m2 + fp + eps * torch.exp(logs2) * noise) * ym, ym, feat, reverse=True) * ym
+    if dz is not None:
+        zz2 = zz2 + dz
+    cum = np.concatenate([[0], np.cumsum(w.reshape(-1).long().cpu().numpy())])
+    voiced, hiss = (feat[0, 1] > 0.5).cpu().numpy(), _frame_hiss(y)
+    zz = zz.clone()
+    for k in s_pos:
+        a, b = _s_hiss_window(voiced, hiss, int(cum[k]), int(cum[k + 1]))
+        if b > a:
+            zz[..., a:b] = zz2[..., a:b]
     return model.base.generator(zz)[0, 0].float().cpu().numpy()
 
 

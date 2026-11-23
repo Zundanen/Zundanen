@@ -3035,8 +3035,12 @@ def trainer_start():
         workers = max(0, min(16, int(data.get("workers", min(4, os.cpu_count() or 1)))))
         bridge = max(0.0, min(0.6, float(data.get("bridge_ratio", V2_BRIDGE_RECOMMENDED))))
         data_ratio = max(0.05, min(0.6, float(data.get("data_ratio", 0.25))))
+        lead_trim = bool(data.get("lead_trim", True))     # align the start of the Finnish WAVs (finnish / new model)
+        lead_ms = int(round(float(data.get("lead_ms", 100)))) if lead_trim else 100
         if not (0 < lr <= 0.01):
             raise ValueError("lr")
+        if not 0 <= lead_ms <= 500:
+            raise ValueError("lead_ms")
     except (TypeError, ValueError):
         return jsonify({"ok": False, "error": "One or more training settings contain an invalid number."}), 400
     import emotion_engine
@@ -3093,6 +3097,8 @@ def trainer_start():
             return jsonify({"ok": False, "error": f"Speaker must be one of {list(speakers)}."}), 400
         cmd += ["--dataset", str(dataset.resolve()), "--character", character, "--data-ratio", f"{data_ratio:.3f}"]
         dataset_label = str(dataset.resolve())
+    if mode in {"finnish", "scratch"} and lead_trim:
+        cmd += ["--lead-ms", str(lead_ms)]
     elif mode == "style":
         name = str(data.get("style_name", "")).strip().lower()
         if not re.fullmatch(r"[a-z][a-z0-9_]{1,23}", name):
@@ -3111,7 +3117,8 @@ def trainer_start():
                 "--style-dir", str(sd.resolve()), "--model", target]
         dataset_label = str(sd.resolve())
     cfg["vits_v2_trainer"] = {"mode": "joint" if mode == "scratch" else mode, "epochs": epochs, "branch_epochs": branch_epochs,
-                              "batch_size": batch_size, "workers": workers, "lr": lr, "bridge_ratio": bridge, "data_ratio": data_ratio}
+                              "batch_size": batch_size, "workers": workers, "lr": lr, "bridge_ratio": bridge, "data_ratio": data_ratio,
+                              "lead_trim": lead_trim, "lead_ms": lead_ms}
     save_config(cfg)
     env = os.environ.copy()
     env.update({"PYTHONUNBUFFERED": "1", "PYTHONIOENCODING": "utf-8"})

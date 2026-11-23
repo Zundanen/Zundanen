@@ -109,14 +109,14 @@ Whisper large-v2:n merkkivirhesuhde (CER, pienempi on parempi) 60 suomenkielisel
 | Ääni | CER |
 |---|---:|
 | Alkuperäinen Chatterbox-Finnish-ääni (käytännön yläraja) | 2,5 % |
-| Chatterbox | 2,3 % |
-| Chatterbox + Zundamon RVC (+8, Protect 0,15) | 4,7 % |
-| Zundamon Normal | 7,1 % |
-| Zundamon Ama / Tsun / Sexy | 9,2 % / 7,8 % / 8,1 % |
+| Chatterbox | 1,9 % |
+| Chatterbox + Zundamon RVC (+8, Protect 0,15) | 3,4 % |
+| Zundamon Normal | 6,1 % |
+| Zundamon Ama / Tsun / Sexy | 7,5 % / 7,0 % / 6,5 % |
+| Shikoku Metan Normal | 6,4 % |
+| Shikoku Metan Ama / Tsun / Sexy | 7,6 % / 6,8 % / 8,0 % |
 
-Zundamon-rivit ovat Hugging Facessa erikseen tutkimuskäyttöön jaetun Zundamonin tunnemallin tuloksia.
-
-Sanat, joissa on h + konsonantti (esim. *tyhjä*, *kissanhiekka*), ovat tunnetusti heikkoja Zundamonin äänellä.
+Zundamon- ja Shikoku Metan -rivit ovat Hugging Facessa erikseen tutkimuskäyttöön jaettujen tunnemallien (päivitetty 2026-11-23) tuloksia.
 
 ## Batch Generation
 
@@ -143,6 +143,7 @@ Vaihda yläreunan valinnoilla `VITS` / `RVC`.
     - **Emotion data**: yksi rivi puhujaa ja tyyliä kohden (WAV-kansio, LAB-kansio – tyhjä = sama kansio –, puhujan nimi ja tyyli Normal / Ama / Tsun / Sexy); lisää rivejä `+`-painikkeella. Jokainen puhuja tarvitsee Normal-rivin. LAB-tiedostolla on sama nimi kuin WAV-tiedostolla; rivi ilman omia LAB-tiedostoja käyttää saman tyylin toisen rivin samannimistä LAB-tiedostoa.
     - **Bridge RVC model (.pth)** (Browse…) ja **Character**: kansion kaikki suomenkieliset lauseet muunnetaan tälle RVC-äänelle (kukin kahdella korkeudella, noin 1 s tiedostoa kohden; 20 000 lausetta ≈ 11 h), jotta hahmo oppii suomea. Character valitaan syötetyistä puhujista (valitaan valmiiksi, kun tiedostonimi täsmää, esim. Zundamon.pth → zundamon). `RVC bridge share` määrää, kuinka usein muunnettuja lauseita käytetään koulutuksessa. Vieressä oleva .index käytetään, jos se löytyy; sävelkorkeuden siirto asetetaan automaattisesti (Index 0,1 / Protect 0,15).
     - Epoch (VITS) -oletus on 35. Tämä kestää paljon kauemmin kuin olemassa olevan mallin jatkaminen (usein vuorokauden tai enemmän).
+  - `Align the start of the Finnish WAVs` (`Finnish fine-tuning` ja `New model (from scratch)`, oletuksena päällä): suomenkielisten WAV-tiedostojen alun hiljaisuus tasataan ennen koulutusta, ja ensimmäistä sanaa edeltää `Silence before the first word (ms)` -kentän mukainen tauko (oletus 100 ms, 0–500). Pitkä tai vaihteleva alkuhiljaisuus heikentää ensimmäisen sanan ääntämistä. Alkuperäisiä tiedostoja ei muuteta; koulutus käyttää kopioita.
   - Koulutuksen pituus annetaan epookkeina (Epoch (VITS) oletus 4,5, Epoch (Style) oletus 80); Batch size ja Workers voi asettaa oman tietokoneen mukaan.
 
 ## Voice Conversion

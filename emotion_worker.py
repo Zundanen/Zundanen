@@ -13,6 +13,7 @@ v2.0.1: a character is one trained model (preset["characters"][name]: speaker,
 base_name, branch_name, level_st, range_st).  Models are loaded when first used
 and at most MAX_MODELS stay in VRAM.  User styles (preset["extra_styles"],
 Style fine-tuning) are offered for the characters whose base they were trained on.
+v91: /s/ before 'y' is brightened (optional "s_before_y": vowel letter or "off"; default "ä").
 Original Zundanen code (MIT).
 """
 
@@ -151,12 +152,17 @@ def main() -> int:
                 level = level0 + a * (s["level_st"] - n["level_st"])
                 ratio = (s["range_st"] / n["range_st"]) ** a
                 timing = _timing(pre, style, a, req, ch)
+            # v91 (2026-11-17): /s/ before 'y' from a render with that 'y' -> 'ä' ('sy' no longer sounds 'シュ');
+            # request / preset key "s_before_y": a vowel letter, or "off"
+            sy_v = str(req.get("s_before_y", pre.get("s_before_y", "ä"))).strip().lower()
+            s_fix = (vocab["s"], vocab["y"], vocab[sy_v]) if sy_v not in ("", "off", "none") and all(
+                c in vocab for c in ("s", "y", sy_v)) else None
             y = S.synth(m_use, zd_use, tok, bert, style=style, strength=a, z=(zs if style != "normal" else 0.0),
                         level_st=level, range_k=k0 * ratio,
                         pitch=pitch_vector(level, ch["range_st"] * ratio, rc), speaker=ch["speaker"],
                         noise=max(0.0, min(1.5, float(req.get("noise_scale", pre["noise_scale"])))),
                         length_scale=max(0.5, min(2.0, float(req.get("length_scale", 1.0)))),
-                        seed=int(req.get("seed", 1234)), device=dev, **timing)
+                        seed=int(req.get("seed", 1234)), device=dev, s_fix=s_fix, **timing)
             out = Path(str(req["output"])).resolve()
             write_wav(out, y)
             emit(RESULT, {"ok": True, "id": rid, "output": str(out), "style": style, "character": character,
