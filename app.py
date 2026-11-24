@@ -24,6 +24,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from rvc_locale import ensure_rvc_language_override
 from aalto_alignment import AlignmentError, native_alignment_status, run_alignment
 from sentence_slicer import slice_generated_item, split_text_sentences
+import pronunciation
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
@@ -833,7 +834,8 @@ def validate_tts_config(cfg: dict) -> None:
 
 
 def validate_config(cfg: dict) -> None:
-    validate_tts_config(cfg)
+    """RVC files only. The Chatterbox-Finnish files are checked by the v1 Finnish TTS path itself
+    (validate_tts_config): v2 does not use them and setup no longer downloads them."""
     required = {
         "RVC Python": Path(cfg["rvc_python"]),
         "RVC repo": Path(cfg["rvc_repo"]),
@@ -924,8 +926,8 @@ def generate_voice_file(
 
     cfg = cfg or load_config()
     source_only = bool(source_only)
+    validate_tts_config(cfg)
     if source_only:
-        validate_tts_config(cfg)
         voices = scan_voices(cfg)
     else:
         validate_config(cfg)
@@ -1423,13 +1425,14 @@ def _batch_generate_v65(item: dict, output: Path, v65_cfg: dict, cfg: dict) -> N
         _stop_old_vits_worker_only()
     style = item.get("style") or v65_cfg["style"]
     strength = item.get("strength", v65_cfg["strength"] if style == v65_cfg["style"] else None)
+    spoken = pronunciation.apply(item["text"])  # abbreviations read with Finnish letter names
     tts_out = TEMP_DIR / f"batch_tts_{uuid.uuid4().hex}.wav" if v65_cfg.get("use_rvc") else output
     try:
         if chatterbox:
-            _generate_chatterbox(text=item["text"], output=tts_out, seed=int(item["seed"]), noise_scale=0.4,
+            _generate_chatterbox(text=spoken, output=tts_out, seed=int(item["seed"]), noise_scale=0.4,
                                  length_scale=float(item["length_scale"]), batch=True)
         else:
-            emotion_engine.generate(text=item["text"], output=tts_out, style=style, strength=strength, seed=int(item["seed"]),
+            emotion_engine.generate(text=spoken, output=tts_out, style=style, strength=strength, seed=int(item["seed"]),
                                 noise_scale=0.4, length_scale=float(item["length_scale"]), level=v65_cfg["level"],
                                 character=v65_cfg["character"])
         if v65_cfg.get("use_rvc"):
@@ -1490,7 +1493,8 @@ def batch_runner() -> None:
                     _batch_generate_v65(item, output, v65_cfg, cfg)
                 else:
                     generate_vits_file(
-                        text=item["text"], output=output, checkpoint=item["checkpoint"],
+                        text=pronunciation.apply(item["text"]),
+                        output=output, checkpoint=item["checkpoint"],
                         noise_scale=item["noise_scale"], length_scale=item["length_scale"],
                         seed=item["seed"], batch=True,
                     )
@@ -1648,6 +1652,15 @@ def update_config():
     return jsonify({"ok": True})
 
 
+@app.post("/api/pronunciation/preview")
+def pronunciation_preview():
+    """The text as the TTS will read it (shown under the text box when it differs)."""
+    data = request.get_json(silent=True) or {}
+    text = str(data.get("text", ""))[:20000]
+    spoken = pronunciation.apply(text)
+    return jsonify({"ok": True, "spoken": spoken, "changed": spoken != text})
+
+
 @app.post("/api/generate")
 def generate():
     with training_state_lock:
@@ -1667,6 +1680,7 @@ def generate():
         if not text:
             return jsonify({"ok": False, "error": "Enter Finnish text."}), 400
         cfg = load_config()
+        spoken = pronunciation.apply(text)  # abbreviations read with Finnish letter names
         checkpoint = str(data.get("checkpoint") or cfg.get("vits_checkpoint") or "").strip()
         try:
             noise_scale = max(0.0, min(1.5, float(data.get("noise_scale", cfg.get("vits", {}).get("noise_scale", 0.4)))))
@@ -1710,11 +1724,11 @@ def generate():
             if use_rvc and rvc_voice not in scan_voices(cfg):
                 return jsonify({"ok": False, "error": f"RVC model not found in exports: {rvc_voice or '(none)'}"}), 400
             if chatterbox:   # v73: Finnish VITS 100k (Chatterbox voice), Normal only
-                v65_result = _generate_chatterbox(text=text, output=PREVIEW_WAV_PATH, seed=seed,
+                v65_result = _generate_chatterbox(text=spoken, output=PREVIEW_WAV_PATH, seed=seed,
                                                   noise_scale=noise_scale, length_scale=length_scale)
             else:
                 v65_result = emotion_engine.generate(
-                    text=text, output=PREVIEW_WAV_PATH, style=str(data.get("emotion_style", "normal")),
+                    text=spoken, output=PREVIEW_WAV_PATH, style=str(data.get("emotion_style", "normal")),
                     strength=v65_strength, seed=seed, noise_scale=noise_scale, length_scale=length_scale,
                     level=v65_level, range_k=v65_range, character=str(data.get("character", "zundamon")),
                 )
@@ -1739,12 +1753,13 @@ def generate():
                         tmp_out.unlink(missing_ok=True)
                     except OSError:
                         pass
-            PREVIEW_TTS_TEXT_PATH.write_text(text, encoding="utf-8")
+            PREVIEW_TTS_TEXT_PATH.write_text(spoken, encoding="utf-8")  # accent analysis aligns what was said
             PREVIEW_SOURCE_META_PATH.write_text(json.dumps({
                 "format": "zundanen_vits_preview_v1",
                 "mode": "generated_vits",
                 "engine": "v65",
                 "text": text,
+                "spoken_text": spoken,
                 "noise_scale": noise_scale,
                 "length_scale": length_scale,
                 "seed": seed,
@@ -1756,6 +1771,7 @@ def generate():
             return jsonify({
                 "ok": True,
                 "engine": "v65",
+                "spoken_text": spoken,
                 "filename": f"Zundanen_{who}_{v65_result['style']}_{stamp}_seed{seed}.wav",
                 "rvc": rvc_info,
                 "audio_url": "/api/preview-audio",
@@ -1794,7 +1810,7 @@ def generate():
                 pass
 
         result = generate_vits_file(
-            text=text, output=PREVIEW_WAV_PATH, checkpoint=str(cp), noise_scale=noise_scale,
+            text=spoken, output=PREVIEW_WAV_PATH, checkpoint=str(cp), noise_scale=noise_scale,
             length_scale=length_scale, seed=seed, batch=False,
         )
         style_result = dict(style='neutral', bypass=True)
@@ -1809,11 +1825,12 @@ def generate():
             shutil.copy2(styled_audio, PREVIEW_WAV_PATH)
         # Accent analysis works directly on the final VITS waveform.
         shutil.copy2(PREVIEW_WAV_PATH, PREVIEW_TTS_WAV_PATH)
-        PREVIEW_TTS_TEXT_PATH.write_text(text, encoding="utf-8")
+        PREVIEW_TTS_TEXT_PATH.write_text(spoken, encoding="utf-8")
         PREVIEW_SOURCE_META_PATH.write_text(json.dumps({
             "format": "zundanen_vits_preview_v1",
             "mode": "generated_vits",
             "text": text,
+            "spoken_text": spoken,
             "checkpoint": str(cp),
             "noise_scale": noise_scale,
             "length_scale": length_scale,
@@ -1848,7 +1865,8 @@ def alignment_run():
 
     data = request.get_json(silent=True) or {}
     supplied_text = str(data.get("text", "")).strip()
-    if supplied_text:
+    if supplied_text:  # the same reading as generation (abbreviations), so the words match the audio
+        supplied_text = pronunciation.apply(supplied_text)
         PREVIEW_TTS_TEXT_PATH.write_text(supplied_text, encoding="utf-8")
     if not PREVIEW_TTS_TEXT_PATH.exists() or not PREVIEW_TTS_TEXT_PATH.read_text(encoding="utf-8").strip():
         return jsonify({

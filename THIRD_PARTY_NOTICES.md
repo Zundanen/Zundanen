@@ -4,7 +4,7 @@ Zundanen v2.0.0 uses several third-party projects. This source repository does n
 
 - **Finnish-NLP/Chatterbox-Finnish** — MIT license  
   https://huggingface.co/Finnish-NLP/Chatterbox-Finnish  
-  Used to generate the Finnish training speech of the included Chatterbox model (and installed by setup as the TTS environment). The voice prompt was the reference audio bundled with Chatterbox-Finnish, `samples/reference_finnish.wav`, which comes from Mozilla Common Voice (CC0 1.0).  
+  Used to generate the Finnish training speech of the included Chatterbox model. The voice prompt was the reference audio bundled with Chatterbox-Finnish, `samples/reference_finnish.wav`, which comes from Mozilla Common Voice (CC0 1.0).  
   Training data of Chatterbox-Finnish, as listed on its model card: Mozilla Common Voice 15.0 (CC0 1.0), Filmot (CC BY), YouTube (CC BY) and Finnish Parliament data (CLARIN PUB +BY +PRIV). Attribution to these sources is given here.
 - **ResembleAI Chatterbox** — MIT license  
   https://github.com/resemble-ai/chatterbox

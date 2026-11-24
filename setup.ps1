@@ -17,7 +17,6 @@ $ProgressPreference = "SilentlyContinue"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Runtime = Join-Path $Root "runtime"
 $TtsRoot = Join-Path $Runtime "tts"
-$TtsRepo = Join-Path $TtsRoot "Chatterbox-Finnish"
 $TtsVenv = Join-Path $TtsRoot ".venv"
 $RvcRoot = Join-Path $Runtime "rvc"
 $RvcRepo = Join-Path $RvcRoot "RVC-WebUI"
@@ -350,7 +349,7 @@ if ($Force -and (Test-Path $Runtime)) {
 }
 New-Item -ItemType Directory -Force -Path $Runtime, $TtsRoot, $RvcRoot, $Exports | Out-Null
 
-Write-Step "1 / 9  Installing Windows prerequisites"
+Write-Step "1 / 7  Installing Windows prerequisites"
 if (-not (Get-Command winget.exe -ErrorAction SilentlyContinue)) {
     throw "WinGet was not found. Install/repair 'App Installer' from Microsoft Store, then run setup.bat again."
 }
@@ -377,23 +376,7 @@ if ($gpu.Mode -eq "cpu") {
     Write-Warning "No NVIDIA GPU detected. Voice Generation can fall back to CPU, but Model Trainer currently requires NVIDIA CUDA."
 }
 
-Write-Step "2 / 9  Preparing Finnish Chatterbox source"
-if (-not (Test-Path (Join-Path $TtsRepo ".git"))) {
-    if (Test-Path $TtsRepo) { Remove-Item $TtsRepo -Recurse -Force }
-    $oldSkip = $env:GIT_LFS_SKIP_SMUDGE
-    $env:GIT_LFS_SKIP_SMUDGE = "1"
-    try {
-        Invoke-Native $Git @("clone", "--depth", "1", "https://huggingface.co/Finnish-NLP/Chatterbox-Finnish", $TtsRepo)
-    }
-    finally {
-        if ($null -eq $oldSkip) { Remove-Item Env:GIT_LFS_SKIP_SMUDGE -ErrorAction SilentlyContinue }
-        else { $env:GIT_LFS_SKIP_SMUDGE = $oldSkip }
-    }
-} else {
-    Write-Host "Chatterbox-Finnish source already exists; keeping it."
-}
-
-Write-Step "3 / 9  Creating Finnish TTS environment"
+Write-Step "2 / 7  Creating Finnish TTS environment"
 if (-not (Test-Path (Join-Path $TtsVenv "Scripts\python.exe"))) {
     Invoke-Native $Py311 @("-m", "venv", $TtsVenv)
 }
@@ -410,36 +393,18 @@ if ($gpu.Mode -eq "blackwell") {
     Invoke-Native $TtsPython @("-m", "pip", "install", "torch==2.5.1", "torchvision==0.20.1", "torchaudio==2.5.1", "--index-url", "https://download.pytorch.org/whl/cpu")
 }
 
-$TtsRequirements = Join-Path $TtsRoot "requirements.windows.txt"
-Get-Content (Join-Path $TtsRepo "requirements.txt") |
-    Where-Object { $_ -notmatch '^\s*torchao\s*==' } |
-    Set-Content -Encoding UTF8 $TtsRequirements
-Invoke-Native $TtsPython @("-m", "pip", "install", "-r", $TtsRequirements)
+# Finnish TTS environment packages (VITS, FinBERT and the emotion models), unchanged from v2.0.0.
+$TtsPackages = @(
+    "transformers==4.46.3", "diffusers==0.29.0", "peft==0.17.1",
+    "resemble-perth==1.0.1", "conformer==0.3.2", "s3tokenizer==0.3.0", "huggingface_hub",
+    "silero-vad==6.2.0", "librosa==0.11.0", "soundfile==0.13.1", "pyloudnorm",
+    "num2words", "ffmpeg-python", "tqdm", "pandas", "safetensors", "tensorboard", "omegaconf", "hf_transfer", "gdown", "requests"
+)
+Invoke-Native $TtsPython (@("-m", "pip", "install") + $TtsPackages)
 Invoke-Native $TtsPython @("-m", "pip", "install", "huggingface_hub>=0.26,<1.0", "flask>=3.0,<4", "pywebview==6.2.1")
 Invoke-Native $TtsPython @("-m", "pip", "install", "setuptools==80.9.0")
 
-Write-Step "4 / 9  Downloading Finnish TTS weights"
-$TtsHf = Join-Path $TtsVenv "Scripts\hf.exe"
-if (-not (Test-Path $TtsHf)) { throw "hf.exe was not installed in the TTS environment." }
-$FineTuneWeight = Join-Path $TtsRepo "models\best_finnish_multilingual_cp986.safetensors"
-$ReferenceAudio = Join-Path $TtsRepo "samples\reference_finnish.wav"
-$needWeight = (-not (Test-Path $FineTuneWeight)) -or ((Get-Item $FineTuneWeight).Length -lt 10000000)
-$needReference = (-not (Test-Path $ReferenceAudio)) -or ((Get-Item $ReferenceAudio).Length -lt 1024)
-if ($needWeight) {
-    Remove-Item $FineTuneWeight -Force -ErrorAction SilentlyContinue
-    Invoke-Native $TtsHf @("download", "Finnish-NLP/Chatterbox-Finnish", "models/best_finnish_multilingual_cp986.safetensors", "--revision", "main", "--local-dir", $TtsRepo)
-} else {
-    Write-Host "Finnish fine-tune weight already downloaded; keeping it."
-}
-if ($needReference) {
-    Remove-Item $ReferenceAudio -Force -ErrorAction SilentlyContinue
-    Invoke-Native $TtsHf @("download", "Finnish-NLP/Chatterbox-Finnish", "samples/reference_finnish.wav", "--revision", "main", "--local-dir", $TtsRepo)
-} else {
-    Write-Host "Finnish reference audio already downloaded; keeping it."
-}
-Invoke-Native $TtsPython @("setup.py") $TtsRepo
-
-Write-Step "5 / 9  Preparing RVC source"
+Write-Step "3 / 7  Preparing RVC source"
 if (-not (Test-Path (Join-Path $RvcRepo ".git"))) {
     if (Test-Path $RvcRepo) { Remove-Item $RvcRepo -Recurse -Force }
     Invoke-Native $Git @("clone", "--depth", "1", "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI.git", $RvcRepo)
@@ -451,7 +416,7 @@ if (-not (Test-Path (Join-Path $RvcRepo ".git"))) {
 # always inheriting the Windows display language through locale.getdefaultlocale().
 Invoke-Native $TtsPython @("-c", "import sys; sys.path.insert(0, r'$Root'); from rvc_locale import ensure_rvc_language_override; print('RVC locale patch applied:', ensure_rvc_language_override(r'$RvcRepo'))")
 
-Write-Step "6 / 9  Creating RVC environment"
+Write-Step "4 / 7  Creating RVC environment"
 if (-not (Test-Path (Join-Path $RvcVenv "Scripts\python.exe"))) {
     Invoke-Native $Py312 @("-m", "venv", $RvcVenv)
 }
@@ -479,7 +444,7 @@ Set-Content -Path $RvcReqOfficial -Value $content -Encoding UTF8
 Invoke-Native $RvcPython @("-m", "pip", "install", "-r", $RvcReqOfficial)
 Invoke-Native $RvcPython @("-m", "pip", "install", "huggingface_hub>=0.26,<1.0")
 
-Write-Step "7 / 9  Downloading RVC base assets"
+Write-Step "5 / 7  Downloading RVC base assets"
 $RvcHf = Join-Path $RvcVenv "Scripts\hf.exe"
 if (-not (Test-Path $RvcHf)) { throw "hf.exe was not installed in the RVC environment." }
 Invoke-Native $RvcHf @("download", "lj1995/VoiceConversionWebUI", "--revision", "main", "--include", "hubert_base/*", "--local-dir", (Join-Path $RvcRepo "assets"))
@@ -494,13 +459,13 @@ New-Item -ItemType Directory -Force -Path $MuteDest | Out-Null
 Invoke-Native $RvcPython @("-m", "zipfile", "-e", $MuteZip, $MuteDest)
 New-Item -ItemType Directory -Force -Path (Join-Path $RvcRepo "assets\weights"), (Join-Path $RvcRepo "assets\indices"), $Exports | Out-Null
 
-Write-Step "8 / 9  Installing Accent engine"
+Write-Step "6 / 7  Installing Accent engine"
 $AccentSetup = Join-Path $Root "install_accent_support.ps1"
 if (-not (Test-Path $AccentSetup)) { throw "install_accent_support.ps1 is missing." }
 $WindowsPowerShell = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
 Invoke-Native $WindowsPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $AccentSetup)
 
-Write-Step "9 / 9  Verifying installation"
+Write-Step "7 / 7  Verifying installation"
 Invoke-Native $TtsPython @("-c", "import torch, flask, soundfile, safetensors; print('TTS torch:', torch.__version__); print('TTS CUDA:', torch.cuda.is_available())")
 Invoke-Native $RvcPython @("-c", "import torch, faiss, librosa, numpy; print('RVC torch:', torch.__version__); print('RVC CUDA:', torch.cuda.is_available()); print('NumPy:', numpy.__version__); print('FAISS: OK')")
 Invoke-Native $RvcPython @("-c", "import pyworld; print('PyWORLD:', pyworld.__version__)")

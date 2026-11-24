@@ -2,16 +2,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $TtsPython = Join-Path $Root "runtime\tts\.venv\Scripts\python.exe"
-$TtsRepo = Join-Path $Root "runtime\tts\Chatterbox-Finnish"
 $RvcPython = Join-Path $Root "runtime\rvc\.venv\Scripts\python.exe"
 $RvcRepo = Join-Path $Root "runtime\rvc\RVC-WebUI"
 $NativeProbe = Join-Path $Root "aalto_native_probe.py"
 
 $checks = @(
     @("TTS Python", $TtsPython),
-    @("Finnish fine-tune", (Join-Path $TtsRepo "models\best_finnish_multilingual_cp986.safetensors")),
-    @("Finnish reference", (Join-Path $TtsRepo "samples\reference_finnish.wav")),
-    @("Chatterbox base VE", (Join-Path $TtsRepo "pretrained_models\ve.safetensors")),
     @("RVC Python", $RvcPython),
     @("HuBERT", (Join-Path $RvcRepo "assets\hubert_base\config.json")),
     @("RMVPE", (Join-Path $RvcRepo "assets\rmvpe\rmvpe.pt")),

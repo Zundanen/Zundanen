@@ -32,6 +32,8 @@ This release replaces the first v2.0.0 upload. Changes since then:
 - In the emotion models, s before y (e.g. *syönyt*) sounded close to "sh". Generation now corrects it automatically.
 - The `Align the start of the Finnish WAVs` option in the Model Trainer (see above).
 - Updated Zundamon and Shikoku Metan models on Hugging Face (Zundamon before: 7.1% / 9.2% / 7.8% / 8.1%). Shikoku Metan now uses the same style tempo as Zundamon.
+- Abbreviations are read with Finnish letter names (*TV:tä* → *teeveetä*, *EU:hun* → *eeuuhun*). When the text is read differently from what you typed, a `Read as` line under the text box shows the reading.
+- Setup no longer downloads Chatterbox-Finnish (about 5 GB), which v2 does not use.
 
 If you downloaded v2.0.0 before, get the source again (`Code → Download ZIP`, or `git pull`) and copy it over your Zundanen folder. `runtime/`, `config.json`, `outputs/` and `models/characters/` are not part of the repository, so they are kept. The Python environments are unchanged, so setup does not need to be run again. Replace `models/characters/Zundamon.pt` and `Metan.pt` with the new files from Hugging Face; the RVC models are unchanged.
 

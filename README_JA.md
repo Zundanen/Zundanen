@@ -48,7 +48,7 @@ Microsoft Visual C++ Redistributable
 Microsoft Edge WebView2 Runtime
 Git
 FFmpeg
-Python 3.11 + Finnish-NLP/Chatterbox-Finnish（TTS 環境：VITS と FinBERT もこの環境で動きます）
+Python 3.11（TTS 環境：VITS と FinBERT）
 Python 3.12 + RVC-WebUI
 HuBERT / RMVPE / RVC pretrained assets
 PyWORLD / WORLD vocoder
