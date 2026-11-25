@@ -12,14 +12,30 @@ import soundfile as sf
 FRAME_PERIOD_MS = 5.0
 MIN_DURATION_SCALE = 0.50
 MAX_DURATION_SCALE = 1.60
+MIN_STRENGTH = -50.0
+MAX_STRENGTH = 50.0
 
-# 0% = no change. 100% = the user's current preferred accent preset.
+# Values at 100%. 0% = no change; the slider stops at +50% (half of these), which is the strongest accent offered.
 MAX_PRESET = {
     "peak_semitones": 7.5,
     "word_deaccent_semitones": -3.0,
     "duration_percent": 25.0,
     "gain_db": 20.0,
 }
+
+# Negative strength weakens the selected syllable instead; the rest of the word is left alone. At -50% the
+# syllable's pitch movement relative to the word's median F0 is reduced by `flatten`, and the syllable gets the
+# duration and gain changes below. Values in between scale linearly.
+WEAKEN_PRESET = {
+    "flatten": 0.8,
+    "duration_percent": -12.5,
+    "gain_db": -6.0,
+}
+
+# The WORLD-resynthesised audio is used only inside the edited words (plus this margin); everything else keeps the
+# original samples, because WORLD resynthesis makes the whole utterance sound noisier.
+SPLICE_MARGIN_S = 0.03
+SPLICE_FADE_S = 0.02
 
 # Net pitch target inside the selected syllable. The whole word is first
 # de-accented, then this selected-syllable contour replaces that offset so the
@@ -37,8 +53,26 @@ ACCENT_ENVELOPE = (
 
 
 def _params(strength: float) -> dict[str, float]:
-    amount = max(0.0, min(100.0, float(strength))) / 100.0
+    """Positive: MAX_PRESET * strength/100 (same scale as before; capped at +50%).
+    Negative: WEAKEN_PRESET scaled 0..1 over 0..-50%."""
+    strength = max(MIN_STRENGTH, min(MAX_STRENGTH, float(strength)))
+    if strength < 0.0:
+        amount = strength / MIN_STRENGTH
+        return {key: float(value) * amount for key, value in WEAKEN_PRESET.items()}
+    amount = strength / 100.0
     return {key: float(value) * amount for key, value in MAX_PRESET.items()}
+
+
+def _edge_shape(rel: np.ndarray, edge: float = 0.18) -> np.ndarray:
+    """1 inside the syllable, raised-cosine ramps over the first/last `edge` of it."""
+    shape = np.ones(rel.size, dtype=np.float64)
+    left = rel < edge
+    right = rel > (1.0 - edge)
+    if np.any(left):
+        shape[left] = 0.5 - 0.5 * np.cos(np.pi * rel[left] / edge)
+    if np.any(right):
+        shape[right] = 0.5 - 0.5 * np.cos(np.pi * np.clip((1.0 - rel[right]) / edge, 0.0, 1.0))
+    return shape
 
 
 def _load_accents(path: Path) -> list[dict]:
@@ -58,8 +92,8 @@ def _load_accents(path: Path) -> list[dict]:
             strength = float(item.get("strength", 0.0))
         except (TypeError, ValueError):
             continue
-        strength = max(0.0, min(100.0, strength))
-        if strength <= 0.0:
+        strength = max(MIN_STRENGTH, min(MAX_STRENGTH, strength))
+        if abs(strength) < 1e-9:
             continue
         if not all(math.isfinite(v) for v in (start, end, word_start, word_end, strength)):
             continue
@@ -89,13 +123,36 @@ def _smooth_curve(curve: np.ndarray, radius: int) -> np.ndarray:
     return np.convolve(curve, kernel, mode="same")
 
 
-def _build_source_pitch_curve(frame_count: int, frame_seconds: float, accents: list[dict]) -> np.ndarray:
+def _build_source_pitch_curve(
+    frame_count: int, frame_seconds: float, accents: list[dict], f0: np.ndarray | None = None
+) -> np.ndarray:
     curve = np.zeros(frame_count, dtype=np.float64)
     if frame_count <= 0:
         return curve
 
     times = np.arange(frame_count, dtype=np.float64) * frame_seconds
+    f0_st = None
+    if f0 is not None and len(f0) == frame_count:
+        f0 = np.asarray(f0, dtype=np.float64)
+        f0_st = np.where(f0 > 0.0, 12.0 * np.log2(np.maximum(f0, 1e-9)), np.nan)
     for accent in accents:
+        if accent["strength"] < 0.0:
+            # Weaken: pull the selected syllable's F0 toward the median F0 of the word's voiced frames.
+            if f0_st is None:
+                continue
+            ws, we = float(accent["word_start"]), float(accent["word_end"])
+            ss, se = float(accent["start"]), float(accent["end"])
+            word_st = f0_st[(times >= ws) & (times < we)]
+            word_st = word_st[np.isfinite(word_st)]
+            selected = np.where((times >= ss) & (times <= se))[0]
+            if word_st.size == 0 or selected.size == 0 or se <= ss:
+                continue
+            deviation = np.nan_to_num(f0_st[selected] - float(np.median(word_st)), nan=0.0)
+            rel = (times[selected] - ss) / max(1e-9, se - ss)
+            amount = _params(accent["strength"])["flatten"]
+            curve[selected] = -amount * deviation * _edge_shape(rel)
+            continue
+
         preset = _params(accent["strength"])
         deaccent = float(preset["word_deaccent_semitones"])
         peak = float(preset["peak_semitones"])
@@ -207,22 +264,49 @@ def _build_source_gain_curve(frame_count: int, frame_seconds: float, accents: li
         rel = (times[idx] - start) / max(1e-9, end - start)
         # Smooth raised-cosine-ish entry/exit. Most of the syllable remains at
         # full requested gain so high strengths are clearly audible.
-        shape = np.ones(idx.size, dtype=np.float64)
-        edge = 0.18
-        left = rel < edge
-        right = rel > (1.0 - edge)
-        if np.any(left):
-            x = rel[left] / edge
-            shape[left] = 0.5 - 0.5 * np.cos(np.pi * x)
-        if np.any(right):
-            x = (1.0 - rel[right]) / edge
-            shape[right] = 0.5 - 0.5 * np.cos(np.pi * np.clip(x, 0.0, 1.0))
-        gain_db[idx] = np.maximum(gain_db[idx], target_db * shape)
+        shaped = target_db * _edge_shape(rel)
+        if target_db >= 0.0:
+            gain_db[idx] = np.maximum(gain_db[idx], shaped)
+        else:
+            gain_db[idx] = np.minimum(gain_db[idx], shaped)
     return gain_db
 
 
+def _splice_original(
+    original: np.ndarray, synthesized: np.ndarray, source_map: np.ndarray, frame_count: int,
+    frame_seconds: float, sample_rate: int, accents: list[dict],
+) -> tuple[np.ndarray, float]:
+    """Keep the original samples outside the edited words; use WORLD audio only inside them (with crossfades).
+    Outside the edited syllables the time map is the identity plus a whole-frame shift, so those samples are copied
+    unchanged. Returns the spliced audio and the share of output samples that are WORLD audio."""
+    hop = float(sample_rate) * frame_seconds
+    out_len = max(1, int(round(original.size + (source_map.size - frame_count) * hop)))
+    world = np.zeros(out_len, dtype=np.float64)
+    n = min(out_len, synthesized.size)
+    world[:n] = synthesized[:n]
+
+    src_time = source_map * frame_seconds
+    weight_frames = np.zeros(source_map.size, dtype=np.float64)
+    for accent in accents:
+        lo = float(accent["word_start"]) - SPLICE_MARGIN_S
+        hi = float(accent["word_end"]) + SPLICE_MARGIN_S
+        weight_frames[(src_time >= lo) & (src_time <= hi)] = 1.0
+    fade = max(1, int(round(SPLICE_FADE_S / frame_seconds)))
+    weight_frames = np.convolve(weight_frames, np.ones(fade) / fade, mode="same")
+
+    out_frame = np.arange(out_len, dtype=np.float64) / hop
+    frame_axis = np.arange(source_map.size, dtype=np.float64)
+    weight = np.interp(out_frame, frame_axis, weight_frames)
+    last = float(source_map.size - 1)
+    # Source frame of each output sample; past the last frame, continue 1:1 instead of holding still.
+    src_frame = np.interp(out_frame, frame_axis, source_map) + np.maximum(0.0, out_frame - last)
+    original_aligned = np.interp(src_frame * hop, np.arange(original.size, dtype=np.float64), original)
+    mixed = weight * world + (1.0 - weight) * original_aligned
+    return mixed, float(np.mean(weight > 0.5))
+
+
 def _apply_output_gain(samples: np.ndarray, sample_rate: int, frame_gain_db: np.ndarray) -> tuple[np.ndarray, float]:
-    if samples.size == 0 or frame_gain_db.size == 0 or not np.any(frame_gain_db > 1e-8):
+    if samples.size == 0 or frame_gain_db.size == 0 or not np.any(np.abs(frame_gain_db) > 1e-8):
         return samples, 0.0
     frame_x = np.linspace(0.0, 1.0, frame_gain_db.size, endpoint=True)
     sample_x = np.linspace(0.0, 1.0, samples.size, endpoint=True)
@@ -273,7 +357,7 @@ def process_world(source: Path, output: Path, accents_path: Path) -> dict:
     if len(f0) == 0:
         raise RuntimeError("WORLD analysis returned no frames.")
 
-    source_pitch = _build_source_pitch_curve(len(f0), frame_seconds, accents)
+    source_pitch = _build_source_pitch_curve(len(f0), frame_seconds, accents, f0)
     source_gain = _build_source_gain_curve(len(f0), frame_seconds, accents)
     source_map, stats = _build_time_map(len(f0), frame_seconds, accents)
 
@@ -308,6 +392,9 @@ def process_world(source: Path, output: Path, accents_path: Path) -> dict:
     if synthesized.size == 0 or not np.all(np.isfinite(synthesized)):
         raise RuntimeError("WORLD synthesis produced invalid audio.")
 
+    synthesized, world_share = _splice_original(
+        audio, synthesized, source_map, len(f0), frame_seconds, int(sample_rate), accents
+    )
     synthesized, max_gain_db = _apply_output_gain(synthesized, int(sample_rate), out_gain_db)
     peak = float(np.max(np.abs(synthesized))) if synthesized.size else 0.0
     if peak > 0.999:
@@ -324,6 +411,7 @@ def process_world(source: Path, output: Path, accents_path: Path) -> dict:
         "frame_period_ms": FRAME_PERIOD_MS,
         "pitch_edited_frames": int(np.count_nonzero(active_pitch)),
         "max_gain_db": round(max_gain_db, 3),
+        "world_share": round(world_share, 4),
         "max_preset": MAX_PRESET,
         "input_duration": round(float(audio.size) / float(sample_rate), 4),
         "output_duration": round(float(synthesized.size) / float(sample_rate), 4),

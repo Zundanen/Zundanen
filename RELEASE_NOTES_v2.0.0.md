@@ -18,7 +18,7 @@ Measured on 60 held-out Finnish Tatoeba sentences (Whisper large-v2 CER, lower i
 - Model Trainer → Joint training → Base model `New model (from scratch)`: a new model from random weights out of a Finnish WAV+TXT folder, emotion WAV+LAB rows (folder, LAB folder, speaker, style; more rows with +) and an RVC model (.pth) with its Character chosen from the entered speakers for the Finnish bridge (every Finnish sentence of the folder; RVC bridge share sets how often it is used; pitch shift set automatically, the character's own style tempo measured from its recordings).
 - Model Trainer → VITS: `Align the start of the Finnish WAVs` (Finnish fine-tuning and New model, on by default) evens out the silence at the start of the Finnish WAVs before training, leaving `Silence before the first word (ms)` (default 100 ms, 0–500). Training uses aligned copies; the original files are not changed.
 - Voice Conversion: RVC conversion of a WAV file or a whole folder, record-and-convert with Save As, in-app real-time conversion (no extra window, about 0.3 s latency).
-- Accent: unchanged from v1.1.0.
+- Accent: forced alignment as in v1.1.0. Speech from the character models is edited inside the model; imported WAVs and Chatterbox speech are edited with WORLD. Strength −50 % (weaker accent) to +50 % (strongest).
 
 ## Model files
 
@@ -34,6 +34,7 @@ This release replaces the first v2.0.0 upload. Changes since then:
 - Updated Zundamon and Shikoku Metan models on Hugging Face (Zundamon before: 7.1% / 9.2% / 7.8% / 8.1%). Shikoku Metan now uses the same style tempo as Zundamon.
 - Abbreviations are read with Finnish letter names (*TV:tä* → *teeveetä*, *EU:hun* → *eeuuhun*). When the text is read differently from what you typed, a `Read as` line under the text box shows the reading.
 - Setup no longer downloads Chatterbox-Finnish (about 5 GB), which v2 does not use.
+- Accent editing no longer makes the whole sentence noisy: only the edited words change. Speech from the character models is rendered again by the model with the edited accent instead of being processed with WORLD. The strength slider now runs from −50 % (weaker accent) to +50 % (as strong as 50 % before). If the preview used RVC, the edited speech is converted with RVC again.
 
 If you downloaded v2.0.0 before, get the source again (`Code → Download ZIP`, or `git pull`) and copy it over your Zundanen folder. `runtime/`, `config.json`, `outputs/` and `models/characters/` are not part of the repository, so they are kept. The Python environments are unchanged, so setup does not need to be run again. Replace `models/characters/Zundamon.pt` and `Metan.pt` with the new files from Hugging Face; the RVC models are unchanged.
 

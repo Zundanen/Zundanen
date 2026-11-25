@@ -1764,6 +1764,10 @@ def generate():
                 "length_scale": length_scale,
                 "seed": seed,
                 "v65": v65_result,
+                # 2026-11-25: what the accent editor needs to render this preview again (None: Chatterbox)
+                "v65_request": None if chatterbox else {
+                    "style": str(data.get("emotion_style", "normal")), "strength": v65_strength, "level": v65_level,
+                    "range_k": v65_range, "character": str(data.get("character", "zundamon"))},
                 "rvc": rvc_info,
             }, ensure_ascii=False, indent=2), encoding="utf-8")
             stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1978,8 +1982,9 @@ def alignment_accent_preview():
                 continue
             if word_index in used_words:
                 continue
-            strength = max(0.0, min(100.0, strength))
-            if strength <= 0.0:
+            # -50..50 %: negative weakens the selected syllable (see world_accent_worker.py).
+            strength = max(-50.0, min(50.0, strength))
+            if strength == 0.0:
                 continue
             candidates = by_word.get(word_index) or []
             selected = next((x for x in candidates if int(x.get("syllable_index", -1)) == syllable_index), None)
@@ -2023,23 +2028,45 @@ def alignment_accent_preview():
                 pass
 
         source_mode = "generated_tts"
+        source_meta: dict = {}
         if PREVIEW_SOURCE_META_PATH.exists():
             try:
-                source_mode = str(json.loads(PREVIEW_SOURCE_META_PATH.read_text(encoding="utf-8")).get("mode") or source_mode)
+                source_meta = json.loads(PREVIEW_SOURCE_META_PATH.read_text(encoding="utf-8"))
+                source_mode = str(source_meta.get("mode") or source_mode)
             except Exception:
                 pass
 
         world_result = {}
+        edit_engine = ""
         if source_mode in {"imported_final", "generated_tts_source_only", "generated_vits"}:
             # Imported WAVs are assumed to be already-finished voice audio (for
             # example a Batch Generation result). Apply WORLD directly and do
             # not run RVC a second time.
-            if accents:
-                world_result = apply_world_accent_edits(
-                    PREVIEW_TTS_WAV_PATH, PITCH_EDIT_WAV_PATH, accents, cfg
+            # 2026-11-25: a v2 VITS preview is rendered again with the accents edited inside the model (no WORLD
+            # noise); its RVC conversion, if the preview used one, is applied again afterwards.
+            vits_request = source_meta.get("v65_request") if source_mode == "generated_vits" else None
+            rvc_after = source_meta.get("rvc") if source_mode == "generated_vits" else None
+            edit_out = PITCH_EDIT_TTS_WAV_PATH if rvc_after else PITCH_EDIT_WAV_PATH
+            if accents and vits_request:
+                import emotion_engine
+                world_result = emotion_engine.generate(
+                    text=str(source_meta.get("spoken_text") or source_meta.get("text") or ""), output=edit_out,
+                    seed=int(source_meta["seed"]), noise_scale=float(source_meta.get("noise_scale", 0.4)),
+                    length_scale=float(source_meta.get("length_scale", 1.0)),
+                    accent_edits=[{k: a[k] for k in ("start", "end", "word_start", "word_end", "strength")}
+                                  for a in accents],
+                    **vits_request,
                 )
+                edit_engine = "vits_accent"
+            elif accents:
+                world_result = apply_world_accent_edits(PREVIEW_TTS_WAV_PATH, edit_out, accents, cfg)
+                edit_engine = "world_accent"
             else:
-                shutil.copy2(PREVIEW_TTS_WAV_PATH, PITCH_EDIT_WAV_PATH)
+                shutil.copy2(PREVIEW_TTS_WAV_PATH, edit_out)
+            if rvc_after:
+                run_rvc_on_audio(input_wav=edit_out, output_wav=PITCH_EDIT_WAV_PATH, voice=rvc_after["voice"],
+                                 pitch=rvc_after["pitch"], index_rate=rvc_after["index_rate"],
+                                 protect=rvc_after["protect"], cfg=cfg)
         else:
             rvc_input = PREVIEW_TTS_WAV_PATH
             if accents:
@@ -2067,6 +2094,7 @@ def alignment_accent_preview():
             "original_audio_url": "/api/preview-audio",
             "accents": normalized,
             "edited_words": len(accents),
+            "engine": edit_engine or ("world_accent" if accents else ""),
             "mode": (
                 "world_on_imported_wav" if source_mode == "imported_final" and accents
                 else "imported_wav_unchanged" if source_mode == "imported_final"

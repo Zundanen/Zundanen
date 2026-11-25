@@ -155,7 +155,7 @@ Vaihda yläreunan valinnoilla `VITS` / `RVC`.
 
 ## Accent
 
-Kuten v1.1.0:ssa (Windows-natiivi Aalto/Kaldi-kohdistus, muokkaus WORLD/PyWORLD-kirjastolla; ei WSL2:ta eikä Docker Desktopia).
+Kohdistus toimii kuten v1.1.0:ssa (Windows-natiivi Aalto/Kaldi; ei WSL2:ta eikä Docker Desktopia). Hahmomallien tuottaman puheen aksenttia muokataan mallin sisällä: lause luodaan uudelleen samalla seedillä, ja vain muokatut sanat muuttuvat. Tuodut WAV-tiedostot ja Chatterbox-puhe muokataan WORLD/PyWORLD-kirjastolla. Voimakkuus on −50 % (heikompi aksentti) – +50 % (voimakkain).
 
 ## Käyttöliittymän kieli
 

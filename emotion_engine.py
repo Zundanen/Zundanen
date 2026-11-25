@@ -203,7 +203,8 @@ def _ensure():
 
 def generate(*, text: str, output: Path, style: str = "normal", strength: float | None = None, seed: int = 1234,
              noise_scale: float = 0.4, length_scale: float = 1.0, level: float | None = None,
-             range_k: float | None = None, z: float | None = None, character: str = "zundamon") -> dict:
+             range_k: float | None = None, z: float | None = None, character: str = "zundamon",
+             accent_edits: list[dict] | None = None) -> dict:
     global _req_id
     style = str(style).lower()
     pre = preset()
@@ -222,6 +223,8 @@ def generate(*, text: str, output: Path, style: str = "normal", strength: float 
         for k, v in (("strength", strength), ("level", level), ("range_k", range_k), ("z", z)):
             if v is not None:
                 req[k] = float(v)
+        if accent_edits:   # 2026-11-25: same request again, word accents edited inside the model
+            req["accent_edits"] = list(accent_edits)
         try:
             proc.stdin.write(json.dumps(req, ensure_ascii=False) + "\n")
             proc.stdin.flush()

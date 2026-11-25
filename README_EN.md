@@ -155,7 +155,7 @@ Switch with `VITS` / `RVC` at the top.
 
 ## Accent
 
-Same as v1.1.0 (Windows-native Aalto/Kaldi forced alignment, editing with WORLD/PyWORLD; no WSL2 / Docker Desktop).
+Forced alignment as in v1.1.0 (Windows-native Aalto/Kaldi; no WSL2 / Docker Desktop). Speech from the character models is edited inside the model: the sentence is rendered again with the same seed, and only the edited words change. Imported WAVs and Chatterbox speech are edited with WORLD/PyWORLD. Strength runs from −50 % (weaker accent) to +50 % (strongest).
 
 ## UI language
 

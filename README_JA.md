@@ -155,7 +155,7 @@ filename,text,style,strength,speed,seed
 
 ## Accent
 
-v1.1.0 と同じです（Windows ネイティブ Aalto/Kaldi による強制アライメント，WORLD/PyWORLD による編集．WSL2 / Docker Desktop 不要）．
+強制アライメントは v1.1.0 と同じです（Windows ネイティブ Aalto/Kaldi．WSL2 / Docker Desktop 不要）．キャラクターモデルで生成した音声は，モデルの中でアクセントを編集します．同じ seed で作り直し，編集した単語だけが変わります．読み込んだ WAV と Chatterbox の音声は WORLD/PyWORLD で編集します．強さは −50%（アクセントを弱める）〜 +50%（最大）です．
 
 ## UI の言語
 

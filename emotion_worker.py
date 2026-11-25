@@ -14,6 +14,8 @@ base_name, branch_name, level_st, range_st).  Models are loaded when first used
 and at most MAX_MODELS stay in VRAM.  User styles (preset["extra_styles"],
 Style fine-tuning) are offered for the characters whose base they were trained on.
 v91: /s/ before 'y' is brightened (optional "s_before_y": vowel letter or "off"; default "ä").
+2026-11-25: optional "accent_edits": [{start, end, word_start, word_end, strength}] re-renders the same request with
+word accents edited inside the model (emotion_tts/accent_edit.py).
 Original Zundanen code (MIT).
 """
 
@@ -157,18 +159,24 @@ def main() -> int:
             sy_v = str(req.get("s_before_y", pre.get("s_before_y", "ä"))).strip().lower()
             s_fix = (vocab["s"], vocab["y"], vocab[sy_v]) if sy_v not in ("", "off", "none") and all(
                 c in vocab for c in ("s", "y", sy_v)) else None
-            y = S.synth(m_use, zd_use, tok, bert, style=style, strength=a, z=(zs if style != "normal" else 0.0),
-                        level_st=level, range_k=k0 * ratio,
-                        pitch=pitch_vector(level, ch["range_st"] * ratio, rc), speaker=ch["speaker"],
-                        noise=max(0.0, min(1.5, float(req.get("noise_scale", pre["noise_scale"])))),
-                        length_scale=max(0.5, min(2.0, float(req.get("length_scale", 1.0)))),
-                        seed=int(req.get("seed", 1234)), device=dev, s_fix=s_fix, **timing)
+            kw = dict(style=style, strength=a, z=(zs if style != "normal" else 0.0),
+                      level_st=level, range_k=k0 * ratio,
+                      pitch=pitch_vector(level, ch["range_st"] * ratio, rc), speaker=ch["speaker"],
+                      noise=max(0.0, min(1.5, float(req.get("noise_scale", pre["noise_scale"])))),
+                      length_scale=max(0.5, min(2.0, float(req.get("length_scale", 1.0)))),
+                      seed=int(req.get("seed", 1234)), device=dev, s_fix=s_fix, **timing)
+            accent = None
+            if req.get("accent_edits"):   # 2026-11-25: word accents edited inside the model (accent_edit.py)
+                import accent_edit
+                y, accent = accent_edit.synth_accent(m_use, zd_use, tok, bert, edits=list(req["accent_edits"]), **kw)
+            else:
+                y = S.synth(m_use, zd_use, tok, bert, **kw)
             out = Path(str(req["output"])).resolve()
             write_wav(out, y)
             emit(RESULT, {"ok": True, "id": rid, "output": str(out), "style": style, "character": character,
                           "strength": a, "level_st": round(level, 3), "range_k": round(k0 * ratio, 3),
                           "seconds": round(len(y) / 24000, 3), "normalized_text": feat.canonical_text,
-                          "warning": "; ".join(str(w) for w in (feat.warnings or []))})
+                          "warning": "; ".join(str(w) for w in (feat.warnings or [])), "accent": accent})
         except Exception as exc:
             emit(RESULT, {"ok": False, "id": rid, "error": str(exc), "trace": traceback.format_exc(limit=5)})
     return 0
